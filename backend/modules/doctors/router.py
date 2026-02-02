@@ -100,10 +100,7 @@ async def update_doctor(
         doctor.full_name = doctor_update.full_name
     if doctor_update.specialty is not None:
         doctor.specialty = doctor_update.specialty
-    if (
-        hasattr(doctor_update, "queue_prefix")
-        and doctor_update.queue_prefix is not None
-    ):
+    if doctor_update.queue_prefix is not None:
         doctor.queue_prefix = doctor_update.queue_prefix
     if doctor_update.is_active is not None:
         doctor.is_active = doctor_update.is_active
