@@ -54,6 +54,7 @@
     "reauth_required": "Qayta avtorizatsiya kerak.",
     "login": "Kirish",
     "login_failed": "Kirish xatosi",
+    "invalid_credentials": "Login yoki parol noto‘g‘ri",
     "welcome": "MedX Pro'ga xush kelibsiz",
     "username": "Foydalanuvchi nomi",
     "username_placeholder": "Foydalanuvchi nomini kiriting",

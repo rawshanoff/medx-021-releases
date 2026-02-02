@@ -54,6 +54,7 @@
     "reauth_required": "Нужна повторная авторизация.",
     "login": "Войти",
     "login_failed": "Ошибка входа",
+    "invalid_credentials": "Неверное имя пользователя или пароль",
     "welcome": "Добро пожаловать в MedX Pro",
     "username": "Имя пользователя",
     "username_placeholder": "Введите имя пользователя",

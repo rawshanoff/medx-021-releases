@@ -25,6 +25,26 @@ export default function Login() {
     return Boolean(username.trim() && password.trim());
   }, [password, username]);
 
+  const getLoginErrorMessage = (err: any) => {
+    const status: number | undefined = err?.response?.status;
+    const detail =
+      typeof err?.response?.data?.detail === 'string' ? String(err.response.data.detail) : null;
+    const normalized = detail?.trim().toLowerCase() ?? null;
+
+    // FastAPI OAuth2PasswordRequestForm default error detail for wrong creds.
+    if (
+      status === 401 ||
+      normalized === 'invalid credentials' ||
+      normalized?.includes('invalid credentials') ||
+      normalized?.includes('incorrect username') ||
+      normalized?.includes('incorrect password')
+    ) {
+      return t('auth.invalid_credentials');
+    }
+
+    return detail || t('auth.login_failed');
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -60,9 +80,7 @@ export default function Login() {
       navigate(redirectPath);
     } catch (err: any) {
       console.error('Login error:', err);
-      const detail =
-        typeof err?.response?.data?.detail === 'string' ? String(err.response.data.detail) : null;
-      const msg = detail || t('auth.login_failed');
+      const msg = getLoginErrorMessage(err);
       setErrorText(msg);
       showToast(msg, 'error');
     } finally {

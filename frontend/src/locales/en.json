@@ -54,6 +54,7 @@
     "reauth_required": "Re-authorization required.",
     "login": "Sign In",
     "login_failed": "Login failed",
+    "invalid_credentials": "Invalid username or password",
     "welcome": "Welcome to MedX Pro",
     "username": "Username",
     "username_placeholder": "Enter username",
