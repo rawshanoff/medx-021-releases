@@ -75,14 +75,16 @@ function SettingsTile({
   return (
     <button
       type="button"
-      className="w-full rounded-md border border-border bg-card p-3 text-left transition hover:bg-accent/40"
+      className="flex w-full items-start gap-3 rounded-md border border-border bg-card p-4 text-left transition hover:bg-accent/40"
       onClick={onClick}
     >
-      <div className="rounded-md bg-primary/10 p-2 text-primary">{icon}</div>
-      <div className="min-w-0">
-        <div className="text-[13px] font-medium">{title}</div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <div className="min-w-0 pt-0.5">
+        <div className="text-[14px] font-medium">{title}</div>
         {subtitle ? (
-          <div className="mt-0.5 text-[12px] text-muted-foreground">{subtitle}</div>
+          <div className="mt-0.5 text-[13px] text-muted-foreground">{subtitle}</div>
         ) : null}
       </div>
     </button>
@@ -235,7 +237,7 @@ export default function System() {
     <div className="flex h-full flex-col gap-3">
       <div>
         <h1 className="text-2xl font-medium">{t('system.title')}</h1>
-        <div className="mt-0.5 text-[12px] text-muted-foreground">
+        <div className="mt-1 text-[13px] text-muted-foreground">
           {t('common.version')}: {version}
         </div>
       </div>
@@ -244,31 +246,31 @@ export default function System() {
         <SettingsTile
           title="Реквизиты"
           subtitle="Клиника, логотип, QR, текст под QR"
-          icon={<Building2 size={16} />}
+          icon={<Building2 size={18} />}
           onClick={() => setOpenSection('requisites')}
         />
         <SettingsTile
           title="Настройка принтера"
           subtitle="Выбор deviceName, бумага, silent‑печать"
-          icon={<Printer size={16} />}
+          icon={<Printer size={18} />}
           onClick={() => setOpenSection('printer')}
         />
         <SettingsTile
           title="Настройка чека"
           subtitle="Шаблон, поля, предпросмотр и тест"
-          icon={<FileText size={16} />}
+          icon={<FileText size={18} />}
           onClick={() => setOpenSection('receipt')}
         />
         <SettingsTile
           title="Активация / лицензия"
           subtitle="Статус, функции, загрузка ключа"
-          icon={<KeyRound size={16} />}
+          icon={<KeyRound size={18} />}
           onClick={() => setOpenSection('license')}
         />
         <SettingsTile
           title={t('system.updates')}
           subtitle={t('system.updates_desc')}
-          icon={<Download size={16} />}
+          icon={<Download size={18} />}
           onClick={() => {
             setOpenSection('updates');
             checkForUpdates();
@@ -278,14 +280,14 @@ export default function System() {
           <SettingsTile
             title="Пользователи"
             subtitle="Создание, роли, удаление"
-            icon={<Users size={16} />}
+            icon={<Users size={18} />}
             onClick={() => setOpenSection('users')}
           />
         ) : null}
         <SettingsTile
           title="Сбросить настройки"
           subtitle="Вернуть значения по умолчанию"
-          icon={<Settings size={16} />}
+          icon={<Settings size={18} />}
           onClick={() => {
             setLocalPrintSettings(getPrintSettings());
             showToast('Настройки загружены из сохранённых', 'success');
@@ -317,7 +319,13 @@ export default function System() {
             >
               {licenseStatus}
             </div>
-            <Button variant="ghost" size="sm" type="button" onClick={fetchSystemInfo}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-10 px-3 text-[13px]"
+              type="button"
+              onClick={fetchSystemInfo}
+            >
               {t('common.refresh', { defaultValue: 'Обновить' })}
             </Button>
           </div>
@@ -327,7 +335,7 @@ export default function System() {
               {activeFeatures.map((f) => (
                 <span
                   key={f}
-                  className="rounded-sm border border-border bg-background px-2 py-0.5 text-[12px]"
+                  className="rounded-sm border border-border bg-background px-2 py-0.5 text-[13px]"
                 >
                   {f}
                 </span>
@@ -347,7 +355,12 @@ export default function System() {
             <div className="text-[12px] text-muted-foreground">
               {licenseFile ? licenseFile.name : t('auth.click_upload')}
             </div>
-            <Button type="button" onClick={handleLicenseUpload} disabled={!licenseFile}>
+            <Button
+              className="h-10 px-3 text-[13px]"
+              type="button"
+              onClick={handleLicenseUpload}
+              disabled={!licenseFile}
+            >
               {t('auth.activate_btn')}
             </Button>
           </div>
@@ -363,7 +376,7 @@ export default function System() {
       >
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               Логотип (для чека)
             </label>
             <Input
@@ -390,6 +403,7 @@ export default function System() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="h-10 px-3 text-[13px]"
                   type="button"
                   onClick={() => setLocalPrintSettings((p) => ({ ...p, logoDataUrl: '' }))}
                 >
@@ -400,14 +414,18 @@ export default function System() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">Название клиники</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Название клиники
+            </label>
             <Input
               value={printSettings.clinicName}
               onChange={(e) => setLocalPrintSettings((p) => ({ ...p, clinicName: e.target.value }))}
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">Телефон</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Телефон
+            </label>
             <Input
               value={printSettings.clinicPhone}
               onChange={(e) =>
@@ -416,7 +434,9 @@ export default function System() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground">Адрес</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Адрес
+            </label>
             <Input
               value={printSettings.clinicAddress}
               onChange={(e) =>
@@ -425,14 +445,18 @@ export default function System() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground">Примечание внизу</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Примечание внизу
+            </label>
             <Input
               value={printSettings.footerNote}
               onChange={(e) => setLocalPrintSettings((p) => ({ ...p, footerNote: e.target.value }))}
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground">Текст под QR</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Текст под QR
+            </label>
             <Input
               placeholder="Например: Telegram: @salikhmed"
               value={printSettings.underQrText}
@@ -442,7 +466,7 @@ export default function System() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               QR ссылка (опционально)
             </label>
             <div className="flex gap-2">
@@ -455,6 +479,7 @@ export default function System() {
               <Button
                 variant="secondary"
                 size="sm"
+                className="h-10 px-3 text-[13px]"
                 type="button"
                 onClick={async () => {
                   if (!printSettings.qrUrl) {
@@ -487,6 +512,7 @@ export default function System() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="h-10 px-3 text-[13px]"
                   type="button"
                   onClick={() => setLocalPrintSettings((p) => ({ ...p, qrImageDataUrl: '' }))}
                 >
@@ -499,6 +525,7 @@ export default function System() {
 
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={() => {
               setPrintSettings(printSettings);
@@ -509,6 +536,7 @@ export default function System() {
           </Button>
           <Button
             variant="secondary"
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={() => setLocalPrintSettings(getPrintSettings())}
           >
@@ -542,6 +570,7 @@ export default function System() {
             <Button
               variant="secondary"
               size="sm"
+              className="h-10 px-3 text-[13px]"
               type="button"
               onClick={async () => {
                 const api: any = (window as any).medx;
@@ -556,12 +585,12 @@ export default function System() {
             >
               Показать список принтеров
             </Button>
-            <div className="text-[12px] text-muted-foreground">
+            <div className="text-[13px] text-muted-foreground">
               Выберите <code>deviceName</code> для silent‑печати
             </div>
           </div>
 
-          <div className="md:col-span-2 text-[12px] text-muted-foreground">
+          <div className="md:col-span-2 text-[13px] text-muted-foreground">
             Текущий <code>deviceName</code>:{' '}
             <span className="font-medium text-foreground">
               {printSettings.preferredPrinterDeviceName || 'не выбран'}
@@ -571,7 +600,7 @@ export default function System() {
           <div>
             <label className="mb-1 block text-[12px] text-muted-foreground">Размер бумаги</label>
             <select
-              className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-10 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.paperSize}
               onChange={(e) =>
                 setLocalPrintSettings((p) => ({ ...p, paperSize: e.target.value as any }))
@@ -609,7 +638,7 @@ export default function System() {
               Режим silent‑печати
             </label>
             <select
-              className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-10 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.silentPrintMode || 'html'}
               onChange={(e) =>
                 setLocalPrintSettings((p) => ({ ...p, silentPrintMode: e.target.value as any }))
@@ -638,6 +667,7 @@ export default function System() {
 
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={() => {
               setPrintSettings(printSettings);
@@ -648,6 +678,7 @@ export default function System() {
           </Button>
           <Button
             variant="secondary"
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={() => setLocalPrintSettings(getPrintSettings())}
           >
