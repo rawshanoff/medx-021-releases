@@ -15,7 +15,23 @@
 @layer base {
   :root {
     /* Base UI scale */
-    font-size: 14px;
+    font-size: 16px;
+
+    /* App scale helpers (optional, for non-Tailwind CSS) */
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+
+    /* Spacing helpers (optional, for non-Tailwind CSS) */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
 
     /* Shadcn tokens (HSL channels, to support bg-.../10 opacity) */
     --background: 0 0% 100%;
@@ -47,6 +63,7 @@
     --ring: 221.2 83.2% 53.3%;
 
     --radius: 6px;
+    --radius-full: 9999px;
 
     /* App semantic extras */
     --success: 142.1 76.2% 36.3%;
@@ -116,7 +133,7 @@
   }
 
   body {
-    /* base font-size is set in :root (14px) */
+    /* base font-size is set in :root (16px) */
     @apply bg-background text-foreground font-sans antialiased;
     margin: 0;
     /* High density: minimal backgrounds */
