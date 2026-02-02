@@ -103,12 +103,12 @@ export default function Login() {
             <div className="text-[26px] font-semibold tracking-tight text-foreground">
               MedX <span className="text-primary">Pro</span>
             </div>
-            <div className="mt-2 text-sm text-muted-foreground">{t('auth.welcome')}</div>
+            <div className="mt-2 text-base text-muted-foreground">{t('auth.welcome')}</div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2.5">
-              <label className="text-sm font-medium text-muted-foreground">
+              <label className="text-base font-medium text-muted-foreground">
                 {t('auth.username')}
               </label>
               <div className="relative">
@@ -131,7 +131,7 @@ export default function Login() {
             </div>
 
             <div className="space-y-2.5">
-              <label className="text-sm font-medium text-muted-foreground">
+              <label className="text-base font-medium text-muted-foreground">
                 {t('auth.password')}
               </label>
               <div className="relative">
@@ -167,7 +167,7 @@ export default function Login() {
 
             <div className="space-y-3 pt-[8px]">
               {errorText ? (
-                <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-base text-destructive">
                   {errorText}
                 </div>
               ) : null}
