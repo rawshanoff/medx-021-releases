@@ -303,7 +303,7 @@ export default function Reception() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 text-xs"
+                              className="h-7 text-[13px]"
                               onClick={async () => {
                                 if (!confirm(t('reception.refund_confirm'))) return;
                                 try {

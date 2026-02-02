@@ -257,7 +257,7 @@ export default function Doctors() {
                     key={`${historyPage}-${i}`}
                     className="border-b border-border py-2 text-[14px] last:border-b-0"
                   >
-                    <span className="mr-2 text-[12px] text-muted-foreground">[{log.time}]</span>
+                    <span className="mr-2 text-[13px] text-muted-foreground">[{log.time}]</span>
                     <span className="font-medium">{log.action}:</span> {log.details}
                   </div>
                 ))}
@@ -520,7 +520,7 @@ function DoctorCard({
 
         <div className="overflow-hidden rounded-md border border-border">
           <table className="w-full text-[14px]">
-            <thead className="bg-secondary text-[12px] text-muted-foreground">
+            <thead className="bg-secondary text-[13px] text-muted-foreground">
               <tr className="h-10 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
                 <th>{t('doctors.service_name', { defaultValue: 'Услуга' })}</th>
                 <th className="w-[120px]">
