@@ -92,7 +92,7 @@ export default function Reports() {
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
+          <div className="mt-3 grid grid-cols-3 gap-3">
             <div className="rounded-md border border-border bg-background p-3">
               <div className="text-[14px] font-medium">
                 {t('reports.shift_totals', { defaultValue: 'Касса за смену' })}
@@ -180,7 +180,7 @@ export default function Reports() {
             </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid grid-cols-4 gap-3">
             {[
               {
                 title: t('reports.cash_flow_day', { defaultValue: 'Cash Flow за день' }),
