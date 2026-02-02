@@ -16,6 +16,7 @@
   :root {
     /* Base UI scale */
     font-size: 16px;
+    color-scheme: light;
 
     /* App scale helpers (optional, for non-Tailwind CSS) */
     --font-size-xs: 12px;
@@ -85,35 +86,36 @@
 
   .dark,
   [data-theme='dark'] {
+    color-scheme: dark;
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
     /* Slightly lighter than background for better separation */
-    --card: 222.2 84% 7.5%;
+    --card: 222.2 84% 9.5%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 7.5%;
+    --popover: 222.2 84% 9.5%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217.2 32.6% 20.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 217.2 32.6% 20.5%;
     /* brighter secondary text for readability (≈ gray-300/400) */
     --muted-foreground: 215 20% 80%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217.2 32.6% 20.5%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     /* visible borders/inputs in dark mode (≈ gray-600/700) */
-    --border: 215 18% 34%;
-    --input: 215 18% 34%;
+    --border: 215 18% 42%;
+    --input: 215 18% 42%;
     --ring: 224.3 76.3% 48%;
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
