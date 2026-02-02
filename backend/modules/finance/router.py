@@ -55,7 +55,9 @@ async def get_active_shift(
     ),
 ):
     await check_finance_license()
-    existing = await db.execute(select(Shift).where(Shift.is_closed == False))
+    existing = await db.execute(
+        select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+    )
     shift = existing.scalars().first()
     return shift
 
@@ -71,7 +73,9 @@ async def open_shift(
     await check_finance_license()
 
     # Check if there is already an open shift
-    existing = await db.execute(select(Shift).where(Shift.is_closed == False))
+    existing = await db.execute(
+        select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+    )
     if existing.scalars().first():
         raise HTTPException(status_code=400, detail="A shift is already open")
 
@@ -96,7 +100,9 @@ async def close_shift(
         require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
     ),
 ):
-    result = await db.execute(select(Shift).where(Shift.is_closed == False))
+    result = await db.execute(
+        select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+    )
     shift = result.scalars().first()
     if not shift:
         raise HTTPException(status_code=400, detail="No open shift found")
@@ -133,7 +139,9 @@ async def process_payment(
     # Lock active shift row to prevent race conditions on running totals.
     # We still perform atomic UPDATE on totals, but the lock guarantees a single active shift is used consistently.
     result = await db.execute(
-        select(Shift).where(Shift.is_closed == False).with_for_update()
+        select(Shift)
+        .where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+        .with_for_update()
     )
     shift = result.scalars().first()
     if not shift:
@@ -165,7 +173,9 @@ async def process_payment(
 
     await db.execute(
         update(Shift)
-        .where(Shift.id == shift.id, Shift.is_closed == False)
+        .where(
+            Shift.id == shift.id, Shift.is_closed == False, Shift.deleted_at.is_(None)
+        )
         .values(
             total_cash=Shift.total_cash + delta_cash,
             total_card=Shift.total_card + delta_card,
@@ -193,7 +203,9 @@ async def get_report(
     ),
 ):
     # Check Active Shift
-    res = await db.execute(select(Shift).where(Shift.is_closed == False))
+    res = await db.execute(
+        select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+    )
     shift = res.scalars().first()
 
     if type.upper() == "X":
@@ -214,7 +226,9 @@ async def get_report(
         # Usually checking last closed shift or closing current
         # For simplicity, return last closed shift
         res = await db.execute(
-            select(Shift).where(Shift.is_closed == True).order_by(Shift.end_time.desc())
+            select(Shift)
+            .where(Shift.is_closed == True, Shift.deleted_at.is_(None))
+            .order_by(Shift.end_time.desc())
         )
         last_shift = res.scalars().first()
         if not last_shift:

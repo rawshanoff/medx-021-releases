@@ -1,7 +1,7 @@
 import enum
 from uuid import uuid4
 
-from backend.core.database import Base
+from backend.core.database import Base, SoftDeleteMixin
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -13,7 +13,7 @@ class PatientFileType(str, enum.Enum):
     OTHER = "other"
 
 
-class PatientFile(Base):
+class PatientFile(SoftDeleteMixin, Base):
     __tablename__ = "patient_files"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -39,7 +39,7 @@ class FileDeliveryStatus(str, enum.Enum):
     FAILED = "failed"
 
 
-class FileDeliveryLog(Base):
+class FileDeliveryLog(SoftDeleteMixin, Base):
     __tablename__ = "file_delivery_log"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -59,7 +59,7 @@ class FileDeliveryLog(Base):
     sent_by = relationship("User")
 
 
-class TelegramLinkToken(Base):
+class TelegramLinkToken(SoftDeleteMixin, Base):
     __tablename__ = "telegram_link_tokens"
 
     id = Column(Integer, primary_key=True, index=True)

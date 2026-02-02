@@ -59,7 +59,7 @@ async def upload_file(
     _feat=Depends(require_features(FEATURE_FILES_RESULTS)),
 ):
     patient = await db.get(Patient, patient_id)
-    if not patient:
+    if not patient or patient.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
     raw = await file.read()
@@ -105,7 +105,7 @@ async def download_file(
     _feat=Depends(require_features(FEATURE_FILES_RESULTS)),
 ):
     rec = await db.get(PatientFile, file_id)
-    if not rec:
+    if not rec or rec.deleted_at is not None:
         raise HTTPException(status_code=404, detail="File not found")
 
     path = _storage_path(rec.stored_filename)
@@ -136,7 +136,10 @@ async def list_patient_files(
 ):
     res = await db.execute(
         select(PatientFile)
-        .where(PatientFile.patient_id == patient_id)
+        .where(
+            PatientFile.patient_id == patient_id,
+            PatientFile.deleted_at.is_(None),
+        )
         .order_by(PatientFile.created_at.desc())
     )
     return res.scalars().all()
@@ -159,11 +162,11 @@ async def send_file_to_telegram(
         )
 
     rec = await db.get(PatientFile, file_id)
-    if not rec:
+    if not rec or rec.deleted_at is not None:
         raise HTTPException(status_code=404, detail="File not found")
 
     patient = await db.get(Patient, rec.patient_id)
-    if not patient:
+    if not patient or patient.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
     chat_id = getattr(patient, "telegram_chat_id", None)
@@ -235,7 +238,7 @@ async def create_telegram_link_code(
     ),
 ):
     patient = await db.get(Patient, patient_id)
-    if not patient:
+    if not patient or patient.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
     code = TelegramLinkToken.new_code()
@@ -263,7 +266,9 @@ async def telegram_link(
         raise HTTPException(status_code=403, detail="Invalid bot token")
 
     res = await db.execute(
-        select(TelegramLinkToken).where(TelegramLinkToken.code == req.code)
+        select(TelegramLinkToken).where(
+            TelegramLinkToken.code == req.code, TelegramLinkToken.deleted_at.is_(None)
+        )
     )
     token = res.scalar_one_or_none()
     if not token:
@@ -274,7 +279,7 @@ async def telegram_link(
         raise HTTPException(status_code=400, detail="Code expired")
 
     patient = await db.get(Patient, token.patient_id)
-    if not patient:
+    if not patient or patient.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
     # Store on patient record (simple MVP approach)

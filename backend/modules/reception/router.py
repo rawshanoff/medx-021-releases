@@ -29,7 +29,9 @@ async def add_to_queue(
     today = date.today()
 
     # Get doctor to fetch queue_prefix
-    doctor_result = await db.execute(select(Doctor).where(Doctor.id == item.doctor_id))
+    doctor_result = await db.execute(
+        select(Doctor).where(Doctor.id == item.doctor_id, Doctor.deleted_at.is_(None))
+    )
     doctor = doctor_result.scalar_one_or_none()
 
     if not doctor:
@@ -41,7 +43,9 @@ async def add_to_queue(
         # Next seq for this doctor & date
         res = await db.execute(
             select(func.coalesce(func.max(QueueItem.sequence), 0) + 1).where(
-                QueueItem.doctor_id == item.doctor_id, QueueItem.queue_date == today
+                QueueItem.doctor_id == item.doctor_id,
+                QueueItem.queue_date == today,
+                QueueItem.deleted_at.is_(None),
             )
         )
         next_seq = int(res.scalar_one())
@@ -82,6 +86,7 @@ async def get_queue(
             selectinload(QueueItem.doctor),
             selectinload(QueueItem.patient),
         )
+        .where(QueueItem.deleted_at.is_(None))
         .order_by(QueueItem.created_at.asc())
         # .where(QueueItem.status == QueueStatus.WAITING) # Optionally filter
     )
@@ -109,7 +114,7 @@ async def update_queue_status(
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
     item = await db.get(QueueItem, item_id)
-    if not item:
+    if not item or item.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Queue item not found")
 
     item.status = update.status

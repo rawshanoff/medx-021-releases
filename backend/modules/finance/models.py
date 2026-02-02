@@ -1,6 +1,6 @@
 import enum
 
-from backend.core.database import Base
+from backend.core.database import Base, SoftDeleteMixin
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -13,7 +13,7 @@ class PaymentMethod(str, enum.Enum):
     MIXED = "MIXED"
 
 
-class Shift(Base):
+class Shift(SoftDeleteMixin, Base):
     __tablename__ = "shifts"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -30,7 +30,7 @@ class Shift(Base):
     transactions = relationship("Transaction", back_populates="shift")
 
 
-class Transaction(Base):
+class Transaction(SoftDeleteMixin, Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -52,7 +52,7 @@ class Transaction(Base):
     patient = relationship("Patient")
 
 
-class FinanceAuditLog(Base):
+class FinanceAuditLog(SoftDeleteMixin, Base):
     __tablename__ = "finance_audit_log"
 
     id = Column(Integer, primary_key=True, index=True)
