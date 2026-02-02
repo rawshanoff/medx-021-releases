@@ -135,7 +135,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-[8px] top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+                  className="absolute right-[8px] top-1/2 -translate-y-1/2 rounded-md bg-secondary/40 p-2 text-muted-foreground shadow-sm hover:bg-secondary/70 hover:text-foreground"
                   aria-label={
                     showPassword
                       ? t('common.hide', { defaultValue: 'Скрыть' })
@@ -156,7 +156,7 @@ export default function Login() {
             <Button
               type="submit"
               disabled={loading || !canSubmit}
-              size="lg"
+              size="md"
               className={cn(
                 'w-full bg-gradient-to-r from-primary to-primary/80 shadow-lg hover:from-primary/95 hover:to-primary/75',
                 loading ? 'opacity-80' : '',
