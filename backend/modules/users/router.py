@@ -34,8 +34,10 @@ async def create_user(
     _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
 ):
     """Create new user (admin only)"""
-    # Check if username exists
-    result = await db.execute(select(User).filter(User.username == data.username))
+    # Check if username exists (excluding deleted users)
+    result = await db.execute(
+        select(User).filter(User.username == data.username, User.deleted_at.is_(None))
+    )
     if result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already exists")
 
@@ -62,7 +64,9 @@ async def update_user(
     _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
 ):
     """Update user (admin only)"""
-    result = await db.execute(select(User).filter(User.id == user_id))
+    result = await db.execute(
+        select(User).filter(User.id == user_id, User.deleted_at.is_(None))
+    )
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -90,7 +94,9 @@ async def delete_user(
     _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
 ):
     """Archive user (admin only)"""
-    result = await db.execute(select(User).filter(User.id == user_id))
+    result = await db.execute(
+        select(User).filter(User.id == user_id, User.deleted_at.is_(None))
+    )
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

@@ -115,10 +115,11 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
 
-    # ⚠️ SECURITY: Проверка дефолтного пароля
+    # ⚠️ SECURITY: Проверка дефолтного пароля (если установлен в конфиге)
     # Если пользователь использует дефолтный пароль, требуем его смену
     if (
-        user.username == "admin"
+        settings.DEFAULT_ADMIN_PASSWORD_HASH
+        and user.username == "admin"
         and user.password_hash == settings.DEFAULT_ADMIN_PASSWORD_HASH
     ):
         raise HTTPException(

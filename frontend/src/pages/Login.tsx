@@ -42,11 +42,11 @@ export default function Login() {
       if (userRole === 'cashier') {
         redirectPath = '/finance';
       } else if (userRole === 'doctor') {
-        redirectPath = '/';
+        redirectPath = '/'; // Doctor sees reception queue
       } else if (['admin', 'owner'].includes(userRole)) {
-        redirectPath = '/';
+        redirectPath = '/'; // Admin/Owner sees reception dashboard
       } else if (userRole === 'receptionist') {
-        redirectPath = '/';
+        redirectPath = '/'; // Receptionist sees reception dashboard
       }
 
       navigate(redirectPath);

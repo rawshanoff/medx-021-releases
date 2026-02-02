@@ -47,10 +47,9 @@ class Settings(BaseSettings):
         "100/minute"  # Лимит по умолчанию для остальных эндпоинтов
     )
 
-    # Default Admin Password (for security check)
-    DEFAULT_ADMIN_PASSWORD_HASH: str = (
-        "$2b$12$nr4PvI2HcWYkT0uR6cXMv.rUZH0s6rKK3lyOoR01XpCNj17ZH.tNC"  # Hash для 'admin123'
-    )
+    # Default Admin Password Hash (for security check)
+    # Set via environment variable if needed, otherwise empty (no default password check)
+    DEFAULT_ADMIN_PASSWORD_HASH: str = ""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
