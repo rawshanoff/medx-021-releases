@@ -63,7 +63,8 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
 
-    --radius: 6px;
+    /* Closer to modern admin dashboards (bigger rounding) */
+    --radius: 12px;
     --radius-full: 9999px;
 
     /* App semantic extras */
@@ -87,43 +88,55 @@
   .dark,
   [data-theme='dark'] {
     color-scheme: dark;
-    --background: 222.2 84% 4.9%;
+    /* Deep navy background like the reference admin dashboard */
+    --background: 224 70% 6%;
     --foreground: 210 40% 98%;
 
     /* Slightly lighter than background for better separation */
-    --card: 222.2 84% 9.5%;
+    --card: 224 55% 10.5%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 9.5%;
+    --popover: 224 55% 10.5%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32.6% 20.5%;
+    /* Softer hover/active surfaces */
+    --secondary: 224 40% 20%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 20.5%;
-    /* brighter secondary text for readability (≈ gray-300/400) */
-    --muted-foreground: 215 20% 80%;
+    --muted: 224 40% 20%;
+    /* Bluish muted text like the reference */
+    --muted-foreground: 215 25% 85%;
 
-    --accent: 217.2 32.6% 20.5%;
+    --accent: 224 40% 20%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    /* visible borders/inputs in dark mode (≈ gray-600/700) */
-    --border: 215 18% 42%;
-    --input: 215 18% 42%;
+    /* Clean subtle borders (white alpha), like shadcn-admin */
+    --border: 0 0% 100% / 15%;
+    --input: 0 0% 100% / 18%;
     --ring: 224.3 76.3% 48%;
 
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.35);
     --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.3);
 
     --scrollbar-track: transparent;
-    --scrollbar-thumb: 215 20.2% 35%;
-    --scrollbar-thumb-hover: 215 20.2% 45%;
+    --scrollbar-thumb: 215 20.2% 50%;
+    --scrollbar-thumb-hover: 215 20.2% 60%;
+
+    /* Sidebar tokens (separate from cards/background) */
+    --sidebar: 224 60% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 40% 98%;
+    --sidebar-primary-foreground: 224 60% 8%;
+    --sidebar-accent: 224 40% 22%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 0 0% 100% / 15%;
+    --sidebar-ring: 224.3 76.3% 48%;
   }
 
   *,
@@ -151,6 +164,19 @@
     background-repeat: no-repeat;
     background-size: cover;
     overflow: hidden; /* prevent page scroll; scroll happens in .app-scroll */
+  }
+
+  /* Reference-like dark background (subtle navy gradients) */
+  .dark body,
+  [data-theme='dark'] body {
+    background-image:
+      radial-gradient(1000px 520px at 18% 0%, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0) 58%),
+      radial-gradient(
+        900px 520px at 85% -10%,
+        rgba(59, 130, 246, 0.12) 0%,
+        rgba(59, 130, 246, 0) 55%
+      ),
+      radial-gradient(900px 700px at 50% 120%, rgba(2, 8, 23, 0.75) 0%, rgba(2, 8, 23, 0) 60%);
   }
 
   /* UI baseline: avoid default list markers in app */
