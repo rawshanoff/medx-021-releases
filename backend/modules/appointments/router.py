@@ -102,28 +102,14 @@ async def list_appointments_v2(
         require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.DOCTOR)
     ),
 ):
-    query = (
-        select(Appointment)
-        .options(selectinload(Appointment.patient))
-        .where(
-            Appointment.start_time >= start,
-            Appointment.start_time <= end,
-            Appointment.deleted_at.is_(None),
-        )
+    # Keep compatibility endpoint but reuse the main implementation to avoid drift.
+    return await list_appointments(
+        start=start,
+        end=end,
+        doctor_id=doctor_id,
+        db=db,
+        _user=_user,
     )
-    if doctor_id:
-        query = query.where(Appointment.doctor_id == doctor_id)
-
-    result = await db.execute(query)
-    appts = result.scalars().all()
-
-    # Map to schema
-    res_list = []
-    for a in appts:
-        # Schema 'patient_name' is optional, we fill it manually or rely on relationship
-        a.patient_name = a.patient.full_name if a.patient else "Unknown"
-        res_list.append(a)
-    return res_list
 
 
 @router.delete("/{id}", response_model=MessageResponse)
