@@ -74,7 +74,7 @@ export default function Login() {
     <div className="relative flex min-h-screen items-center justify-center bg-background">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_circle_at_10%_-10%,color-mix(in_srgb,hsl(var(--primary))_10%,transparent)_0%,transparent_58%),radial-gradient(700px_circle_at_92%_8%,color-mix(in_srgb,hsl(var(--primary))_8%,transparent)_0%,transparent_60%)]" />
 
-      <div className="absolute right-6 top-6 flex items-center gap-2 rounded-full border border-border bg-card/80 p-1.5 shadow-sm backdrop-blur">
+      <div className="absolute right-6 top-6 z-20 flex items-center gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
       </div>
@@ -96,7 +96,7 @@ export default function Login() {
               <div className="relative">
                 <UserIcon
                   size={18}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
                   value={username}
@@ -105,7 +105,7 @@ export default function Login() {
                     setErrorText(null);
                   }}
                   placeholder={t('auth.username_placeholder')}
-                  className="pl-10"
+                  className="pl-[44px]"
                   autoFocus
                   required
                 />
@@ -119,7 +119,7 @@ export default function Login() {
               <div className="relative">
                 <Lock
                   size={18}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
                   type={showPassword ? 'text' : 'password'}
@@ -129,13 +129,13 @@ export default function Login() {
                     setErrorText(null);
                   }}
                   placeholder={t('auth.password_placeholder')}
-                  className="pl-10 pr-12"
+                  className="pl-[44px] pr-[48px]"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+                  className="absolute right-[8px] top-1/2 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
                   aria-label={
                     showPassword
                       ? t('common.hide', { defaultValue: 'Скрыть' })

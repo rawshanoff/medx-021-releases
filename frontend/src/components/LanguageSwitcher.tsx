@@ -1,30 +1,23 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from './ui/button';
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
 
-  const toggleLang = () => {
-    // i18next may return "ru-RU" / "en-US" etc via LanguageDetector
-    const current = (i18n.language || '').toLowerCase().split('-')[0]; // 'en', 'ru', 'uz'
-    let next = 'ru';
-    if (current === 'ru') next = 'uz';
-    else if (current === 'uz') next = 'en';
-    else next = 'ru';
-
-    i18n.changeLanguage(next);
-  };
+  // i18next may return "ru-RU" / "en-US" etc via LanguageDetector
+  const current = (i18n.language || '').toLowerCase().split('-')[0]; // 'en', 'ru', 'uz'
+  const value = current === 'ru' || current === 'uz' || current === 'en' ? current : 'ru';
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={toggleLang}
-      title="Switch Language"
-      aria-label="Switch Language"
-      className="font-bold rounded-full"
+    <select
+      value={value}
+      onChange={(e) => i18n.changeLanguage(e.target.value)}
+      title="Language"
+      aria-label="Language"
+      className="h-10 rounded-full border border-border bg-card/80 px-3 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      {i18n.language?.toUpperCase().substring(0, 2)}
-    </Button>
+      <option value="ru">RU</option>
+      <option value="uz">UZ</option>
+      <option value="en">EN</option>
+    </select>
   );
 }
