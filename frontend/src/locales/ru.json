@@ -164,11 +164,12 @@
   },
   "finance": {
     "title": "Финансы",
-    "shift_open": "Смена открыта",
+    "shift_open": "Смена открыта #{{id}}",
     "shift_open_fail": "Не удалось открыть смену",
     "shift_closed": "Смена закрыта",
     "shift_close_fail": "Не удалось закрыть смену",
     "open_shift": "Открыть смену",
+    "close_shift": "Закрыть смену",
     "open_shift_prompt": "Сначала откройте смену",
     "no_shift_error": "Смена закрыта",
     "enter_amount": "Введите сумму",

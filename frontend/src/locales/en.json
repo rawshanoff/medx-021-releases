@@ -164,11 +164,12 @@
   },
   "finance": {
     "title": "Finance",
-    "shift_open": "Shift opened",
+    "shift_open": "Shift opened #{{id}}",
     "shift_open_fail": "Failed to open shift",
     "shift_closed": "Shift closed",
     "shift_close_fail": "Failed to close shift",
     "open_shift": "Open Shift",
+    "close_shift": "Close Shift",
     "open_shift_prompt": "Open shift first",
     "no_shift_error": "Shift closed",
     "enter_amount": "Enter amount",

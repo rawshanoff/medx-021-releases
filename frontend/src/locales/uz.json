@@ -164,11 +164,12 @@
   },
   "finance": {
     "title": "Moliya",
-    "shift_open": "Smena ochildi",
+    "shift_open": "Smena ochildi #{{id}}",
     "shift_open_fail": "Smenani ochishda xatolik",
     "shift_closed": "Smena yopildi",
     "shift_close_fail": "Smenani yopishda xatolik",
     "open_shift": "Smenani ochish",
+    "close_shift": "Smenani yopish",
     "open_shift_prompt": "Avval smenani oching",
     "no_shift_error": "Smena yopildi",
     "enter_amount": "Summani kiriting",
