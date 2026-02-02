@@ -9,6 +9,7 @@ import { useToast } from '../context/ToastContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { cn } from '../lib/cn';
+import { PageContainer } from '../components/PageContainer';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -59,68 +60,71 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_circle_at_10%_-10%,color-mix(in_srgb,hsl(var(--primary))_10%,transparent)_0%,transparent_58%),radial-gradient(700px_circle_at_92%_8%,color-mix(in_srgb,hsl(var(--primary))_8%,transparent)_0%,transparent_60%)]" />
 
-      <div className="absolute right-4 top-4 flex items-center gap-2">
+      <div className="absolute right-6 top-6 flex items-center gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
       </div>
 
-      <div className="relative w-full max-w-sm rounded-md border border-border bg-card p-5 shadow-sm">
-        <div className="mb-4 text-center">
-          <div className="text-[18px] font-medium tracking-tight text-foreground">
-            MedX <span className="text-primary">Pro</span>
+      <PageContainer className="w-full max-w-md">
+        <div className="relative rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div className="mb-6 text-center">
+            <div className="text-2xl font-semibold tracking-tight text-foreground">
+              MedX <span className="text-primary">Pro</span>
+            </div>
+            <div className="mt-2 text-base text-muted-foreground">{t('auth.welcome')}</div>
           </div>
-          <div className="mt-1 text-[12px] text-muted-foreground">{t('auth.welcome')}</div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">{t('auth.username')}</label>
+              <div className="relative">
+                <UserIcon
+                  size={18}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder={t('auth.username_placeholder')}
+                  className="pl-10"
+                  autoFocus
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">{t('auth.password')}</label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t('auth.password_placeholder')}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              size="lg"
+              className={cn('w-full', loading ? 'opacity-80' : '')}
+            >
+              {loading ? t('common.loading') : t('auth.login')}
+            </Button>
+          </form>
         </div>
-
-        <form onSubmit={handleLogin} className="space-y-3">
-          <div className="space-y-1">
-            <label className="text-[12px] font-medium text-foreground">{t('auth.username')}</label>
-            <div className="relative">
-              <UserIcon
-                size={16}
-                className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder={t('auth.username_placeholder')}
-                className="pl-8"
-                autoFocus
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[12px] font-medium text-foreground">{t('auth.password')}</label>
-            <div className="relative">
-              <Lock
-                size={16}
-                className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('auth.password_placeholder')}
-                className="pl-8"
-                required
-              />
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className={cn('w-full', loading ? 'opacity-80' : '')}
-          >
-            {loading ? t('common.loading') : t('auth.login')}
-          </Button>
-        </form>
-      </div>
+      </PageContainer>
     </div>
   );
 }
