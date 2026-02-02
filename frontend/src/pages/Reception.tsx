@@ -187,7 +187,7 @@ export default function Reception() {
       <h1 className="text-xl font-medium">{t('reception.title')}</h1>
 
       <div className="min-h-0 flex-1">
-        <div className="grid h-full min-h-0 grid-cols-1 gap-[16px] xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_360px] gap-[16px]">
           {/* LEFT */}
           <div className="flex min-h-0 flex-col gap-[16px]">
             {/* Search */}
