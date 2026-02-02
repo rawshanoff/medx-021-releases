@@ -33,22 +33,22 @@ export function ResultRow({
 
   return (
     <tr className={cn('border-t border-border', requestFocus ? 'bg-primary/5' : '')}>
-      <td className="px-2 py-1.5 align-top">
+      <td className="px-3 py-3 align-top">
         <div className="font-medium">{patient.full_name}</div>
         <Button
           variant="ghost"
           size="sm"
           type="button"
           onClick={onViewHistory}
-          className="mt-1 h-6 justify-start gap-1 px-2 text-[12px] text-primary hover:text-primary"
+          className="mt-1 h-7 justify-start gap-1 px-2 text-[12px] text-primary hover:text-primary"
         >
           <HistoryIcon size={14} />
           {t('reception.history')}
         </Button>
       </td>
 
-      <td className="px-2 py-1.5 align-top text-muted-foreground">{patient.birth_date || '—'}</td>
-      <td className="px-2 py-1.5 align-top">{patient.phone}</td>
+      <td className="px-3 py-3 align-top text-muted-foreground">{patient.birth_date || '—'}</td>
+      <td className="px-3 py-3 align-top">{patient.phone}</td>
 
       <PaymentCells
         patient={patient}

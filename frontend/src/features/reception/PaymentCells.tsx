@@ -204,13 +204,13 @@ export function PaymentCells({
 
   return (
     <>
-      <td className="px-2 py-1.5 align-top">
+      <td className="px-3 py-3 align-top">
         <div className="flex flex-col gap-2">
           <select
             ref={doctorSelectRef}
             value={selectedDoctorId}
             onChange={(e) => setSelectedDoctorId(e.target.value)}
-            className="h-8 w-full max-w-[240px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="h-[40px] w-full max-w-[240px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <option value="">{t('reception.select_doctor')}</option>
             {doctors.map((d) => (
@@ -224,7 +224,7 @@ export function PaymentCells({
             <select
               value={selectedServiceId}
               onChange={(e) => setSelectedServiceId(e.target.value)}
-              className="h-8 w-full max-w-[240px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-[40px] w-full max-w-[240px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               {selectedDoctor?.services.length === 0 ? (
                 <option value="">{t('doctors.no_services')}</option>
@@ -239,11 +239,11 @@ export function PaymentCells({
         </div>
       </td>
 
-      <td className="px-2 py-1.5 align-top">
+      <td className="px-3 py-3 align-top">
         <select
           value={paymentMethod}
           onChange={(e) => handlePaymentMethodChange(e.target.value)}
-          className="h-8 w-full max-w-[200px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="h-[40px] w-full max-w-[200px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <option value="CASH">{t('reception.cash')}</option>
           <option value="CARD">{t('reception.card')}</option>
@@ -252,7 +252,7 @@ export function PaymentCells({
         </select>
       </td>
 
-      <td className="px-2 py-1.5 align-top text-right">
+      <td className="px-3 py-3 align-top text-right">
         <Button
           onClick={handlePay}
           disabled={loading || !selectedServiceId}
