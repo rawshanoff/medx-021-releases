@@ -9,5 +9,6 @@ export function PageContainer({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={cn('p-6', className)}>{children}</div>;
+  // Use explicit px-based spacing to ensure consistent Electron layout.
+  return <div className={cn('p-[24px]', className)}>{children}</div>;
 }

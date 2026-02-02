@@ -68,8 +68,8 @@ export default function Login() {
         <ThemeToggle />
       </div>
 
-      <PageContainer className="w-full max-w-md">
-        <div className="relative rounded-xl border border-border bg-card p-6 shadow-sm">
+      <PageContainer className="w-full max-w-[520px]">
+        <div className="relative rounded-[16px] border border-border bg-card p-[24px] shadow-[0_12px_40px_rgba(2,8,23,0.12)]">
           <div className="mb-6 text-center">
             <div className="text-2xl font-semibold tracking-tight text-foreground">
               MedX <span className="text-primary">Pro</span>
