@@ -51,7 +51,7 @@ export default function Activation() {
         </div>
 
         <div className="text-[16px] font-medium">{t('auth.welcome')}</div>
-        <div className="mt-1 text-[12px] text-muted-foreground">{t('auth.upload_key')}</div>
+        <div className="mt-1 text-[13px] text-muted-foreground">{t('auth.upload_key')}</div>
 
         <div className="mt-4">
           <label

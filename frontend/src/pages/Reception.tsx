@@ -259,10 +259,10 @@ export default function Reception() {
           width={980}
         >
           {historyState.loading ? (
-            <div className="text-[12px] text-muted-foreground">{t('common.loading')}</div>
+            <div className="text-[13px] text-muted-foreground">{t('common.loading')}</div>
           ) : null}
           {historyState.error ? (
-            <div className="text-[12px] text-destructive">{historyState.error}</div>
+            <div className="text-[13px] text-destructive">{historyState.error}</div>
           ) : null}
 
           {!historyState.loading && !historyState.error ? (
@@ -291,11 +291,11 @@ export default function Reception() {
                           <div className="font-medium">
                             {Number(tx.amount || 0).toLocaleString()} {t('common.currency')}
                           </div>
-                          <div className="text-[12px] text-muted-foreground">
+                          <div className="text-[13px] text-muted-foreground">
                             {new Date(tx.created_at).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-[12px] text-muted-foreground">
+                        <div className="text-[13px] text-muted-foreground">
                           {tx.description || ''}
                         </div>
                         {canRefund && (
@@ -362,7 +362,7 @@ export default function Reception() {
                     );
                   })}
                   {(historyState.data?.transactions ?? []).length === 0 ? (
-                    <div className="text-[12px] text-muted-foreground">—</div>
+                    <div className="text-[13px] text-muted-foreground">—</div>
                   ) : null}
                 </div>
               </div>
@@ -374,15 +374,15 @@ export default function Reception() {
                     <div key={`q-${qi.id}`} className="rounded-md border border-border bg-card p-2">
                       <div className="flex justify-between gap-2">
                         <div className="font-medium">{qi.ticket_number}</div>
-                        <div className="text-[12px] text-muted-foreground">
+                        <div className="text-[13px] text-muted-foreground">
                           {new Date(qi.created_at).toLocaleDateString()}
                         </div>
                       </div>
-                      <div className="text-[12px] text-muted-foreground">{String(qi.status)}</div>
+                      <div className="text-[13px] text-muted-foreground">{String(qi.status)}</div>
                     </div>
                   ))}
                   {(historyState.data?.queue ?? []).length === 0 ? (
-                    <div className="text-[12px] text-muted-foreground">—</div>
+                    <div className="text-[13px] text-muted-foreground">—</div>
                   ) : null}
                 </div>
               </div>
@@ -398,15 +398,15 @@ export default function Reception() {
                         <div className="font-medium">
                           {new Date(a.start_time).toLocaleDateString()}
                         </div>
-                        <div className="text-[12px] text-muted-foreground">{String(a.status)}</div>
+                        <div className="text-[13px] text-muted-foreground">{String(a.status)}</div>
                       </div>
-                      <div className="text-[12px] text-muted-foreground">
+                      <div className="text-[13px] text-muted-foreground">
                         {String(a.doctor_id || '')}
                       </div>
                     </div>
                   ))}
                   {(historyState.data?.appointments ?? []).length === 0 ? (
-                    <div className="text-[12px] text-muted-foreground">—</div>
+                    <div className="text-[13px] text-muted-foreground">—</div>
                   ) : null}
                 </div>
               </div>
