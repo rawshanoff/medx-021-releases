@@ -56,7 +56,7 @@ export function Modal({
           <div className="min-w-0">
             <div className="text-[14px] font-medium">{title}</div>
             {description ? (
-              <div className="mt-0.5 text-[12px] text-muted-foreground">{description}</div>
+              <div className="mt-0.5 text-[13px] text-muted-foreground">{description}</div>
             ) : null}
           </div>
           <Button

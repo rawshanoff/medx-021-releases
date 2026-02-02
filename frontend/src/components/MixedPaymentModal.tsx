@@ -62,7 +62,7 @@ export default function MixedPaymentModal({
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1">
-          <label className="text-[12px] font-medium text-foreground">{t('reception.cash')}</label>
+          <label className="text-[13px] font-medium text-foreground">{t('reception.cash')}</label>
           <Input
             type="number"
             min={0}
@@ -73,7 +73,7 @@ export default function MixedPaymentModal({
           />
         </div>
         <div className="space-y-1">
-          <label className="text-[12px] font-medium text-foreground">{t('reception.card')}</label>
+          <label className="text-[13px] font-medium text-foreground">{t('reception.card')}</label>
           <Input
             type="number"
             min={0}
@@ -84,7 +84,7 @@ export default function MixedPaymentModal({
           />
         </div>
         <div className="space-y-1">
-          <label className="text-[12px] font-medium text-foreground">
+          <label className="text-[13px] font-medium text-foreground">
             {t('reception.transfer')}
           </label>
           <Input

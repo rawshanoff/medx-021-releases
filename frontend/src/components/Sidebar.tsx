@@ -91,7 +91,7 @@ export default function Sidebar({
       <div className="flex items-center justify-between gap-2 border-b border-border p-2">
         <div className="flex min-w-0 items-baseline gap-2" title="MedX Pro">
           <div className="text-[13px] font-medium text-primary">{collapsed ? 'MX' : 'MedX'}</div>
-          {!collapsed ? <div className="text-[12px] text-muted-foreground">Pro</div> : null}
+          {!collapsed ? <div className="text-[13px] text-muted-foreground">Pro</div> : null}
         </div>
         <Button
           variant="ghost"
@@ -132,7 +132,7 @@ export default function Sidebar({
 
       <div className="border-t border-border p-2">
         {role && !collapsed ? (
-          <div className="mb-2 text-[12px] text-muted-foreground">
+          <div className="mb-2 text-[13px] text-muted-foreground">
             {t('common.role')}: <span className="font-medium text-foreground">{role}</span>
           </div>
         ) : null}
@@ -151,7 +151,7 @@ export default function Sidebar({
             <div className="min-w-0">
               <div className="truncate text-[13px] font-medium">{profileName}</div>
               {role ? (
-                <div className="truncate text-[12px] text-muted-foreground">{role}</div>
+                <div className="truncate text-[13px] text-muted-foreground">{role}</div>
               ) : null}
             </div>
           ) : null}
