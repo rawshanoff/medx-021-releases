@@ -1,6 +1,7 @@
 from typing import List
 
 from backend.core.database import get_db
+from backend.core.schemas import MessageResponse
 from backend.modules.auth import require_roles
 from backend.modules.doctors.models import AuditLog, Doctor, DoctorService
 from backend.modules.doctors.schemas import (
@@ -67,7 +68,7 @@ async def list_doctors(
     return result.scalars().all()
 
 
-@router.post("/{doctor_id}/services")
+@router.post("/{doctor_id}/services", response_model=MessageResponse)
 async def add_service(
     doctor_id: int,
     service: DoctorServiceCreate,
@@ -122,7 +123,7 @@ async def update_doctor(
     return result.scalars().first()
 
 
-@router.delete("/{doctor_id}")
+@router.delete("/{doctor_id}", response_model=MessageResponse)
 async def delete_doctor(
     doctor_id: int,
     db: AsyncSession = Depends(get_db),
@@ -152,7 +153,7 @@ async def delete_doctor(
     return {"message": "Deleted"}
 
 
-@router.delete("/services/{service_id}")
+@router.delete("/services/{service_id}", response_model=MessageResponse)
 async def delete_service(
     service_id: int,
     db: AsyncSession = Depends(get_db),

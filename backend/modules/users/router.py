@@ -1,5 +1,6 @@
 import bcrypt
 from backend.core.database import get_db
+from backend.core.schemas import MessageResponse
 from backend.modules.auth import require_roles
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -78,7 +79,7 @@ async def update_user(
     return user
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", response_model=MessageResponse)
 async def delete_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),

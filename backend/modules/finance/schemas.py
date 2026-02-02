@@ -40,3 +40,23 @@ class ShiftRead(ShiftCreate):
 
     class Config:
         from_attributes = True
+
+
+class ReportXRead(BaseModel):
+    type: str
+    shift_id: int
+    cashier: int | None
+    total_cash: int
+    total_card: int
+    total_transfer: int
+    generated_at: datetime
+
+
+class ReportZRead(BaseModel):
+    type: str
+    shift_id: int
+    total_cash: int
+    total_card: int
+    total_transfer: int
+    total_income: int
+    closed_at: datetime | None

@@ -12,6 +12,8 @@ from backend.modules.finance.models import (
     Transaction,
 )
 from backend.modules.finance.schemas import (
+    ReportXRead,
+    ReportZRead,
     ShiftCreate,
     ShiftRead,
     TransactionCreate,
@@ -182,7 +184,7 @@ async def process_payment(
     return new_tx
 
 
-@router.get("/reports/{type}")
+@router.get("/reports/{type}", response_model=ReportXRead | ReportZRead)
 async def get_report(
     type: str,
     db: AsyncSession = Depends(get_db),

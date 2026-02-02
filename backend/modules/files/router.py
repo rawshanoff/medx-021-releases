@@ -8,6 +8,7 @@ from backend.core.config import settings
 from backend.core.database import get_db
 from backend.core.features import FEATURE_FILES_RESULTS, FEATURE_TELEGRAM_PATIENT
 from backend.core.licenses import require_features
+from backend.core.schemas import StatusResponse
 from backend.modules.auth import require_roles
 from backend.modules.files.models import (
     FileDeliveryLog,
@@ -141,7 +142,7 @@ async def list_patient_files(
     return res.scalars().all()
 
 
-@router.post("/{file_id}/send/telegram")
+@router.post("/{file_id}/send/telegram", response_model=StatusResponse)
 async def send_file_to_telegram(
     file_id: int,
     db: AsyncSession = Depends(get_db),

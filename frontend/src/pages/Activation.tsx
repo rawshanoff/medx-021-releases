@@ -57,13 +57,19 @@ export default function Activation() {
           <label
             htmlFor="license-upload"
             className={cn(
-              "flex cursor-pointer flex-col items-center gap-2 rounded-md border border-dashed border-border bg-background px-3 py-4 text-[13px] text-foreground",
-              "hover:border-primary hover:bg-secondary/40"
+              'flex cursor-pointer flex-col items-center gap-2 rounded-md border border-dashed border-border bg-background px-3 py-4 text-[13px] text-foreground',
+              'hover:border-primary hover:bg-secondary/40',
             )}
           >
             <Upload size={16} className="text-muted-foreground" />
             <span className="truncate">{file ? file.name : t('auth.click_upload')}</span>
-            <input id="license-upload" type="file" accept=".key" onChange={handleFileChange} className="hidden" />
+            <input
+              id="license-upload"
+              type="file"
+              accept=".key"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </label>
         </div>
 

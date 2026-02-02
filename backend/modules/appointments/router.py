@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 from backend.core.database import get_db
+from backend.core.schemas import MessageResponse
 from backend.modules.appointments.models import Appointment
 from backend.modules.appointments.schemas import AppointmentCreate, AppointmentRead
 from backend.modules.auth import require_roles
@@ -118,7 +119,7 @@ async def list_appointments_v2(
     return res_list
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=MessageResponse)
 async def cancel_appointment(
     id: int,
     db: AsyncSession = Depends(get_db),

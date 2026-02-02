@@ -49,13 +49,15 @@ export function Modal({
       <div
         className={cn(
           'w-full rounded-md border border-border bg-card p-4 text-foreground shadow-sm',
-          maxWFromWidth(width)
+          maxWFromWidth(width),
         )}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[14px] font-medium">{title}</div>
-            {description ? <div className="mt-0.5 text-[12px] text-muted-foreground">{description}</div> : null}
+            {description ? (
+              <div className="mt-0.5 text-[12px] text-muted-foreground">{description}</div>
+            ) : null}
           </div>
           <Button
             variant="ghost"
@@ -73,4 +75,3 @@ export function Modal({
     </div>
   );
 }
-

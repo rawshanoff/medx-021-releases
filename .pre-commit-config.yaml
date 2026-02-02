@@ -1,0 +1,33 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-backend
+        name: ruff (backend)
+        entry: ruff check backend --fix
+        language: python
+        additional_dependencies: ["ruff"]
+        types: [python]
+        files: ^backend/
+
+      - id: black-backend
+        name: black (backend)
+        entry: black backend
+        language: python
+        additional_dependencies: ["black"]
+        types: [python]
+        files: ^backend/
+
+      - id: eslint-frontend
+        name: eslint (frontend)
+        entry: npm --prefix frontend run lint
+        language: system
+        pass_filenames: false
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+
+      - id: prettier-frontend
+        name: prettier (frontend)
+        entry: npx --prefix frontend prettier --write
+        language: system
+        pass_filenames: true
+        files: ^frontend/src/.*\.(ts|tsx|js|jsx|css|md|json)$
+

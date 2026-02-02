@@ -11,19 +11,19 @@ export type PrintSettings = {
   boldAllText: boolean; // make whole receipt bold for readability
   showTotalAmount: boolean; // show money totals / amounts on receipt
   showPaymentType: boolean; // show payment type line on receipt
-  silentPrintMode: "html" | "image"; // Electron silent printing mode
+  silentPrintMode: 'html' | 'image'; // Electron silent printing mode
   silentScalePercent: number; // Electron webContents.print scaleFactor (10..200)
-  receiptWidthMode: "standard" | "safe"; // full width vs safe width with margins
+  receiptWidthMode: 'standard' | 'safe'; // full width vs safe width with margins
   receiptTemplateId: ReceiptTemplateId;
-  paperSize: "58" | "80";
+  paperSize: '58' | '80';
   qrUrl: string;
   qrImageDataUrl: string; // generated once; used instead of remote QR
 };
 
-const STORAGE_KEY = "medx-print-settings";
-const RECEIPT_STORAGE_PREFIX = "medx-receipt:";
+const STORAGE_KEY = 'medx-print-settings';
+const RECEIPT_STORAGE_PREFIX = 'medx-receipt:';
 
-export type ReceiptTemplateId = "check-4-58" | "check-1" | "check-6";
+export type ReceiptTemplateId = 'check-4-58' | 'check-1' | 'check-6';
 
 export function getPrintSettings(): PrintSettings {
   try {
@@ -42,25 +42,25 @@ export function setPrintSettings(next: PrintSettings) {
 
 function defaultSettings(): PrintSettings {
   return {
-    clinicName: "MedX Clinic",
-    clinicPhone: "",
-    clinicAddress: "",
-    footerNote: "",
-    underQrText: "",
-    logoDataUrl: "",
+    clinicName: 'MedX Clinic',
+    clinicPhone: '',
+    clinicAddress: '',
+    footerNote: '',
+    underQrText: '',
+    logoDataUrl: '',
     autoPrint: false,
-    preferredPrinterName: "",
-    preferredPrinterDeviceName: "",
+    preferredPrinterName: '',
+    preferredPrinterDeviceName: '',
     boldAllText: true,
     showTotalAmount: true,
     showPaymentType: true,
-    silentPrintMode: "image",
+    silentPrintMode: 'image',
     silentScalePercent: 100,
-    receiptWidthMode: "standard",
-    receiptTemplateId: "check-6",
-    paperSize: "80",
-    qrUrl: "",
-    qrImageDataUrl: "",
+    receiptWidthMode: 'standard',
+    receiptTemplateId: 'check-6',
+    paperSize: '80',
+    qrUrl: '',
+    qrImageDataUrl: '',
   };
 }
 
@@ -76,7 +76,7 @@ export type PrintWindow = Window | null;
 export function openPrintWindow(): PrintWindow {
   // IMPORTANT: must be called directly from a user gesture (click/keydown) to avoid popup blockers
   // Avoid noopener/noreferrer here because we need to write into the window reliably.
-  return window.open("", "_blank", "width=520,height=720");
+  return window.open('', '_blank', 'width=520,height=720');
 }
 
 function writeHtmlToWindow(opened: PrintWindow, html: string) {
@@ -99,9 +99,9 @@ function isElectronRuntime(): boolean {
 async function electronSilentPrintHtml(
   html: string,
   deviceName: string,
-  paperSize: PrintSettings["paperSize"],
-  mode: PrintSettings["silentPrintMode"],
-  scaleFactor: number
+  paperSize: PrintSettings['paperSize'],
+  mode: PrintSettings['silentPrintMode'],
+  scaleFactor: number,
 ): Promise<boolean> {
   try {
     const api = (window as any)?.medx;
@@ -114,16 +114,17 @@ async function electronSilentPrintHtml(
   }
 }
 
-export function printQueueTicket(item: PrintableQueueItem, settings?: PrintSettings, win?: PrintWindow) {
+export function printQueueTicket(
+  item: PrintableQueueItem,
+  settings?: PrintSettings,
+  win?: PrintWindow,
+) {
   const s = settings ?? getPrintSettings();
-  const widthMm = s.paperSize === "58" ? 58 : 80;
-  const contentMm =
-    s.receiptWidthMode === "safe"
-      ? (s.paperSize === "58" ? 54 : 76)
-      : widthMm;
+  const widthMm = s.paperSize === '58' ? 58 : 80;
+  const contentMm = s.receiptWidthMode === 'safe' ? (s.paperSize === '58' ? 54 : 76) : widthMm;
 
   const created = item.created_at ? new Date(item.created_at) : null;
-  const createdStr = created ? created.toLocaleString() : "";
+  const createdStr = created ? created.toLocaleString() : '';
 
   const html = `
 <!doctype html>
@@ -153,15 +154,15 @@ export function printQueueTicket(item: PrintableQueueItem, settings?: PrintSetti
     <div class="receipt">
       <div class="h">
       <div style="font-weight:700">${escapeHtml(s.clinicName)}</div>
-      ${s.clinicPhone ? `<div class="meta">${escapeHtml(s.clinicPhone)}</div>` : ""}
-      ${s.clinicAddress ? `<div class="meta">${escapeHtml(s.clinicAddress)}</div>` : ""}
+      ${s.clinicPhone ? `<div class="meta">${escapeHtml(s.clinicPhone)}</div>` : ''}
+      ${s.clinicAddress ? `<div class="meta">${escapeHtml(s.clinicAddress)}</div>` : ''}
       <div class="line"></div>
       <div class="ticket">${escapeHtml(item.ticket_number)}</div>
       <div class="name">${escapeHtml(item.patient_name)}</div>
-      ${item.doctor_name ? `<div class="meta">${escapeHtml(item.doctor_name)}</div>` : ""}
-      ${createdStr ? `<div class="meta">${escapeHtml(createdStr)}</div>` : ""}
+      ${item.doctor_name ? `<div class="meta">${escapeHtml(item.doctor_name)}</div>` : ''}
+      ${createdStr ? `<div class="meta">${escapeHtml(createdStr)}</div>` : ''}
       <div class="line"></div>
-      ${s.footerNote ? `<div class="footer">${escapeHtml(s.footerNote)}</div>` : ""}
+      ${s.footerNote ? `<div class="footer">${escapeHtml(s.footerNote)}</div>` : ''}
       </div>
     </div>
   </body>
@@ -169,13 +170,15 @@ export function printQueueTicket(item: PrintableQueueItem, settings?: PrintSetti
 
   // Electron: silent printing without any dialogs/windows
   if (s.autoPrint && isElectronRuntime()) {
-    const scaleFactor = Number.isFinite(Number(s.silentScalePercent)) ? Number(s.silentScalePercent) : 100;
+    const scaleFactor = Number.isFinite(Number(s.silentScalePercent))
+      ? Number(s.silentScalePercent)
+      : 100;
     void electronSilentPrintHtml(
       html,
-      s.preferredPrinterDeviceName || "",
+      s.preferredPrinterDeviceName || '',
       s.paperSize,
-      s.silentPrintMode || "image",
-      scaleFactor
+      s.silentPrintMode || 'image',
+      scaleFactor,
     );
     return;
   }
@@ -227,13 +230,15 @@ export function printReceipt(payload: ReceiptPayload, settings?: PrintSettings, 
   const html = buildReceiptHtml(payload, s);
   // Electron: silent printing without dialogs/windows
   if (s.autoPrint && isElectronRuntime()) {
-    const scaleFactor = Number.isFinite(Number(s.silentScalePercent)) ? Number(s.silentScalePercent) : 100;
+    const scaleFactor = Number.isFinite(Number(s.silentScalePercent))
+      ? Number(s.silentScalePercent)
+      : 100;
     void electronSilentPrintHtml(
       html,
-      s.preferredPrinterDeviceName || "",
+      s.preferredPrinterDeviceName || '',
       s.paperSize,
-      s.silentPrintMode || "image",
-      scaleFactor
+      s.silentPrintMode || 'image',
+      scaleFactor,
     );
     return;
   }
@@ -249,21 +254,18 @@ export function printReceipt(payload: ReceiptPayload, settings?: PrintSettings, 
 
 export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
   const created = new Date(p.createdAtIso);
-  const dateStr = created.toLocaleDateString("ru-RU");
-  const timeStr = created.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+  const dateStr = created.toLocaleDateString('ru-RU');
+  const timeStr = created.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   const money = formatMoney(p.amount);
   const showTotal = s.showTotalAmount !== false;
   const showPayment = s.showPaymentType !== false;
   const payLabel = formatPaymentUz(p.paymentMethod, p.paymentBreakdown, p.currency, showTotal);
-  const widthMm = s.paperSize === "58" ? 58 : 80;
-  const contentMm =
-    s.receiptWidthMode === "safe"
-      ? (s.paperSize === "58" ? 54 : 76)
-      : widthMm;
-  const qr = s.qrUrl ? escapeHtml(s.qrUrl) : "";
-  const underQr = (s.underQrText || "").trim();
-  const logo = (s.logoDataUrl || "").trim();
-  const qrImage = (s.qrImageDataUrl || "").trim();
+  const widthMm = s.paperSize === '58' ? 58 : 80;
+  const contentMm = s.receiptWidthMode === 'safe' ? (s.paperSize === '58' ? 54 : 76) : widthMm;
+  const qr = s.qrUrl ? escapeHtml(s.qrUrl) : '';
+  const underQr = (s.underQrText || '').trim();
+  const logo = (s.logoDataUrl || '').trim();
+  const qrImage = (s.qrImageDataUrl || '').trim();
   const boldAll = Boolean(s.boldAllText);
 
   const commonHead = `
@@ -272,65 +274,65 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
     <title>Chek</title>
     <style>
       * { box-sizing: border-box; }
-      body { margin: 0; padding: 0; background: #fff; color: #000; ${boldAll ? "font-weight: 900;" : ""} }
+      body { margin: 0; padding: 0; background: #fff; color: #000; ${boldAll ? 'font-weight: 900;' : ''} }
       @page { size: ${widthMm}mm auto; margin: 0; }
       html, body { width: ${widthMm}mm; }
       @media print { body { margin: 0; padding: 0; } }
-      .receipt { width: ${contentMm}mm; max-width: ${contentMm}mm; margin: 0 auto; padding: ${widthMm === 58 ? "4mm 2mm 6mm" : "4mm 3mm 6mm"}; font-family: "Courier New", monospace; }
+      .receipt { width: ${contentMm}mm; max-width: ${contentMm}mm; margin: 0 auto; padding: ${widthMm === 58 ? '4mm 2mm 6mm' : '4mm 3mm 6mm'}; font-family: "Courier New", monospace; }
       .center { text-align: center; }
       .row { display:flex; justify-content:space-between; gap: 8px; font-size: 12px; }
       .row > span { min-width: 0; }
       .divider { border-top: 1px dashed #000; margin: 6px 0; }
-      .logo { font-weight: 900; font-size: ${widthMm === 58 ? "16px" : "16px"}; text-transform: uppercase; }
+      .logo { font-weight: 900; font-size: ${widthMm === 58 ? '16px' : '16px'}; text-transform: uppercase; }
       .sub { font-size: 11px; line-height: 1.2; }
-      .logo-slot { display:flex; align-items:center; justify-content:center; margin: 2px 0 6px; min-height: ${widthMm === 58 ? "22mm" : "18mm"}; }
-      .logo-img { max-width: 100%; max-height: ${widthMm === 58 ? "20mm" : "16mm"}; object-fit: contain; }
+      .logo-slot { display:flex; align-items:center; justify-content:center; margin: 2px 0 6px; min-height: ${widthMm === 58 ? '22mm' : '18mm'}; }
+      .logo-img { max-width: 100%; max-height: ${widthMm === 58 ? '20mm' : '16mm'}; object-fit: contain; }
       .queue { text-align:center; margin: 8px 0; }
       .queue-label { font-size: 11px; text-transform: uppercase; }
-      .queue-num { font-size: ${widthMm === 58 ? "42px" : "44px"}; font-weight: 900; letter-spacing: 2px; line-height: 1; }
+      .queue-num { font-size: ${widthMm === 58 ? '42px' : '44px'}; font-weight: 900; letter-spacing: 2px; line-height: 1; }
       .title { font-weight: 800; margin-top: 4px; font-size: 12px; }
       .value { font-weight: 900; font-size: 13px; word-break: break-word; }
       .total { display:flex; justify-content:space-between; font-weight: 900; font-size: 14px; }
       .small { font-size: 11px; }
-      .qr { display:block; margin: 10px auto 4px; width: ${widthMm === 58 ? "120px" : "140px"}; height: ${widthMm === 58 ? "120px" : "140px"}; }
+      .qr { display:block; margin: 10px auto 4px; width: ${widthMm === 58 ? '120px' : '140px'}; height: ${widthMm === 58 ? '120px' : '140px'}; }
       .underqr { margin-top: 6px; font-size: 11px; text-align: center; }
     </style>
   `;
 
   const headerBlock = `
     <div class="center">
-      <div class="logo">${escapeHtml(s.clinicName || "KLINIKA")}</div>
+      <div class="logo">${escapeHtml(s.clinicName || 'KLINIKA')}</div>
       <div class="sub">
-        ${s.clinicAddress ? `${escapeHtml(s.clinicAddress)}<br>` : ""}
-        ${s.clinicPhone ? `tel: ${escapeHtml(s.clinicPhone)}` : ""}
+        ${s.clinicAddress ? `${escapeHtml(s.clinicAddress)}<br>` : ''}
+        ${s.clinicPhone ? `tel: ${escapeHtml(s.clinicPhone)}` : ''}
       </div>
     </div>
   `;
 
   const logoBlock = `
     <div class="logo-slot">
-      ${logo ? `<img class="logo-img" src="${escapeHtml(logo)}" alt="logo" />` : ""}
+      ${logo ? `<img class="logo-img" src="${escapeHtml(logo)}" alt="logo" />` : ''}
     </div>
   `;
 
   const footer = `
     <div class="divider"></div>
     <div class="center small">
-      ${s.footerNote ? escapeHtml(s.footerNote) : "Спасибо за доверие!"}
+      ${s.footerNote ? escapeHtml(s.footerNote) : 'Спасибо за доверие!'}
     </div>
   `;
 
-  const underQrLine = underQr ? `<div class="underqr">${escapeHtml(underQr)}</div>` : "";
+  const underQrLine = underQr ? `<div class="underqr">${escapeHtml(underQr)}</div>` : '';
 
   const qrImg = qrImage
     ? `<img class="qr" src="${escapeHtml(qrImage)}" alt="QR">`
     : qr
       ? `<img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data=${encodeURIComponent(
-          s.qrUrl
+          s.qrUrl,
         )}" alt="QR">`
-      : "";
+      : '';
 
-  if (s.receiptTemplateId === "check-4-58") {
+  if (s.receiptTemplateId === 'check-4-58') {
     // Inspired by check-4 58.html (Uz)
     return `
 <!DOCTYPE html>
@@ -367,12 +369,16 @@ ${commonHead}
 
     <div class="divider"></div>
 
-    ${showTotal ? `
+    ${
+      showTotal
+        ? `
       <div class="service-row">
         <div class="service-name">JAMI:</div>
         <div class="price">${escapeHtml(money)} ${escapeHtml(p.currency)}</div>
       </div>
-    ` : ``}
+    `
+        : ``
+    }
 
     ${showPayment ? `<div class="row small" style="margin-top: 4px;"><span>To'lov turi:</span><span>${escapeHtml(payLabel)}</span></div>` : ``}
 
@@ -384,7 +390,7 @@ ${commonHead}
 </html>`;
   }
 
-  if (s.receiptTemplateId === "check-1") {
+  if (s.receiptTemplateId === 'check-1') {
     // Inspired by check-1.html (80mm border + huge ticket)
     return `
 <!DOCTYPE html>
@@ -467,7 +473,7 @@ ${commonHead}
     <div class="table-row">
       <span class="col-service">${escapeHtml(p.serviceName)}</span>
       <span class="col-qty">1</span>
-      <span class="col-price">${showTotal ? escapeHtml(money) : ""}</span>
+      <span class="col-price">${showTotal ? escapeHtml(money) : ''}</span>
     </div>
 
     <div class="divider"></div>
@@ -484,7 +490,7 @@ ${commonHead}
 
 function formatMoney(amount: number): string {
   try {
-    return Number(amount || 0).toLocaleString("ru-RU");
+    return Number(amount || 0).toLocaleString('ru-RU');
   } catch {
     return String(amount || 0);
   }
@@ -492,33 +498,33 @@ function formatMoney(amount: number): string {
 
 function formatPaymentUz(
   method: string,
-  breakdown?: ReceiptPayload["paymentBreakdown"],
+  breakdown?: ReceiptPayload['paymentBreakdown'],
   currency?: string,
-  includeAmounts: boolean = true
+  includeAmounts: boolean = true,
 ): string {
-  const c = (currency || "").trim();
-  const m = (method || "").toUpperCase();
+  const c = (currency || '').trim();
+  const m = (method || '').toUpperCase();
   const labelMap: Record<string, string> = {
-    CASH: "Naqd",
-    CARD: "Karta",
-    TRANSFER: "O‘tkazma",
-    MIXED: "Aralash",
+    CASH: 'Naqd',
+    CARD: 'Karta',
+    TRANSFER: 'O‘tkazma',
+    MIXED: 'Aralash',
   };
-  if (m !== "MIXED") return labelMap[m] || m;
+  if (m !== 'MIXED') return labelMap[m] || m;
   if (!includeAmounts) return labelMap[m] || m;
   const parts: string[] = [];
-  if (breakdown?.cash) parts.push(`Naqd: ${formatMoney(breakdown.cash)}${c ? ` ${c}` : ""}`);
-  if (breakdown?.card) parts.push(`Karta: ${formatMoney(breakdown.card)}${c ? ` ${c}` : ""}`);
-  if (breakdown?.transfer) parts.push(`O‘tkazma: ${formatMoney(breakdown.transfer)}${c ? ` ${c}` : ""}`);
-  return parts.length ? parts.join(" / ") : (labelMap[m] || m);
+  if (breakdown?.cash) parts.push(`Naqd: ${formatMoney(breakdown.cash)}${c ? ` ${c}` : ''}`);
+  if (breakdown?.card) parts.push(`Karta: ${formatMoney(breakdown.card)}${c ? ` ${c}` : ''}`);
+  if (breakdown?.transfer)
+    parts.push(`O‘tkazma: ${formatMoney(breakdown.transfer)}${c ? ` ${c}` : ''}`);
+  return parts.length ? parts.join(' / ') : labelMap[m] || m;
 }
 
 function escapeHtml(input: string): string {
   return String(input)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
-

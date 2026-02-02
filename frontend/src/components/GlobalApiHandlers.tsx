@@ -23,10 +23,7 @@ export default function GlobalApiHandlers() {
     const onLogout = (event: Event) => {
       const detail = (event as CustomEvent<LogoutEventDetail>).detail;
       const reason = detail?.reason;
-      const message =
-        reason === 'expired'
-          ? t('auth.session_expired')
-          : t('auth.reauth_required');
+      const message = reason === 'expired' ? t('auth.session_expired') : t('auth.reauth_required');
       showToast(message, 'warning');
       navigate('/login', { replace: true });
     };

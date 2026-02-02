@@ -67,7 +67,7 @@
   }
 
   .dark,
-  [data-theme="dark"] {
+  [data-theme='dark'] {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
@@ -158,4 +158,3 @@
 
 /* Glassmorphism Utilities (for overlays/cards only) */
 /* (legacy .glass removed — use Tailwind + tokens instead) */
-

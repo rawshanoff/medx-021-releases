@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import bcrypt
 from backend.core.config import settings
 from backend.core.database import get_db
+from backend.core.schemas import MessageResponse
 from backend.modules.users.models import User
 from backend.modules.users.schemas import LoginResponse, UserResponse
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -138,7 +139,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
     )
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=MessageResponse)
 async def logout():
     """Logout endpoint (client-side token removal)"""
     return {"message": "Logged out successfully"}

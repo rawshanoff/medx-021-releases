@@ -1,5 +1,8 @@
 import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
+from backend.core.config import settings
 from backend.core.database import init_db
 from backend.core.exceptions import AppException
 from backend.modules.appointments.router import router as appointments_router
@@ -15,6 +18,35 @@ from backend.modules.users.router import router as users_router
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+
+def _configure_logging() -> None:
+    level_name = str(getattr(settings, "LOG_LEVEL", "INFO") or "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
+
+    log_file = getattr(settings, "LOG_FILE", None)
+    if log_file:
+        path = Path(log_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        handlers.append(
+            RotatingFileHandler(
+                filename=str(path),
+                maxBytes=int(getattr(settings, "LOG_MAX_BYTES", 5_000_000)),
+                backupCount=int(getattr(settings, "LOG_BACKUP_COUNT", 3)),
+                encoding="utf-8",
+            )
+        )
+
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+        handlers=handlers,
+    )
+
+
+_configure_logging()
 
 app = FastAPI(title="MedX API", version="1.0.0")
 logger = logging.getLogger("medx")

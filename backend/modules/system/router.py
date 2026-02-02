@@ -1,11 +1,16 @@
 from backend.modules.auth import require_roles
+from backend.modules.system.schemas import (
+    DoctorInfo,
+    UpdateCheckResponse,
+    VersionResponse,
+)
 from backend.modules.users.models import UserRole
 from fastapi import APIRouter, Depends
 
 router = APIRouter()
 
 
-@router.get("/version")
+@router.get("/version", response_model=VersionResponse)
 def get_version(
     _user=Depends(
         require_roles(
@@ -20,7 +25,7 @@ def get_version(
     return {"version": "1.0.0-mvp", "status": "active"}
 
 
-@router.get("/update-check")
+@router.get("/update-check", response_model=UpdateCheckResponse)
 async def check_update(
     _user=Depends(
         require_roles(
@@ -41,7 +46,7 @@ async def check_update(
     }
 
 
-@router.get("/doctors")
+@router.get("/doctors", response_model=list[DoctorInfo])
 async def get_doctors(
     _user=Depends(
         require_roles(

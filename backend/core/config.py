@@ -11,6 +11,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     DB_ECHO: bool = False
 
+    # Logging
+    LOG_LEVEL: str = "INFO"
+    # If set, also write logs to this file path (e.g. logs/medx.log)
+    LOG_FILE: str | None = None
+    LOG_MAX_BYTES: int = 5_000_000
+    LOG_BACKUP_COUNT: int = 3
+
     # Files / Telegram (paid modules)
     FILE_STORAGE_DIR: str = "storage/patient_files"
     PATIENT_BOT_TOKEN: str = ""  # Telegram bot token for sending files to patients

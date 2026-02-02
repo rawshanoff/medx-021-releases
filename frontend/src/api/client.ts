@@ -51,17 +51,14 @@ client.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const message =
-      error?.response?.data?.detail ||
-      error?.message ||
-      'Ошибка запроса';
+    const message = error?.response?.data?.detail || error?.message || 'Ошибка запроса';
     if (status === 403) {
       emitEvent('api:error', { message: message || 'Нет доступа' });
       return Promise.reject(error);
     }
     emitEvent('api:error', { message });
     return Promise.reject(error);
-  }
+  },
 );
 
 export default client;
