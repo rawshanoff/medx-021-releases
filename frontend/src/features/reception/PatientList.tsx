@@ -36,7 +36,7 @@ export function PatientList({
     <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-border bg-card">
       <div className="h-full overflow-auto">
         <table className="w-full text-[14px]">
-          <thead className="sticky top-0 z-10 bg-secondary text-[12px] text-muted-foreground">
+          <thead className="sticky top-0 z-10 bg-secondary text-[13px] text-muted-foreground">
             <tr className="[&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
               <th>{t('nav.patients')}</th>
               <th>{t('reception.dob')}</th>

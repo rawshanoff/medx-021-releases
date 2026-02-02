@@ -139,7 +139,7 @@ export default function Patients() {
         <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-border bg-card">
           <div className="h-full overflow-auto">
             <table className="w-full text-[14px]">
-              <thead className="sticky top-0 z-10 bg-secondary text-[12px] text-muted-foreground">
+              <thead className="sticky top-0 z-10 bg-secondary text-[13px] text-muted-foreground">
                 <tr className="h-10 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
                   <th className="w-[110px]">{t('patients.id')}</th>
                   <th>{t('reception.first_name')}</th>
@@ -263,7 +263,7 @@ function PatientRow({
 
   return (
     <tr className={isFocused ? 'h-10 bg-muted/40' : 'h-10'}>
-      <td className="p-3 font-mono text-[12px] text-muted-foreground">{formatID(patient.id)}</td>
+      <td className="p-3 font-mono text-[13px] text-muted-foreground">{formatID(patient.id)}</td>
 
       <td className="p-3">
         {isEditing ? (
@@ -515,7 +515,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
 
       <div className="mt-3 overflow-hidden rounded-md border border-border">
         <table className="w-full text-[13px]">
-          <thead className="bg-secondary text-[12px] text-muted-foreground">
+          <thead className="bg-secondary text-[13px] text-muted-foreground">
             <tr className="h-9 [&>th]:p-2 [&>th]:text-left [&>th]:font-medium">
               <th>{t('patients.file_name', { defaultValue: 'Имя' })}</th>
               <th className="w-[140px]">{t('common.type', { defaultValue: 'Тип' })}</th>

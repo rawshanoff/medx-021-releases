@@ -977,7 +977,7 @@ export default function System() {
 
         <div className="overflow-hidden rounded-md border border-border bg-card">
           <table className="w-full text-[13px]">
-            <thead className="bg-secondary text-[12px] text-muted-foreground">
+            <thead className="bg-secondary text-[13px] text-muted-foreground">
               <tr className="[&>th]:px-2.5 [&>th]:py-2 [&>th]:text-left [&>th]:font-medium">
                 <th className="w-[80px]">ID</th>
                 <th>Username</th>
@@ -995,7 +995,7 @@ export default function System() {
                     <td className="font-medium">{user.username}</td>
                     <td>{user.full_name}</td>
                     <td>
-                      <span className="inline-flex items-center rounded-sm border border-border bg-secondary px-2 py-0.5 text-[12px]">
+                      <span className="inline-flex items-center rounded-sm border border-border bg-secondary px-2 py-0.5 text-[13px]">
                         {user.role}
                       </span>
                     </td>
@@ -1027,7 +1027,7 @@ export default function System() {
             >
               {t('common.prev', { defaultValue: 'Назад' })}
             </Button>
-            <div className="text-[12px] text-muted-foreground">
+            <div className="text-[13px] text-muted-foreground">
               {usersPage + 1} / {Math.max(1, Math.ceil(users.length / usersPageSize))}
             </div>
             <Button
@@ -1105,7 +1105,7 @@ export default function System() {
               >
                 {t('common.prev', { defaultValue: 'Назад' })}
               </Button>
-              <div className="text-[12px] text-muted-foreground">
+              <div className="text-[13px] text-muted-foreground">
                 {printersPage + 1} / {Math.max(1, Math.ceil(printers.length / printersPageSize))}
               </div>
               <Button
