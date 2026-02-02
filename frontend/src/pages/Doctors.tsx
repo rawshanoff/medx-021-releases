@@ -698,7 +698,7 @@ function DoctorCard({
               type="number"
               placeholder="1000"
               value={svcPrice}
-              onChange={(e) => setSvcPrice(Number(e.target.value))}
+              onChange={(e) => setSvcPrice(Math.max(0, Number(e.target.value)))}
             />
           </div>
           <div>
@@ -710,7 +710,7 @@ function DoctorCard({
               type="number"
               placeholder="0"
               value={svcPriority}
-              onChange={(e) => setSvcPriority(Number(e.target.value))}
+              onChange={(e) => setSvcPriority(Math.max(0, Number(e.target.value)))}
             />
           </div>
         </div>

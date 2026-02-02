@@ -9,6 +9,28 @@ class DoctorServiceBase(BaseModel):
     price: int
     priority: int = 0
 
+    @field_validator("name")
+    @classmethod
+    def _validate_name(cls, v: str) -> str:
+        s = str(v or "").strip()
+        if not s:
+            raise ValueError("service name is required")
+        return s
+
+    @field_validator("price")
+    @classmethod
+    def _validate_price(cls, v: int) -> int:
+        if int(v) < 0:
+            raise ValueError("price must be >= 0")
+        return int(v)
+
+    @field_validator("priority")
+    @classmethod
+    def _validate_priority(cls, v: int) -> int:
+        if int(v) < 0:
+            raise ValueError("priority must be >= 0")
+        return int(v)
+
 
 class DoctorServiceCreate(DoctorServiceBase):
     pass
