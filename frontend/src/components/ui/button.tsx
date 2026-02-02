@@ -18,8 +18,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium transition-colors shadow-sm',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          'inline-flex items-center justify-center gap-[8px] whitespace-nowrap rounded-[10px] text-[16px] font-medium transition-colors shadow-sm',
+          'focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-[2px] focus-visible:ring-offset-[hsl(var(--background))]',
           'disabled:pointer-events-none disabled:opacity-50',
           {
             default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/85',
@@ -30,10 +30,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           }[variant],
           {
             // Electron desktop: larger click targets (>= 44px)
-            sm: 'h-10 px-4',
-            md: 'h-12 px-6',
-            lg: 'h-14 px-8',
-            icon: 'h-12 w-12 p-0',
+            sm: 'h-[40px] px-[16px]',
+            md: 'h-[48px] px-[24px]',
+            lg: 'h-[56px] px-[32px]',
+            icon: 'h-[48px] w-[48px] p-0',
           }[size],
           className,
         )}

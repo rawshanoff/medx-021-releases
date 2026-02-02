@@ -12,7 +12,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       title="Toggle Theme"
       aria-label="Toggle Theme"
-      className="h-10 w-10 rounded-full border border-border bg-card/80 shadow-sm backdrop-blur hover:bg-secondary/70"
+      className="h-[40px] w-[40px] rounded-full border border-border bg-card/80 shadow-sm backdrop-blur hover:bg-secondary/70"
     >
       {resolvedTheme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
     </Button>
