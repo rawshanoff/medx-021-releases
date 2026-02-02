@@ -44,10 +44,10 @@ export function PatientSearch({
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-md border border-border bg-card p-3">
-      <div className="grid grid-cols-2 items-end gap-2 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
+    <div className="rounded-md border border-border bg-card p-4">
+      <div className="grid grid-cols-2 items-end gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
         <div>
-          <label className="mb-1 block text-[12px] text-muted-foreground">
+          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
             {t('reception.phone')}
           </label>
           <Input
@@ -70,7 +70,7 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1 block text-[12px] text-muted-foreground">
+          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
             {t('reception.first_name')}
           </label>
           <Input
@@ -94,7 +94,7 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1 block text-[12px] text-muted-foreground">
+          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
             {t('reception.last_name')}
           </label>
           <Input
@@ -118,7 +118,7 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1 block text-[12px] text-muted-foreground">
+          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
             {t('reception.dob')}
           </label>
           <Input
