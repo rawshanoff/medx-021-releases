@@ -34,7 +34,22 @@ export default function Login() {
 
       localStorage.setItem('token', res.data.access_token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      navigate('/');
+
+      // Redirect based on user role
+      const userRole = res.data.user.role?.toLowerCase();
+      let redirectPath = '/';
+
+      if (userRole === 'cashier') {
+        redirectPath = '/finance';
+      } else if (userRole === 'doctor') {
+        redirectPath = '/';
+      } else if (['admin', 'owner'].includes(userRole)) {
+        redirectPath = '/';
+      } else if (userRole === 'receptionist') {
+        redirectPath = '/';
+      }
+
+      navigate(redirectPath);
     } catch (err: any) {
       console.error('Login error:', err);
       showToast(err.response?.data?.detail || t('auth.login_failed'), 'error');

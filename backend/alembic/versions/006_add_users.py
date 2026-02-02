@@ -44,7 +44,8 @@ def upgrade():
     op.create_index("ix_users_username", "users", ["username"], unique=True)
 
     # Create default admin user
-    # Password: admin123
+    # ⚠️ SECURITY WARNING: Default password is 'admin123'
+    # This password MUST be changed immediately after first login!
     # Hash generated with bcrypt
     op.execute("""
         INSERT INTO users (username, password_hash, full_name, role, is_active)

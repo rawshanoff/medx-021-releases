@@ -70,7 +70,11 @@ async def list_appointments(
     query = (
         select(Appointment)
         .join(Appointment.patient)
-        .where(Appointment.start_time >= start, Appointment.start_time <= end)
+        .where(
+            Appointment.start_time >= start,
+            Appointment.start_time <= end,
+            Appointment.deleted_at.is_(None),
+        )
     )
 
     if doctor_id:

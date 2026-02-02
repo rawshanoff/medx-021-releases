@@ -1,6 +1,7 @@
 from typing import List
 
 from backend.core.database import get_db
+from backend.core.schemas import MessageResponse
 from backend.modules.appointments.models import Appointment
 from backend.modules.auth import require_roles
 from backend.modules.finance.models import Transaction
@@ -177,6 +178,31 @@ async def update_patient(
     await db.commit()
     await db.refresh(patient)
     return patient
+
+
+@router.delete("/{patient_id}", response_model=MessageResponse)
+async def delete_patient(
+    patient_id: int,
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OWNER,
+            UserRole.RECEPTIONIST,
+        )
+    ),
+):
+    """Archive patient (soft delete)"""
+    result = await db.execute(
+        select(Patient).where(Patient.id == patient_id, Patient.deleted_at.is_(None))
+    )
+    patient = result.scalars().first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    patient.soft_delete()
+    await db.commit()
+    return {"message": "Patient archived successfully"}
 
 
 @router.get("/{patient_id}/history", response_model=PatientHistoryRead)

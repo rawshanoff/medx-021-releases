@@ -57,7 +57,9 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload"
         )
 
-    result = await db.execute(select(User).filter(User.username == username))
+    result = await db.execute(
+        select(User).filter(User.username == username, User.deleted_at.is_(None))
+    )
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
@@ -90,8 +92,12 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ):
     """Login endpoint"""
-    # Find user
-    result = await db.execute(select(User).filter(User.username == form_data.username))
+    # Find user (exclude deleted users)
+    result = await db.execute(
+        select(User).filter(
+            User.username == form_data.username, User.deleted_at.is_(None)
+        )
+    )
     user = result.scalar_one_or_none()
 
     if not user or not user.is_active:
