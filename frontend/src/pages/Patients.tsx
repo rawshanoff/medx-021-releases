@@ -25,11 +25,11 @@ export default function Patients() {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [dob, setDob] = useState('');
-  const phoneRef = useRef<HTMLInputElement | null>(null);
-  const nameRef = useRef<HTMLInputElement | null>(null);
-  const surnameRef = useRef<HTMLInputElement | null>(null);
-  const dobRef = useRef<HTMLInputElement | null>(null);
-  const createBtnRef = useRef<HTMLButtonElement | null>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const surnameRef = useRef<HTMLInputElement>(null);
+  const dobRef = useRef<HTMLInputElement>(null);
+  const createBtnRef = useRef<HTMLButtonElement>(null);
   const filesBtnRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const {

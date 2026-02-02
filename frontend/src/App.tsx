@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import type { ReactNode } from 'react';
 
 import { ThemeProvider } from './ThemeProvider';
 import './i18n';
@@ -19,7 +20,7 @@ import QueueTV from './pages/QueueTV';
 import { ToastProvider } from './context/ToastContext';
 
 // Simple Protected Route Component
-const ProtectedRoute = ({ children, roles }: { children: JSX.Element; roles?: string[] }) => {
+const ProtectedRoute = ({ children, roles }: { children: ReactNode; roles?: string[] }) => {
   const token = getToken();
   if (!token || isTokenExpired(token)) {
     clearAuth();
