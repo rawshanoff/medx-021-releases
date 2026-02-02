@@ -2,6 +2,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 backend/.pytest_cache/
+.ruff_cache/
+backend/.ruff_cache/
 .venv/
 env/
 venv/
