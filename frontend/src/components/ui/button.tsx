@@ -12,13 +12,13 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'sm', asChild, ...props }, ref) => {
+  ({ className, variant = 'default', size = 'md', asChild, ...props }, ref) => {
     const Comp: any = asChild ? Slot : 'button';
     return (
       <Comp
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-[13px] font-medium transition-colors',
+          'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           'disabled:pointer-events-none disabled:opacity-50',
           {
@@ -29,11 +29,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             destructive: 'bg-destructive text-destructive-foreground hover:opacity-90',
           }[variant],
           {
-            // High density: 28px/32px controls
-            sm: 'h-7 px-2.5',
-            md: 'h-8 px-3',
-            lg: 'h-9 px-3.5',
-            icon: 'h-8 w-8 p-0',
+            // Electron desktop: larger click targets (>= 44px)
+            sm: 'h-10 px-4',
+            md: 'h-12 px-6',
+            lg: 'h-14 px-8',
+            icon: 'h-12 w-12 p-0',
           }[size],
           className,
         )}
