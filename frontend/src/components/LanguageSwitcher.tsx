@@ -13,7 +13,7 @@ export function LanguageSwitcher() {
       onChange={(e) => i18n.changeLanguage(e.target.value)}
       title="Language"
       aria-label="Language"
-      className="h-10 rounded-full border border-border bg-card/80 px-3 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="h-10 w-[72px] rounded-full border border-border bg-card/80 px-3 text-sm font-semibold text-foreground shadow-sm backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <option value="ru">RU</option>
       <option value="uz">UZ</option>

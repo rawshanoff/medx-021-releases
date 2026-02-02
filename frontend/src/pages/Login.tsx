@@ -74,7 +74,7 @@ export default function Login() {
     <div className="relative flex min-h-screen items-center justify-center bg-background">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_circle_at_10%_-10%,color-mix(in_srgb,hsl(var(--primary))_10%,transparent)_0%,transparent_58%),radial-gradient(700px_circle_at_92%_8%,color-mix(in_srgb,hsl(var(--primary))_8%,transparent)_0%,transparent_60%)]" />
 
-      <div className="absolute right-6 top-6 z-20 flex items-center gap-2">
+      <div className="fixed right-6 top-6 z-[2000] flex items-center gap-2">
         <LanguageSwitcher />
         <ThemeToggle />
       </div>
