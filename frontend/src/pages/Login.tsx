@@ -147,23 +147,25 @@ export default function Login() {
               </div>
             </div>
 
-            {errorText ? (
-              <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {errorText}
-              </div>
-            ) : null}
+            <div className="space-y-3 pt-[8px]">
+              {errorText ? (
+                <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {errorText}
+                </div>
+              ) : null}
 
-            <Button
-              type="submit"
-              disabled={loading || !canSubmit}
-              size="md"
-              className={cn(
-                'w-full bg-gradient-to-r from-primary to-primary/80 shadow-lg hover:from-primary/95 hover:to-primary/75',
-                loading ? 'opacity-80' : '',
-              )}
-            >
-              {loading ? t('common.loading') : t('auth.login')}
-            </Button>
+              <Button
+                type="submit"
+                disabled={loading || !canSubmit}
+                size="sm"
+                className={cn(
+                  'h-[44px] w-full bg-gradient-to-r from-primary to-primary/80 shadow-lg hover:from-primary/95 hover:to-primary/75',
+                  loading ? 'opacity-80' : '',
+                )}
+              >
+                {loading ? t('common.loading') : t('auth.login')}
+              </Button>
+            </div>
           </form>
         </div>
       </PageContainer>
