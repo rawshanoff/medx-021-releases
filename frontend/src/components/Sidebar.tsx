@@ -144,7 +144,7 @@ export default function Sidebar({
           )}
           title={profileName}
         >
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-[12px] font-medium text-primary">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary text-[13px] font-medium text-primary">
             {initials || 'MX'}
           </div>
           {!collapsed ? (
