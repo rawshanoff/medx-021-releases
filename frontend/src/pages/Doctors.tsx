@@ -72,13 +72,18 @@ export default function Doctors() {
   const handleCreateDoctor = async () => {
     if (!newDocName) return;
     try {
-      await client.post('/doctors/', {
+      const payload: Record<string, unknown> = {
         full_name: newDocName,
         specialty: newDocSpec,
-        queue_prefix: newDocPrefix.toUpperCase(), // Ensure uppercase
         is_active: true,
         services: [],
-      });
+      };
+      const prefix = String(newDocPrefix || '')
+        .trim()
+        .toUpperCase();
+      if (prefix) payload.queue_prefix = prefix.slice(0, 1);
+
+      await client.post('/doctors/', payload);
       setCreateOpen(false);
       setNewDocName('');
       setNewDocSpec('');
@@ -364,10 +369,20 @@ function DoctorCard({
 
   const handleUpdateDoctor = async () => {
     try {
+      const prefix = String(editPrefix || '')
+        .trim()
+        .toUpperCase();
+      if (!prefix) {
+        showToast(
+          t('doctors.prefix_required', { defaultValue: 'Префикс очереди обязателен (1 буква)' }),
+          'warning',
+        );
+        return;
+      }
       await client.put(`/doctors/${doctor.id}`, {
         full_name: editName,
         specialty: editSpec,
-        queue_prefix: String(editPrefix || '').toUpperCase(),
+        queue_prefix: prefix.slice(0, 1),
       });
       setEditOpen(false);
       onUpdate();
@@ -646,7 +661,7 @@ function DoctorCard({
             className="h-8 text-xs"
             type="button"
             onClick={handleUpdateDoctor}
-            disabled={!editName.trim()}
+            disabled={!editName.trim() || !String(editPrefix || '').trim()}
           >
             {t('common.save', { defaultValue: 'Сохранить' })}
           </Button>
