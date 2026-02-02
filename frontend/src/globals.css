@@ -89,10 +89,10 @@
     --foreground: 210 40% 98%;
 
     /* Slightly lighter than background for better separation */
-    --card: 222.2 84% 6.5%;
+    --card: 222.2 84% 7.5%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 6.5%;
+    --popover: 222.2 84% 7.5%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 217.2 91.2% 59.8%;
@@ -112,8 +112,8 @@
     --destructive-foreground: 210 40% 98%;
 
     /* visible borders/inputs in dark mode (≈ gray-600/700) */
-    --border: 215 18% 30%;
-    --input: 215 18% 30%;
+    --border: 215 18% 34%;
+    --input: 215 18% 34%;
     --ring: 224.3 76.3% 48%;
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
