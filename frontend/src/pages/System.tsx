@@ -237,26 +237,26 @@ export default function System() {
     <div className="flex h-full flex-col gap-3">
       <div className="grid grid-cols-3 gap-3">
         <SettingsTile
-          title="Реквизиты"
-          subtitle="Клиника, логотип, QR, текст под QR"
+          title={t('system.clinic_details')}
+          subtitle={t('system.clinic_details_desc')}
           icon={<Building2 size={18} />}
           onClick={() => setOpenSection('requisites')}
         />
         <SettingsTile
-          title="Настройка принтера"
-          subtitle="Выбор deviceName, бумага, silent‑печать"
+          title={t('system.printer_settings')}
+          subtitle={t('system.printer_settings_desc')}
           icon={<Printer size={18} />}
           onClick={() => setOpenSection('printer')}
         />
         <SettingsTile
-          title="Настройка чека"
-          subtitle="Шаблон, поля, предпросмотр и тест"
+          title={t('system.receipt_settings')}
+          subtitle={t('system.receipt_settings_desc')}
           icon={<FileText size={18} />}
           onClick={() => setOpenSection('receipt')}
         />
         <SettingsTile
-          title="Активация / лицензия"
-          subtitle="Статус, функции, загрузка ключа"
+          title={t('system.activation')}
+          subtitle={t('system.activation_desc')}
           icon={<KeyRound size={18} />}
           onClick={() => setOpenSection('license')}
         />
@@ -271,15 +271,15 @@ export default function System() {
         />
         {canManageUsers ? (
           <SettingsTile
-            title="Пользователи"
-            subtitle="Создание, роли, удаление"
+            title={t('system.users')}
+            subtitle={t('system.users_desc')}
             icon={<Users size={18} />}
             onClick={() => setOpenSection('users')}
           />
         ) : null}
         <SettingsTile
-          title="Сбросить настройки"
-          subtitle="Вернуть значения по умолчанию"
+          title={t('system.reset_settings')}
+          subtitle={t('system.reset_settings_desc')}
           icon={<Settings size={18} />}
           onClick={() => {
             setLocalPrintSettings(getPrintSettings());
@@ -290,8 +290,8 @@ export default function System() {
 
       <SettingsModal
         open={openSection === 'license'}
-        title="Активация / лицензия"
-        description="Статус лицензии и загрузка ключа."
+        title={t('system.activation_title')}
+        description={t('system.activation_description')}
         onClose={() => setOpenSection(null)}
         width={820}
       >
@@ -362,8 +362,8 @@ export default function System() {
 
       <SettingsModal
         open={openSection === 'requisites'}
-        title="Реквизиты"
-        description="Данные клиники и QR/логотип для печати."
+        title={t('system.clinic_title')}
+        description={t('system.clinic_description')}
         onClose={() => setOpenSection(null)}
         width={900}
       >
@@ -451,7 +451,7 @@ export default function System() {
               Текст под QR
             </label>
             <Input
-              placeholder="Например: Telegram: @salikhmed"
+              placeholder={t('system.telegram_placeholder')}
               value={printSettings.underQrText}
               onChange={(e) =>
                 setLocalPrintSettings((p) => ({ ...p, underQrText: e.target.value }))
@@ -540,8 +540,8 @@ export default function System() {
 
       <SettingsModal
         open={openSection === 'printer'}
-        title="Настройка принтера"
-        description="Выбор принтера (deviceName) и параметры silent‑печати."
+        title={t('system.printer_title')}
+        description={t('system.printer_description')}
         onClose={() => setOpenSection(null)}
         width={900}
       >
@@ -551,7 +551,7 @@ export default function System() {
               Название принтера (для интерфейса)
             </label>
             <Input
-              placeholder="Например: XP-58"
+              placeholder={t('system.printer_placeholder')}
               value={printSettings.preferredPrinterName}
               onChange={(e) =>
                 setLocalPrintSettings((p) => ({ ...p, preferredPrinterName: e.target.value }))
@@ -684,8 +684,8 @@ export default function System() {
 
       <SettingsModal
         open={openSection === 'receipt'}
-        title="Настройка чека"
-        description="Шаблон, что показывать в чеке, предпросмотр и тесты."
+        title={t('system.receipt_title')}
+        description={t('system.receipt_description')}
         onClose={() => setOpenSection(null)}
         width={980}
       >
@@ -951,8 +951,8 @@ export default function System() {
 
       <SettingsModal
         open={openSection === 'users'}
-        title="Пользователи"
-        description="Создание пользователей и управление ролями."
+        title={t('system.users_title')}
+        description={t('system.users_description')}
         onClose={() => {
           setOpenSection(null);
           setUsersPage(0);
@@ -997,7 +997,7 @@ export default function System() {
                         variant="ghost"
                         size="icon"
                         type="button"
-                        title="Удалить"
+                        title={t('system.delete_user')}
                         onClick={() => handleDeleteUser(user.id)}
                       >
                         <Trash2 size={16} />
@@ -1041,8 +1041,8 @@ export default function System() {
       {showPrinters && (
         <Modal
           open={true}
-          title="Принтеры"
-          description="Выберите deviceName для silent‑печати (без скролла, постранично)."
+          title={t('system.printers_title')}
+          description={t('system.printers_description')}
           onClose={() => {
             setShowPrinters(false);
             setPrintersPage(0);

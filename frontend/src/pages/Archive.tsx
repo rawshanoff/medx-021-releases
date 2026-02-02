@@ -144,10 +144,7 @@ export default function Archive() {
             }`}
           >
             {getTabIcon(tab)}
-            {t(`archive.tabs.${tab}`, {
-              defaultValue:
-                tab === 'patients' ? 'Пациенты' : tab === 'doctors' ? 'Врачи' : 'Пользователи',
-            })}
+            {t(`archive.tabs.${tab}`)}
           </button>
         ))}
       </div>
