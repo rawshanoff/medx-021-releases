@@ -123,6 +123,12 @@
     --scrollbar-thumb-hover: 215 20.2% 45%;
   }
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   * {
     @apply border-border;
   }
