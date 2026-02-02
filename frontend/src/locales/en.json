@@ -100,7 +100,12 @@
     "fill_required": "Fill required fields",
     "patient_created": "Patient created",
     "patient_create_failed": "Failed to create patient",
-    "history_load_failed": "Failed to load history"
+    "history_load_failed": "Failed to load history",
+    "refund": "Refund",
+    "refund_confirm": "Are you sure you want to refund this payment?",
+    "refund_success": "Refund completed",
+    "refund_failed": "Refund failed",
+    "refund_only_waiting": "Refund is only available for non-started appointments"
   },
   "patients": {
     "title": "Patients",

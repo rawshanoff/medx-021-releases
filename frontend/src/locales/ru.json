@@ -100,7 +100,12 @@
     "fill_required": "Заполните обязательные поля",
     "patient_created": "Пациент создан",
     "patient_create_failed": "Ошибка создания пациента",
-    "history_load_failed": "Не удалось загрузить историю"
+    "history_load_failed": "Не удалось загрузить историю",
+    "refund": "Возврат",
+    "refund_confirm": "Вы уверены, что хотите вернуть оплату?",
+    "refund_success": "Возврат выполнен",
+    "refund_failed": "Ошибка возврата",
+    "refund_only_waiting": "Возврат возможен только для неначатых приемов"
   },
   "patients": {
     "title": "Пациенты",

@@ -100,7 +100,12 @@
     "fill_required": "Majburiy maydonlarni to'ldiring",
     "patient_created": "Bemor yaratildi",
     "patient_create_failed": "Bemor yaratishda xatolik",
-    "history_load_failed": "Tarixni yuklashda xatolik"
+    "history_load_failed": "Tarixni yuklashda xatolik",
+    "refund": "Qaytarish",
+    "refund_confirm": "To'lovni qaytarishni xohlaysizmi?",
+    "refund_success": "Qaytarish bajarildi",
+    "refund_failed": "Qaytarishda xatolik",
+    "refund_only_waiting": "Qaytarish faqat boshlanmagan qabul uchun mavjud"
   },
   "patients": {
     "title": "Bemorlar",

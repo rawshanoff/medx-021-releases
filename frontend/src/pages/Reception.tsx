@@ -281,24 +281,95 @@ export default function Reception() {
                   {t('finance.title', { defaultValue: 'Финансы' })}
                 </div>
                 <div className="grid gap-2">
-                  {(historyState.data?.transactions ?? []).slice(0, 3).map((tx) => (
-                    <div
-                      key={`tx-${tx.id}`}
-                      className="rounded-md border border-border bg-card p-2"
-                    >
-                      <div className="flex justify-between gap-2">
-                        <div className="font-medium">
-                          {Number(tx.amount || 0).toLocaleString()} {t('common.currency')}
+                  {(historyState.data?.transactions ?? []).slice(0, 3).map((tx) => {
+                    // Check if there's a WAITING queue item created around the same time (within 5 minutes)
+                    const txTime = new Date(tx.created_at).getTime();
+                    const relatedQueueItem = historyState.data?.queue?.find((qi) => {
+                      const qiTime = new Date(qi.created_at).getTime();
+                      const timeDiff = Math.abs(txTime - qiTime);
+                      return qi.status === 'WAITING' && timeDiff < 5 * 60 * 1000; // 5 minutes
+                    });
+                    const canRefund = tx.amount > 0 && relatedQueueItem != null;
+
+                    return (
+                      <div
+                        key={`tx-${tx.id}`}
+                        className="rounded-md border border-border bg-card p-2"
+                      >
+                        <div className="flex justify-between gap-2">
+                          <div className="font-medium">
+                            {Number(tx.amount || 0).toLocaleString()} {t('common.currency')}
+                          </div>
+                          <div className="text-[12px] text-muted-foreground">
+                            {new Date(tx.created_at).toLocaleDateString()}
+                          </div>
                         </div>
                         <div className="text-[12px] text-muted-foreground">
-                          {new Date(tx.created_at).toLocaleDateString()}
+                          {tx.description || ''}
                         </div>
+                        {canRefund && (
+                          <div className="mt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs"
+                              onClick={async () => {
+                                if (!confirm(t('reception.refund_confirm'))) return;
+                                try {
+                                  // Create refund transaction (negative amount)
+                                  await client.post('/finance/transactions', {
+                                    patient_id: historyState.patient.id,
+                                    amount: -Math.abs(tx.amount),
+                                    payment_method: tx.payment_method,
+                                    description: `[REFUND] ${tx.description || ''}`,
+                                    doctor_id: tx.doctor_id,
+                                    cash_amount:
+                                      tx.payment_method === 'CASH'
+                                        ? -Math.abs(tx.amount)
+                                        : tx.payment_method === 'MIXED'
+                                          ? -Math.abs(tx.cash_amount || 0)
+                                          : 0,
+                                    card_amount:
+                                      tx.payment_method === 'CARD'
+                                        ? -Math.abs(tx.amount)
+                                        : tx.payment_method === 'MIXED'
+                                          ? -Math.abs(tx.card_amount || 0)
+                                          : 0,
+                                    transfer_amount:
+                                      tx.payment_method === 'TRANSFER'
+                                        ? -Math.abs(tx.amount)
+                                        : tx.payment_method === 'MIXED'
+                                          ? -Math.abs(tx.transfer_amount || 0)
+                                          : 0,
+                                  });
+                                  // Update queue status to CANCELLED
+                                  if (relatedQueueItem) {
+                                    await client.put(`/reception/queue/${relatedQueueItem.id}`, {
+                                      status: 'CANCELLED',
+                                    });
+                                    await refreshQueue();
+                                  }
+                                  // Refresh history
+                                  const res = await client.get(
+                                    `/patients/${historyState.patient.id}/history`,
+                                  );
+                                  setHistoryState({
+                                    ...historyState,
+                                    data: res.data,
+                                  });
+                                  showToast(t('reception.refund_success'), 'success');
+                                } catch (e) {
+                                  showToast(t('reception.refund_failed'), 'error');
+                                }
+                              }}
+                            >
+                              {t('reception.refund')}
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-[12px] text-muted-foreground">
-                        {tx.description || ''}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {(historyState.data?.transactions ?? []).length === 0 ? (
                     <div className="text-[12px] text-muted-foreground">—</div>
                   ) : null}
