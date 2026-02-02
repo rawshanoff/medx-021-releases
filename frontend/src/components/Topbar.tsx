@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, LogOut } from 'lucide-react';
+import { Bell, Download, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/cn';
 import { clearAuth, getUser, getUserRole } from '../utils/auth';
@@ -23,6 +23,7 @@ export function Topbar() {
   const { t } = useTranslation();
   const location = useLocation();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   const pathname = location.pathname || '/';
@@ -46,12 +47,38 @@ export function Topbar() {
   const profileName = user?.full_name?.trim() || user?.username || (role ?? 'MedX');
   const initials = getInitials(profileName);
 
+  const checkForUpdates = async () => {
+    try {
+      // Only check for admin/owner users to avoid unnecessary API calls
+      if (!['admin', 'owner'].includes(role || '')) return;
+
+      const response = await fetch('/api/system/update-check', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUpdateAvailable(data.update_available);
+      }
+    } catch (error) {
+      // Silently ignore update check errors
+      console.debug('Update check failed:', error);
+    }
+  };
+
   const handleLogout = () => {
     if (confirm(t('nav.logout_confirm'))) {
       clearAuth();
       window.location.reload();
     }
   };
+
+  // Check for updates on component mount (only for admin/owner)
+  useEffect(() => {
+    checkForUpdates();
+  }, [role]);
 
   useEffect(() => {
     if (!userMenuOpen) return;
@@ -102,6 +129,24 @@ export function Topbar() {
           </span>
         </Button>
 
+        {/* Update notification for admin/owner */}
+        {updateAvailable && ['admin', 'owner'].includes(role || '') && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-[40px] w-[40px] rounded-full border border-primary bg-primary/10 p-0 shadow-sm backdrop-blur hover:bg-primary/20"
+            aria-label={t('system.update_available')}
+            title={t('system.update_available')}
+            type="button"
+            onClick={() => {
+              // Navigate to system updates page
+              window.location.href = '/system';
+            }}
+          >
+            <Download size={18} className="text-primary" />
+          </Button>
+        )}
+
         <div className="h-6 w-px bg-border" />
 
         {/* Avatar: fixed 40x40, no border to "blend" */}
@@ -124,7 +169,9 @@ export function Topbar() {
               <div className="px-2 py-2">
                 <div className="truncate text-center text-[14px] font-semibold">{profileName}</div>
                 {role ? (
-                  <div className="truncate text-center text-[13px] text-muted-foreground">{role}</div>
+                  <div className="truncate text-center text-[13px] text-muted-foreground">
+                    {role}
+                  </div>
                 ) : null}
               </div>
               <div className="h-px bg-border" />
@@ -143,4 +190,3 @@ export function Topbar() {
     </header>
   );
 }
-
