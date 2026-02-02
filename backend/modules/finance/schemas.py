@@ -95,3 +95,15 @@ class ReportZRead(BaseModel):
 
 class RefundCreate(BaseModel):
     reason: str = Field(..., min_length=1, max_length=500)
+
+
+class ReceiptRead(BaseModel):
+    receipt_no: str
+    ticket: str
+    created_at_iso: str
+    patient_name: str
+    service_name: str
+    amount: int
+    currency: str
+    payment_method: str
+    payment_breakdown: Optional[dict] = None

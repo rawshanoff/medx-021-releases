@@ -12,6 +12,7 @@ from backend.modules.finance.models import (
     Transaction,
 )
 from backend.modules.finance.schemas import (
+    ReceiptRead,
     RefundCreate,
     ReportXRead,
     ReportZRead,
@@ -24,6 +25,7 @@ from backend.modules.users.models import User, UserRole
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 router = APIRouter()
 
@@ -329,6 +331,81 @@ async def refund_payment(
     )
 
     return refund_tx
+
+
+@router.get("/receipt/{transaction_id}", response_model=ReceiptRead)
+async def get_receipt_data(
+    transaction_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OWNER,
+            UserRole.RECEPTIONIST,
+            UserRole.DOCTOR,
+            UserRole.CASHIER,
+        )
+    ),
+):
+    """Get receipt data for printing by transaction ID."""
+    await check_finance_license()
+
+    # Get transaction with related data
+    result = await db.execute(
+        select(Transaction)
+        .options(
+            selectinload(Transaction.patient),
+        )
+        .where(Transaction.id == transaction_id, Transaction.deleted_at.is_(None))
+    )
+    tx = result.scalars().first()
+    if not tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    if not tx.patient:
+        raise HTTPException(status_code=404, detail="Patient data not found")
+
+    # Get queue item for ticket number
+    from backend.modules.reception.models import QueueItem
+
+    queue_result = await db.execute(
+        select(QueueItem)
+        .options(selectinload(QueueItem.doctor))
+        .where(
+            QueueItem.patient_id == tx.patient_id,
+            QueueItem.created_at <= tx.created_at,
+            QueueItem.deleted_at.is_(None),
+        )
+        .order_by(QueueItem.created_at.desc())
+        .limit(1)
+    )
+    queue_item = queue_result.scalars().first()
+
+    ticket_number = queue_item.ticket_number if queue_item else "N/A"
+    service_name = tx.doctor_id or "Consultation"  # Fallback if no specific service
+
+    # Payment breakdown for mixed payments
+    payment_breakdown = None
+    if tx.payment_method == PaymentMethod.MIXED:
+        payment_breakdown = {}
+        if tx.cash_amount:
+            payment_breakdown["cash"] = tx.cash_amount
+        if tx.card_amount:
+            payment_breakdown["card"] = tx.card_amount
+        if tx.transfer_amount:
+            payment_breakdown["transfer"] = tx.transfer_amount
+
+    return ReceiptRead(
+        receipt_no=f"TX-{tx.id}",
+        ticket=ticket_number,
+        created_at_iso=tx.created_at.isoformat(),
+        patient_name=tx.patient.full_name,
+        service_name=service_name,
+        amount=tx.amount,
+        currency="UZS",  # Assuming Uzbek Som as default
+        payment_method=tx.payment_method,
+        payment_breakdown=payment_breakdown,
+    )
 
 
 @router.get("/reports/{type}", response_model=ReportXRead | ReportZRead)
