@@ -138,9 +138,9 @@ export default function Patients() {
         {/* Table */}
         <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-border bg-card">
           <div className="h-full overflow-auto">
-            <table className="w-full text-[13px]">
+            <table className="w-full text-[14px]">
               <thead className="sticky top-0 z-10 bg-secondary text-[12px] text-muted-foreground">
-                <tr className="h-9 [&>th]:p-2 [&>th]:text-left [&>th]:font-medium">
+                <tr className="h-10 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
                   <th className="w-[110px]">{t('patients.id')}</th>
                   <th>{t('reception.first_name')}</th>
                   <th>{t('reception.last_name')}</th>
@@ -152,7 +152,7 @@ export default function Patients() {
                 {loading ? (
                   <>
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <tr key={`sk-${i}`} className="[&>td]:p-2">
+                      <tr key={`sk-${i}`} className="[&>td]:px-3 [&>td]:py-3">
                         <td colSpan={5}>
                           <Skeleton className="h-6 w-full" />
                         </td>
@@ -262,13 +262,13 @@ function PatientRow({
   };
 
   return (
-    <tr className={isFocused ? 'h-8 bg-muted/40' : 'h-8'}>
-      <td className="p-2 font-mono text-[12px] text-muted-foreground">{formatID(patient.id)}</td>
+    <tr className={isFocused ? 'h-10 bg-muted/40' : 'h-10'}>
+      <td className="p-3 font-mono text-[12px] text-muted-foreground">{formatID(patient.id)}</td>
 
-      <td className="p-2">
+      <td className="p-3">
         {isEditing ? (
           <Input
-            className="h-8 text-xs"
+            className="h-10 text-[13px]"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
           />
@@ -276,10 +276,10 @@ function PatientRow({
           editName
         )}
       </td>
-      <td className="p-2">
+      <td className="p-3">
         {isEditing ? (
           <Input
-            className="h-8 text-xs"
+            className="h-10 text-[13px]"
             value={editSurname}
             onChange={(e) => setEditSurname(e.target.value)}
           />
@@ -287,10 +287,10 @@ function PatientRow({
           editSurname
         )}
       </td>
-      <td className="p-2">
+      <td className="p-3">
         {isEditing ? (
           <Input
-            className="h-8 text-xs"
+            className="h-10 text-[13px]"
             value={editPhone}
             onChange={(e) => setEditPhone(e.target.value)}
           />
@@ -299,7 +299,7 @@ function PatientRow({
         )}
       </td>
 
-      <td className="p-2 text-right">
+      <td className="p-3 text-right">
         {isEditing ? (
           <div className="flex justify-end gap-2">
             <Button
@@ -307,7 +307,7 @@ function PatientRow({
               size="icon"
               type="button"
               title={t('common.save', { defaultValue: 'Сохранить' })}
-              className="h-8 w-8 text-xs"
+              className="h-10 w-10"
             >
               <Check size={14} />
             </Button>
@@ -317,7 +317,7 @@ function PatientRow({
               size="icon"
               type="button"
               title={t('common.cancel')}
-              className="h-8 w-8 text-xs"
+              className="h-10 w-10"
             >
               <X size={14} />
             </Button>
@@ -329,7 +329,7 @@ function PatientRow({
               variant="ghost"
               size="sm"
               type="button"
-              className="h-8 text-xs"
+              className="h-10 px-3 text-[13px]"
             >
               {t('common.edit')}
             </Button>
@@ -338,7 +338,7 @@ function PatientRow({
               variant="ghost"
               size="sm"
               type="button"
-              className="h-8 text-xs"
+              className="h-10 px-3 text-[13px]"
               ref={registerFilesBtnRef}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowDown') {
