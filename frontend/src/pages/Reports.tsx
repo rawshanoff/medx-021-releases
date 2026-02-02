@@ -64,6 +64,7 @@ export default function Reports() {
         <Button
           variant="secondary"
           size="sm"
+          className="h-10 px-3 text-[13px]"
           type="button"
           onClick={() => {
             refresh().then(() => showToast(t('common.done'), 'success'));
@@ -80,11 +81,11 @@ export default function Reports() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <FileText size={16} className="text-muted-foreground" />
-              <div className="text-[13px] font-medium">
+              <div className="text-[14px] font-medium">
                 {t('reports.basic', { defaultValue: 'Базовые отчёты (бесплатно)' })}
               </div>
             </div>
-            <div className="text-[12px] text-muted-foreground">
+            <div className="text-[13px] text-muted-foreground">
               {shift
                 ? t('finance.shift_open', { id: shift.id })
                 : t('finance.shift_closed', { defaultValue: 'Смена закрыта' })}
@@ -93,13 +94,13 @@ export default function Reports() {
 
           <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
             <div className="rounded-md border border-border bg-background p-3">
-              <div className="text-[13px] font-medium">
+              <div className="text-[14px] font-medium">
                 {t('reports.shift_totals', { defaultValue: 'Касса за смену' })}
               </div>
-              <div className="text-[12px] text-muted-foreground">
+              <div className="text-[13px] text-muted-foreground">
                 {t('reports.by_payment', { defaultValue: 'По типам оплаты' })}
               </div>
-              <div className="mt-3 grid gap-2 text-[13px]">
+              <div className="mt-3 grid gap-2 text-[14px]">
                 {[
                   { label: t('finance.cash'), value: shiftTotals.cash },
                   { label: t('finance.card'), value: shiftTotals.card },
@@ -120,11 +121,11 @@ export default function Reports() {
             </div>
 
             <div className="rounded-md border border-border bg-background p-3">
-              <div className="text-[13px] font-medium">{t('finance.x_report')}</div>
+              <div className="text-[14px] font-medium">{t('finance.x_report')}</div>
               {x?.error ? (
-                <div className="mt-2 text-[12px] text-destructive">{String(x.error)}</div>
+                <div className="mt-2 text-[13px] text-destructive">{String(x.error)}</div>
               ) : (
-                <div className="mt-3 grid gap-2 text-[13px]">
+                <div className="mt-3 grid gap-2 text-[14px]">
                   <div className="flex justify-between gap-3">
                     <span className="text-muted-foreground">{t('finance.cash')}</span>
                     <span className="font-medium">{formatMoney(x?.total_cash, currency)}</span>
@@ -138,11 +139,11 @@ export default function Reports() {
             </div>
 
             <div className="rounded-md border border-border bg-background p-3">
-              <div className="text-[13px] font-medium">{t('finance.z_report')}</div>
+              <div className="text-[14px] font-medium">{t('finance.z_report')}</div>
               {z?.error ? (
-                <div className="mt-2 text-[12px] text-destructive">{String(z.error)}</div>
+                <div className="mt-2 text-[13px] text-destructive">{String(z.error)}</div>
               ) : (
-                <div className="mt-3 grid gap-2 text-[13px]">
+                <div className="mt-3 grid gap-2 text-[14px]">
                   <div className="flex justify-between gap-3">
                     <span className="text-muted-foreground">{t('finance.cash')}</span>
                     <span className="font-medium">{formatMoney(z?.total_cash, currency)}</span>
@@ -168,11 +169,11 @@ export default function Reports() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Lock size={16} className="text-muted-foreground" />
-              <div className="text-[13px] font-medium">
+              <div className="text-[14px] font-medium">
                 {t('reports.pro', { defaultValue: 'Профессиональные отчёты (платно)' })}
               </div>
             </div>
-            <div className="text-[12px] text-muted-foreground">
+            <div className="text-[13px] text-muted-foreground">
               {t('reports.pro_hint', {
                 defaultValue: 'Эти отчёты доступны после активации PRO лицензии.',
               })}
@@ -208,9 +209,15 @@ export default function Reports() {
                 key={x.title}
                 className="rounded-md border border-border bg-background p-3 opacity-60"
               >
-                <div className="text-[13px] font-medium">{x.title}</div>
-                <div className="mt-0.5 text-[12px] text-muted-foreground">{x.desc}</div>
-                <Button className="mt-2" variant="secondary" size="sm" type="button" disabled>
+                <div className="text-[14px] font-medium">{x.title}</div>
+                <div className="mt-0.5 text-[13px] text-muted-foreground">{x.desc}</div>
+                <Button
+                  className="mt-3 h-10 px-3 text-[13px]"
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  disabled
+                >
                   <Lock size={16} /> PRO
                 </Button>
               </div>
