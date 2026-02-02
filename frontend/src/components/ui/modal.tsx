@@ -41,14 +41,14 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/50 p-6"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
         className={cn(
-          'w-full rounded-md border border-border bg-card p-4 text-foreground shadow-sm',
+          'w-full rounded-md border border-border bg-card p-6 text-foreground shadow-sm',
           maxWFromWidth(width),
         )}
       >
@@ -70,7 +70,7 @@ export function Modal({
           </Button>
         </div>
 
-        <div className="mt-3">{children}</div>
+        <div className="mt-6">{children}</div>
       </div>
     </div>
   );

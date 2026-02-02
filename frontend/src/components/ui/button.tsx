@@ -18,7 +18,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-[8px] whitespace-nowrap rounded-[10px] text-[16px] font-medium transition-colors shadow-sm',
+          'inline-flex items-center justify-center gap-[12px] whitespace-nowrap rounded-[12px] text-[16px] font-medium transition-colors shadow-sm',
           'focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-[2px] focus-visible:ring-offset-[hsl(var(--background))]',
           'disabled:pointer-events-none disabled:opacity-50',
           {

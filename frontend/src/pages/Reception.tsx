@@ -183,13 +183,11 @@ export default function Reception() {
   };
 
   return (
-    <div className="flex h-full flex-col gap-[16px]">
-      <h1 className="text-xl font-medium">{t('reception.title')}</h1>
-
+    <div className="flex h-full flex-col gap-[24px]">
       <div className="min-h-0 flex-1">
-        <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_360px] gap-[16px]">
+        <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_360px] gap-[24px]">
           {/* LEFT */}
-          <div className="flex min-h-0 flex-col gap-[16px]">
+          <div className="flex min-h-0 flex-col gap-[24px]">
             {/* Search */}
             <PatientSearch
               phone={phone}
