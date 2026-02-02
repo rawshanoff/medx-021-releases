@@ -114,7 +114,7 @@ export default function Doctors() {
         <Button
           variant="secondary"
           size="sm"
-          className="h-10 px-3 text-[13px]"
+          className="px-3 text-[13px]"
           type="button"
           onClick={() => setHistoryOpen(true)}
         >
@@ -122,7 +122,7 @@ export default function Doctors() {
         </Button>
         <Button
           size="sm"
-          className="h-10 px-3 text-[13px]"
+          className="px-3 text-[13px]"
           type="button"
           onClick={() => setCreateOpen(true)}
         >
@@ -148,7 +148,7 @@ export default function Doctors() {
               placeholder={`${t('reception.first_name', { defaultValue: 'Имя' })} ${t('reception.last_name', { defaultValue: 'Фамилия' })}`}
               value={newDocName}
               onChange={(e) => setNewDocName(e.target.value)}
-              className="h-10 text-[13px]"
+              className="text-[13px]"
             />
           </div>
           <div>
@@ -156,7 +156,7 @@ export default function Doctors() {
               {t('doctors.specialty', { defaultValue: 'Специальность' })}
             </label>
             <Input
-              className="h-10 text-[13px]"
+              className="text-[13px]"
               placeholder={t('doctors.specialty', { defaultValue: 'Специальность' })}
               value={newDocSpec}
               onChange={(e) => setNewDocSpec(e.target.value)}
@@ -180,7 +180,7 @@ export default function Doctors() {
           <Button
             variant="secondary"
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={() => setCreateOpen(false)}
           >
@@ -188,7 +188,7 @@ export default function Doctors() {
           </Button>
           <Button
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={handleCreateDoctor}
             disabled={!newDocName.trim()}
@@ -229,7 +229,7 @@ export default function Doctors() {
           <Button
             variant="secondary"
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={fetchHistory}
           >
@@ -266,7 +266,7 @@ export default function Doctors() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 px-3 text-[13px]"
+              className="px-3 text-[13px]"
               type="button"
               onClick={() => setHistoryPage((p) => Math.max(0, p - 1))}
               disabled={historyPage === 0}
@@ -279,7 +279,7 @@ export default function Doctors() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 px-3 text-[13px]"
+              className="px-3 text-[13px]"
               type="button"
               onClick={() =>
                 setHistoryPage((p) => Math.min(Math.ceil(logs.length / historyPageSize) - 1, p + 1))
@@ -391,7 +391,7 @@ function DoctorCard({
     <div className="rounded-md border border-border bg-card p-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary/60 text-muted-foreground">
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-secondary/60 text-muted-foreground">
             <User size={18} />
           </div>
           <div className="min-w-0">
@@ -411,7 +411,7 @@ function DoctorCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10"
+            className="h-12 w-12"
             type="button"
             title={t('common.edit', { defaultValue: 'Редактировать' })}
             onClick={() => setEditOpen(true)}
@@ -421,7 +421,7 @@ function DoctorCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10"
+            className="h-12 w-12"
             type="button"
             title={t('common.delete', { defaultValue: 'Удалить' })}
             onClick={onDelete}
@@ -439,7 +439,7 @@ function DoctorCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-10 px-3 text-[13px]"
+                className="px-3 text-[13px]"
                 type="button"
                 onClick={() => {
                   setServicesOpen(true);
@@ -453,7 +453,7 @@ function DoctorCard({
             <Button
               variant="secondary"
               size="sm"
-              className="h-10 px-3 text-[13px]"
+              className="px-3 text-[13px]"
               type="button"
               onClick={() => setAddSvcOpen(true)}
             >
@@ -507,7 +507,7 @@ function DoctorCard({
           <Button
             variant="secondary"
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={() => setAddSvcOpen(true)}
           >
@@ -550,7 +550,7 @@ function DoctorCard({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10"
+                        className="h-12 w-12"
                         type="button"
                         title={t('common.delete', { defaultValue: 'Удалить' })}
                         onClick={() => handleDeleteService(svc.id!, svc.name)}
@@ -569,7 +569,7 @@ function DoctorCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 px-3 text-[13px]"
+              className="px-3 text-[13px]"
               type="button"
               onClick={() => setServicesPage((p) => Math.max(0, p - 1))}
               disabled={servicesPage === 0}
@@ -583,7 +583,7 @@ function DoctorCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 px-3 text-[13px]"
+              className="px-3 text-[13px]"
               type="button"
               onClick={() =>
                 setServicesPage((p) =>
@@ -613,7 +613,7 @@ function DoctorCard({
               {t('doctors.full_name', { defaultValue: 'ФИО' })}
             </label>
             <Input
-              className="h-10 text-[13px]"
+              className="text-[13px]"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
             />
@@ -623,7 +623,7 @@ function DoctorCard({
               {t('doctors.specialty', { defaultValue: 'Специальность' })}
             </label>
             <Input
-              className="h-10 text-[13px]"
+              className="text-[13px]"
               value={editSpec}
               onChange={(e) => setEditSpec(e.target.value)}
             />
@@ -644,7 +644,7 @@ function DoctorCard({
           <Button
             variant="secondary"
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={() => setEditOpen(false)}
           >
@@ -652,7 +652,7 @@ function DoctorCard({
           </Button>
           <Button
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={handleUpdateDoctor}
             disabled={!editName.trim() || !String(editPrefix || '').trim()}
@@ -677,7 +677,7 @@ function DoctorCard({
               {t('doctors.service_name', { defaultValue: 'Услуга' })}
             </label>
             <Input
-              className="h-10 text-[13px]"
+              className="text-[13px]"
               placeholder={t('doctors.service_name', { defaultValue: 'Услуга' })}
               value={svcName}
               onChange={(e) => setSvcName(e.target.value)}
@@ -688,7 +688,7 @@ function DoctorCard({
               {t('doctors.price', { defaultValue: 'Цена' })}
             </label>
             <Input
-              className="h-10 text-[13px]"
+              className="text-[13px]"
               type="number"
               placeholder="1000"
               value={svcPrice}
@@ -700,7 +700,7 @@ function DoctorCard({
               {t('doctors.priority', { defaultValue: 'Приоритет' })}
             </label>
             <Input
-              className="h-10 text-[13px]"
+              className="text-[13px]"
               type="number"
               placeholder="0"
               value={svcPriority}
@@ -712,7 +712,7 @@ function DoctorCard({
           <Button
             variant="secondary"
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={() => setAddSvcOpen(false)}
           >
@@ -720,7 +720,7 @@ function DoctorCard({
           </Button>
           <Button
             size="sm"
-            className="h-10 px-3 text-[13px]"
+            className="px-3 text-[13px]"
             type="button"
             onClick={handleAddService}
             disabled={!svcName.trim()}

@@ -266,7 +266,7 @@ function PatientRow({
       <td className="p-3">
         {isEditing ? (
           <Input
-            className="h-10 text-[13px]"
+            className="h-12 text-[13px]"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
           />
@@ -277,7 +277,7 @@ function PatientRow({
       <td className="p-3">
         {isEditing ? (
           <Input
-            className="h-10 text-[13px]"
+            className="h-12 text-[13px]"
             value={editSurname}
             onChange={(e) => setEditSurname(e.target.value)}
           />
@@ -288,7 +288,7 @@ function PatientRow({
       <td className="p-3">
         {isEditing ? (
           <Input
-            className="h-10 text-[13px]"
+            className="h-12 text-[13px]"
             value={editPhone}
             onChange={(e) => setEditPhone(e.target.value)}
           />
@@ -457,7 +457,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             {t('common.type', { defaultValue: 'Тип' })}
           </label>
           <select
-            className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="h-12 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             value={fileType}
             onChange={(e) => setFileType(e.target.value)}
           >
@@ -477,7 +477,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             {t('patients.file', { defaultValue: 'Файл' })}
           </label>
           <Input
-            className="h-8 text-[13px]"
+            className="h-12 text-[13px]"
             type="file"
             onChange={(e) => setUploadFile(e.target.files ? e.target.files[0] : null)}
           />
@@ -514,7 +514,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
       <div className="mt-3 overflow-hidden rounded-md border border-border">
         <table className="w-full text-[13px]">
           <thead className="bg-secondary text-[13px] text-muted-foreground">
-            <tr className="h-9 [&>th]:p-2 [&>th]:text-left [&>th]:font-medium">
+            <tr className="h-12 [&>th]:p-2 [&>th]:text-left [&>th]:font-medium">
               <th>{t('patients.file_name', { defaultValue: 'Имя' })}</th>
               <th className="w-[140px]">{t('common.type', { defaultValue: 'Тип' })}</th>
               <th className="w-[120px]">{t('patients.size', { defaultValue: 'Размер' })}</th>
@@ -532,7 +532,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
               </tr>
             ) : (
               files.slice(page * pageSize, page * pageSize + pageSize).map((f) => (
-                <tr key={f.id} className="h-8 [&>td]:p-2">
+                <tr key={f.id} className="h-12 [&>td]:p-2">
                   <td className="truncate">{f.original_filename}</td>
                   <td>{f.file_type}</td>
                   <td>{Math.round(f.size / 1024)} KB</td>
@@ -544,7 +544,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
                         type="button"
                         onClick={() => handleDownload(f.id, f.original_filename)}
                         disabled={busy}
-                        className="h-8 text-[13px]"
+                        className="h-12 text-[13px]"
                       >
                         {t('patients.download', { defaultValue: 'Скачать' })}
                       </Button>
@@ -554,7 +554,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
                         type="button"
                         onClick={() => handleSendTelegram(f.id)}
                         disabled={busy}
-                        className="h-8 text-[13px]"
+                        className="h-12 text-[13px]"
                       >
                         {t('patients.send_telegram', { defaultValue: 'В Telegram' })}
                       </Button>
@@ -575,7 +575,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="h-8 text-[13px]"
+            className="h-12 text-[13px]"
           >
             {t('common.prev', { defaultValue: 'Назад' })}
           </Button>
@@ -588,7 +588,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="h-8 text-[13px]"
+            className="h-12 text-[13px]"
           >
             {t('common.next', { defaultValue: 'Вперёд' })}
           </Button>

@@ -695,7 +695,7 @@ export default function System() {
               Шаблон чека
             </label>
             <select
-              className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-12 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.receiptTemplateId}
               onChange={(e) =>
                 setLocalPrintSettings((p) => ({ ...p, receiptTemplateId: e.target.value as any }))
@@ -711,7 +711,7 @@ export default function System() {
               Ширина чека
             </label>
             <select
-              className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-12 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.receiptWidthMode || 'standard'}
               onChange={(e) =>
                 setLocalPrintSettings((p) => ({ ...p, receiptWidthMode: e.target.value as any }))
@@ -1170,7 +1170,7 @@ export default function System() {
                 Role
               </label>
               <select
-                className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="h-12 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               >

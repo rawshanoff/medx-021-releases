@@ -29,8 +29,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             destructive: 'bg-destructive text-destructive-foreground hover:opacity-90',
           }[variant],
           {
-            // Electron desktop: larger click targets (>= 44px)
-            sm: 'h-[40px] px-[16px]',
+            // Electron desktop: larger click targets (>= 48px)
+            sm: 'h-[48px] px-[20px]',
             md: 'h-[48px] px-[24px]',
             lg: 'h-[56px] px-[32px]',
             icon: 'h-[48px] w-[48px] p-0',
