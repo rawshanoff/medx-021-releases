@@ -15,6 +15,7 @@ import Finance from './pages/Finance';
 import Doctors from './pages/Doctors';
 import System from './pages/System';
 import Reports from './pages/Reports';
+import QueueTV from './pages/QueueTV';
 import { ToastProvider } from './context/ToastContext';
 
 // Simple Protected Route Component
@@ -47,6 +48,15 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/activation" element={<Activation />} />
+            {/* Queue TV - no layout, fullscreen */}
+            <Route
+              path="/queue-tv"
+              element={
+                <ProtectedRoute>
+                  <QueueTV />
+                </ProtectedRoute>
+              }
+            />
 
             {/* App routes with global layout */}
             <Route element={<RootLayout />}>
