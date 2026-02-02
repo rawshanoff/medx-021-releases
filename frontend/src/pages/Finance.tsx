@@ -122,7 +122,7 @@ export default function Finance() {
         {!shift ? (
           <Button
             size="sm"
-            className="h-8 text-xs"
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={handleOpenShift}
             disabled={loading}
@@ -137,7 +137,7 @@ export default function Finance() {
             <Button
               variant="secondary"
               size="sm"
-              className="h-8 text-xs"
+              className="h-10 px-3 text-[13px]"
               type="button"
               onClick={handleCloseShift}
               disabled={loading}
@@ -150,15 +150,15 @@ export default function Finance() {
 
       <div className="min-h-0 flex-1 space-y-3 overflow-auto">
         {/* Cash Flow */}
-        <div className="rounded-md border border-border bg-card p-2">
+        <div className="rounded-md border border-border bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="text-[13px] font-medium">
+            <div className="text-[14px] font-medium">
               {t('finance.cash_flow', { defaultValue: 'Касса / Cash Flow' })}
             </div>
             <Button
               variant="secondary"
               size="sm"
-              className="h-8 text-xs"
+              className="h-10 px-3 text-[13px]"
               type="button"
               onClick={checkActiveShift}
               disabled={loading}
@@ -167,25 +167,23 @@ export default function Finance() {
             </Button>
           </div>
 
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { label: t('finance.cash'), value: shiftTotals.cash },
               { label: t('finance.card'), value: shiftTotals.card },
               { label: t('reception.transfer'), value: shiftTotals.transfer },
               { label: t('reports.total', { defaultValue: 'Итого' }), value: shiftTotals.total },
             ].map((x) => (
-              <div key={x.label} className="rounded-md border border-border bg-background p-2">
-                <div className="text-[12px] text-muted-foreground dark:text-gray-300">
-                  {x.label}
-                </div>
-                <div className="mt-0.5 text-[14px] font-medium">
+              <div key={x.label} className="rounded-md border border-border bg-background p-3">
+                <div className="text-[13px] font-medium text-muted-foreground">{x.label}</div>
+                <div className="mt-1 text-[18px] font-semibold leading-[24px]">
                   {Number(x.value || 0).toLocaleString()} {t('common.currency')}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="mt-2 text-[12px] text-muted-foreground dark:text-gray-300">
+          <div className="mt-3 text-[13px] text-muted-foreground">
             {t('finance.shift_hint', {
               defaultValue:
                 'Это сводка по текущей открытой смене. Дневной Cash Flow будет в PRO‑отчётах.',
@@ -194,10 +192,10 @@ export default function Finance() {
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           <button
             type="button"
-            className="rounded-md border border-border bg-card p-2 text-left transition hover:bg-accent/40"
+            className="rounded-md border border-border bg-card p-4 text-left transition hover:bg-accent/40"
             onClick={() => setExpenseOpen(true)}
           >
             <div className="flex gap-2">
@@ -205,10 +203,10 @@ export default function Finance() {
                 <TrendingDown size={14} />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-medium">
+                <div className="text-[14px] font-medium">
                   {t('finance.new_transaction', { defaultValue: 'Новый расход' })}
                 </div>
-                <div className="mt-0.5 text-[12px] text-muted-foreground dark:text-gray-300">
+                <div className="mt-0.5 text-[13px] text-muted-foreground">
                   {t('finance.expense_desc', { defaultValue: 'Описание расхода' })}
                 </div>
               </div>
@@ -217,7 +215,7 @@ export default function Finance() {
 
           <button
             type="button"
-            className="rounded-md border border-border bg-card p-2 text-left transition hover:bg-accent/40"
+            className="rounded-md border border-border bg-card p-4 text-left transition hover:bg-accent/40"
             onClick={() => navigate('/reports')}
           >
             <div className="flex gap-2">
@@ -225,28 +223,28 @@ export default function Finance() {
                 <FileText size={14} />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-medium">{t('nav.reports')}</div>
-                <div className="mt-0.5 text-[12px] text-muted-foreground dark:text-gray-300">
+                <div className="text-[14px] font-medium">{t('nav.reports')}</div>
+                <div className="mt-0.5 text-[13px] text-muted-foreground">
                   {t('finance.reports_desc', { defaultValue: 'X/Z отчёты + PRO отчёты' })}
                 </div>
               </div>
             </div>
           </button>
 
-          <div className="rounded-md border border-border bg-card p-2 opacity-60">
+          <div className="rounded-md border border-border bg-card p-4 opacity-60">
             <div className="flex gap-2">
-              <div className="rounded-md bg-primary/10 p-2 text-muted-foreground dark:text-gray-300">
+              <div className="rounded-md bg-primary/10 p-2 text-muted-foreground">
                 <Lock size={14} />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-medium">
+                <div className="text-[14px] font-medium">
                   {t('finance.day_cash', { defaultValue: 'Касса за день' })}
                 </div>
-                <div className="mt-0.5 text-[12px] text-muted-foreground dark:text-gray-300">
+                <div className="mt-0.5 text-[13px] text-muted-foreground">
                   {t('finance.day_cash_desc', { defaultValue: 'Доступно в PRO отчётах' })}
                 </div>
                 <Button
-                  className="mt-2 h-8 text-xs"
+                  className="mt-3 h-10 px-3 text-[13px]"
                   variant="secondary"
                   size="sm"
                   type="button"
@@ -270,13 +268,13 @@ export default function Finance() {
         onClose={() => setExpenseOpen(false)}
         width={860}
       >
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground dark:text-gray-300">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               {t('finance.total_amount', { defaultValue: 'Сумма' })}
             </label>
             <Input
-              className="h-8 text-xs dark:border-gray-600"
+              className="h-10 text-[13px]"
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -284,7 +282,7 @@ export default function Finance() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground dark:text-gray-300">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               {t('finance.payment_method', { defaultValue: 'Тип оплаты' })}
             </label>
             <div className="flex gap-2">
@@ -295,7 +293,7 @@ export default function Finance() {
                   variant="outline"
                   size="sm"
                   className={cn(
-                    'h-8 flex-1 justify-center gap-2 text-xs',
+                    'h-10 flex-1 justify-center gap-2 text-[13px]',
                     paymentMethod === method
                       ? 'border-destructive bg-destructive/10 text-destructive'
                       : '',
@@ -309,7 +307,7 @@ export default function Finance() {
             </div>
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground dark:text-gray-300">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               {t('finance.expense_desc', { defaultValue: 'Описание расхода' })}
             </label>
             <Input
@@ -318,22 +316,22 @@ export default function Finance() {
               placeholder={t('finance.expense_placeholder', {
                 defaultValue: 'Например: канцтовары, такси…',
               })}
-              className="h-8 text-xs dark:border-gray-600"
+              className="h-10 text-[13px]"
             />
           </div>
         </div>
 
         {!shift ? (
-          <div className="mt-2 text-[12px] text-muted-foreground dark:text-gray-300">
+          <div className="mt-3 text-[13px] text-muted-foreground">
             {t('finance.open_shift_prompt', { defaultValue: 'Сначала откройте смену' })}
           </div>
         ) : null}
 
-        <div className="mt-3 flex justify-end gap-2">
+        <div className="mt-4 flex justify-end gap-2">
           <Button
             variant="secondary"
             size="sm"
-            className="h-8 text-xs"
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={() => setExpenseOpen(false)}
           >
@@ -341,7 +339,7 @@ export default function Finance() {
           </Button>
           <Button
             size="sm"
-            className="h-8 text-xs"
+            className="h-10 px-3 text-[13px]"
             type="button"
             onClick={handleExpense}
             disabled={txLoading || !shift}
