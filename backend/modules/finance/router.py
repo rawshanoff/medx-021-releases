@@ -21,10 +21,22 @@ from backend.modules.finance.schemas import (
 )
 from backend.modules.users.models import User, UserRole
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, update
+from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
+
+
+async def _acquire_shift_lock(db: AsyncSession) -> None:
+    """Serialize shift operations (open/close/pay) to avoid races.
+
+    We use Postgres advisory transaction lock. If DB doesn't support it, we skip.
+    """
+    try:
+        await db.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": 21_001})
+    except Exception:
+        # best-effort (e.g., sqlite in some environments)
+        return
 
 
 async def check_finance_license():
@@ -71,6 +83,7 @@ async def open_shift(
     ),
 ):
     await check_finance_license()
+    await _acquire_shift_lock(db)
 
     # Check if there is already an open shift
     existing = await db.execute(
@@ -100,6 +113,7 @@ async def close_shift(
         require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
     ),
 ):
+    await _acquire_shift_lock(db)
     result = await db.execute(
         select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
     )
@@ -128,6 +142,7 @@ async def process_payment(
     ),
 ):
     await check_finance_license()
+    await _acquire_shift_lock(db)
 
     # Требуем описание для отрицательных сумм (расход/возврат)
     if tx.amount < 0 and not (tx.description and tx.description.strip()):
