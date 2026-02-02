@@ -12,6 +12,7 @@ from backend.modules.finance.models import (
     Transaction,
 )
 from backend.modules.finance.schemas import (
+    RefundCreate,
     ReportXRead,
     ReportZRead,
     ShiftCreate,
@@ -207,6 +208,127 @@ async def process_payment(
     await db.commit()
     await db.refresh(new_tx)
     return new_tx
+
+
+@router.post("/refund/{transaction_id}", response_model=TransactionRead)
+async def refund_payment(
+    transaction_id: int,
+    refund_data: RefundCreate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
+    ),
+):
+    """Refund payment for unstarted appointment. Creates negative transaction."""
+    await check_finance_license()
+    await _acquire_shift_lock(db)
+
+    reason = refund_data.reason
+
+    # Find original transaction
+    result = await db.execute(
+        select(Transaction).where(
+            Transaction.id == transaction_id, Transaction.deleted_at.is_(None)
+        )
+    )
+    original_tx = result.scalars().first()
+    if not original_tx:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    # Check if appointment has started (has appointment record)
+    from backend.modules.appointments.models import Appointment
+
+    appointment_result = await db.execute(
+        select(Appointment)
+        .where(
+            Appointment.patient_id == original_tx.patient_id,
+            Appointment.created_at >= original_tx.created_at,
+            Appointment.deleted_at.is_(None),
+        )
+        .limit(1)
+    )
+    if appointment_result.scalars().first():
+        raise HTTPException(
+            status_code=400, detail="Cannot refund: appointment has already started"
+        )
+
+    # Find current shift
+    shift_result = await db.execute(
+        select(Shift)
+        .where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+        .with_for_update()
+    )
+    shift = shift_result.scalars().first()
+    if not shift:
+        raise HTTPException(
+            status_code=400, detail="No open shift. Open a shift first."
+        )
+
+    # Create refund transaction (negative amount)
+    refund_tx = Transaction(
+        shift_id=shift.id,
+        patient_id=original_tx.patient_id,
+        amount=-abs(original_tx.amount),  # Always negative
+        doctor_id=original_tx.doctor_id,
+        payment_method=original_tx.payment_method,
+        cash_amount=-abs(original_tx.cash_amount),
+        card_amount=-abs(original_tx.card_amount),
+        transfer_amount=-abs(original_tx.transfer_amount),
+        description=f"Refund: {reason.strip()} (original TX #{original_tx.id})",
+    )
+
+    # Atomic running totals update (negative values for refund)
+    delta_cash = (
+        -abs(original_tx.cash_amount)
+        if original_tx.payment_method == PaymentMethod.MIXED
+        else (
+            -abs(original_tx.amount)
+            if original_tx.payment_method == PaymentMethod.CASH
+            else 0
+        )
+    )
+    delta_card = (
+        -abs(original_tx.card_amount)
+        if original_tx.payment_method == PaymentMethod.MIXED
+        else (
+            -abs(original_tx.amount)
+            if original_tx.payment_method == PaymentMethod.CARD
+            else 0
+        )
+    )
+    delta_transfer = (
+        -abs(original_tx.transfer_amount)
+        if original_tx.payment_method == PaymentMethod.MIXED
+        else (
+            -abs(original_tx.amount)
+            if original_tx.payment_method == PaymentMethod.TRANSFER
+            else 0
+        )
+    )
+
+    # Update shift totals atomically
+    await db.execute(
+        update(Shift)
+        .where(Shift.id == shift.id)
+        .values(
+            total_cash=Shift.total_cash + delta_cash,
+            total_card=Shift.total_card + delta_card,
+            total_transfer=Shift.total_transfer + delta_transfer,
+        )
+    )
+
+    db.add(refund_tx)
+    await db.commit()
+    await db.refresh(refund_tx)
+
+    await _audit(
+        db,
+        user,
+        "Refund Payment",
+        f"Refunded TX #{original_tx.id} for {abs(original_tx.amount)} (reason: {reason})",
+    )
+
+    return refund_tx
 
 
 @router.get("/reports/{type}", response_model=ReportXRead | ReportZRead)

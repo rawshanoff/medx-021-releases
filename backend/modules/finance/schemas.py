@@ -91,3 +91,7 @@ class ReportZRead(BaseModel):
     total_transfer: int
     total_income: int
     closed_at: datetime | None
+
+
+class RefundCreate(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=500)
