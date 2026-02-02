@@ -105,7 +105,7 @@ export default function Sidebar({
       </div>
 
       <nav className="flex-1 overflow-hidden p-2">
-        <ul className="flex flex-col gap-1">
+        <ul className="m-0 flex list-none flex-col gap-1 p-0">
           {navItems
             .filter((i) => i.allow)
             .map((item) => (

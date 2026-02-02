@@ -167,7 +167,7 @@ export default function Finance() {
             </Button>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid grid-cols-4 gap-3">
             {[
               { label: t('finance.cash'), value: shiftTotals.cash },
               { label: t('finance.card'), value: shiftTotals.card },
@@ -192,7 +192,7 @@ export default function Finance() {
         </div>
 
         {/* Actions */}
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="grid grid-cols-3 gap-3">
           <button
             type="button"
             className="rounded-md border border-border bg-card p-4 text-left transition hover:bg-accent/40"
