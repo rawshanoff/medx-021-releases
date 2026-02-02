@@ -144,10 +144,11 @@ export function PatientSearch({
         <Button
           ref={createBtnRef}
           onClick={onCreate}
-          variant="default"
+          variant="secondary"
           size="icon"
           title={t('reception.create_new')}
           disabled={!canCreate}
+          className="h-[48px] w-[48px]"
           type="button"
         >
           <Plus size={16} />

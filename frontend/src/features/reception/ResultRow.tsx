@@ -34,13 +34,13 @@ export function ResultRow({
   return (
     <tr className={cn('border-t border-border', requestFocus ? 'bg-primary/5' : '')}>
       <td className="px-3 py-3 align-top">
-        <div className="font-medium">{patient.full_name}</div>
+        <div className="text-[15px] font-medium leading-[20px]">{patient.full_name}</div>
         <Button
           variant="ghost"
           size="sm"
           type="button"
           onClick={onViewHistory}
-          className="mt-1 h-7 justify-start gap-1 px-2 text-[12px] text-primary hover:text-primary"
+          className="mt-1 h-[28px] justify-start gap-1 px-2 text-[13px] text-primary/90 hover:bg-primary/10 hover:text-primary"
         >
           <HistoryIcon size={14} />
           {t('reception.history')}
