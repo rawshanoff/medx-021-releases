@@ -60,9 +60,7 @@ export default function QueueTV() {
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-primary/5 p-8">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-foreground mb-2">
-          {t('reception.queue', { defaultValue: 'Очередь' })}
-        </h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2">{t('reception.queue')}</h1>
         <div className="text-xl text-muted-foreground">
           {new Date().toLocaleDateString('ru-RU', {
             weekday: 'long',
@@ -78,15 +76,14 @@ export default function QueueTV() {
           <div className="rounded-2xl border-4 border-primary bg-card p-12 shadow-2xl">
             <div className="text-center mb-6">
               <div className="text-2xl text-muted-foreground mb-2">
-                {currentTicket.doctor_name ||
-                  t('reception.select_doctor', { defaultValue: 'Врач' })}
+                {currentTicket.doctor_name || t('reception.select_doctor')}
               </div>
               <div className="text-lg text-muted-foreground">{currentTicket.patient_name}</div>
             </div>
 
             <div className="text-center">
               <div className="text-sm text-muted-foreground mb-4 uppercase tracking-wider">
-                {t('reception.ticket', { defaultValue: 'Талон' })}
+                {t('reception.ticket')}
               </div>
               <div className="text-[120px] font-black text-primary leading-none tracking-tighter">
                 {currentTicket.ticket_number}
@@ -97,20 +94,16 @@ export default function QueueTV() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 px-6 py-3">
               <div className="h-3 w-3 animate-pulse rounded-full bg-primary"></div>
-              <span className="text-lg font-medium text-primary">
-                {t('reception.waiting', { defaultValue: 'Ожидание' })}
-              </span>
+              <span className="text-lg font-medium text-primary">{t('reception.waiting')}</span>
             </div>
           </div>
         </div>
       ) : (
         <div className="text-center">
           <div className="text-6xl font-bold text-muted-foreground mb-4">
-            {t('reception.no_queue_today', { defaultValue: 'Очередь пустая' })}
+            {t('reception.no_queue_today')}
           </div>
-          <div className="text-xl text-muted-foreground">
-            {t('reception.waiting_for_patients', { defaultValue: 'Ожидание пациентов...' })}
-          </div>
+          <div className="text-xl text-muted-foreground">{t('reception.waiting_for_patients')}</div>
         </div>
       )}
 
@@ -118,7 +111,7 @@ export default function QueueTV() {
       {queue.length > 0 && (
         <div className="mt-12 w-full max-w-4xl">
           <div className="mb-4 text-center text-lg font-medium text-foreground">
-            {t('reception.current_queue', { defaultValue: 'Текущая очередь' })}
+            {t('reception.current_queue')}
           </div>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
             {queue

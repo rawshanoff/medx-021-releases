@@ -97,11 +97,7 @@ export default function Sidebar({
           variant="ghost"
           size="icon"
           onClick={onToggleCollapsed}
-          title={
-            collapsed
-              ? t('common.expand', { defaultValue: 'Развернуть' })
-              : t('common.collapse', { defaultValue: 'Свернуть' })
-          }
+          title={collapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
           aria-label={collapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
         >
           {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
