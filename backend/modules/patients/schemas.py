@@ -1,7 +1,8 @@
+import re
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class PatientBase(BaseModel):
@@ -15,12 +16,22 @@ class PatientBase(BaseModel):
 
 
 class PatientCreate(PatientBase):
-    pass
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        return _normalize_phone(v)
 
 
 class PatientUpdate(PatientBase):
     full_name: Optional[str] = None
     phone: Optional[str] = None
+
+    @field_validator("phone")
+    @classmethod
+    def validate_optional_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        return _normalize_phone(v)
 
 
 class PatientRead(PatientBase):
@@ -78,3 +89,20 @@ class PatientHistoryRead(BaseModel):
     transactions: list[PatientTransactionRead] = []
     queue: list[PatientQueueHistoryRead] = []
     appointments: list[PatientAppointmentHistoryRead] = []
+
+
+def _normalize_phone(raw: str) -> str:
+    s = str(raw).strip()
+    # remove common separators, keep digits
+    digits = re.sub(r"\D+", "", s)
+    if len(digits) < 7:
+        raise ValueError("phone is too short")
+    if len(digits) > 16:
+        raise ValueError("phone is too long")
+
+    # If starts with country code without '+', normalize to +<digits>
+    if s.startswith("+"):
+        return "+" + digits
+    if digits.startswith("998") and len(digits) == 12:
+        return "+" + digits
+    return digits
