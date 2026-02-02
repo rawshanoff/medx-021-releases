@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Main scroll container (prevents "content flies away" / no-scroll issues) */}
-        <div className="min-h-0 flex-1 overflow-auto p-4">{children}</div>
+        <div className="min-h-0 flex-1 overflow-auto p-[24px]">{children}</div>
       </main>
     </div>
   );

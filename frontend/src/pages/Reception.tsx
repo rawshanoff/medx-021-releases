@@ -16,7 +16,6 @@ import { useQueue } from '../features/reception/hooks/useQueue';
 import { usePatientsSearch } from '../features/reception/hooks/usePatients';
 import type { Patient, PatientHistoryRead } from '../types/patients';
 import type { QueueItem } from '../types/reception';
-import { PageContainer } from '../components/PageContainer';
 
 export default function Reception() {
   const { t } = useTranslation();
@@ -184,7 +183,7 @@ export default function Reception() {
   };
 
   return (
-    <PageContainer className="flex h-full flex-col gap-[16px]">
+    <div className="flex h-full flex-col gap-[16px]">
       <h1 className="text-xl font-medium">{t('reception.title')}</h1>
 
       <div className="min-h-0 flex-1">
@@ -453,6 +452,6 @@ export default function Reception() {
           setMixedModalState((prev) => ({ ...prev, isOpen: false }));
         }}
       />
-    </PageContainer>
+    </div>
   );
 }
