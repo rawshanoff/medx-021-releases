@@ -49,10 +49,9 @@ async def create_appointment(
     new_appt = Appointment(**appt.model_dump())
     db.add(new_appt)
     await db.commit()
-    await db.refresh(new_appt)
+    await db.refresh(new_appt, ["patient"])
 
-    # Manually enrich patient name for response (or use relationship lazy load explicitly)
-    # For MVP response, schema expects patient_name optional.
+    # Enrich with patient name
     new_appt.patient_name = patient.full_name
     return new_appt
 
@@ -67,9 +66,10 @@ async def list_appointments(
         require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.DOCTOR)
     ),
 ):
+    """List appointments with eager loading to prevent N+1 queries."""
     query = (
         select(Appointment)
-        .join(Appointment.patient)
+        .options(selectinload(Appointment.patient))
         .where(
             Appointment.start_time >= start,
             Appointment.start_time <= end,
@@ -85,11 +85,9 @@ async def list_appointments(
     result = await db.execute(query)
     appointments = result.scalars().all()
 
-    # Fill names
-    # Note: Because of async, accessing relationship 'appointment.patient' might need eager loading logic
-    # But let's try assuming our schema handles it if we joined?
-    # Actually, default relationship loading in async needs 'selectinload' or manual fetch.
-    # Let's fix query to eager load.
+    # Enrich with patient name
+    for a in appointments:
+        a.patient_name = a.patient.full_name if a.patient else "Unknown"
 
     return appointments
 

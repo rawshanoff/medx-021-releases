@@ -73,11 +73,15 @@ async def get_queue(
     db: AsyncSession = Depends(get_db),
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
+    """Get queue items with eager loading to prevent N+1 queries."""
     # Return all waiting items, or all items for today
     # Ordering by created_at desc (or asc for queue?) Usually ASC for queue (FIFO)
     result = await db.execute(
         select(QueueItem)
-        .options(selectinload(QueueItem.doctor))
+        .options(
+            selectinload(QueueItem.doctor),
+            selectinload(QueueItem.patient),
+        )
         .order_by(QueueItem.created_at.asc())
         # .where(QueueItem.status == QueueStatus.WAITING) # Optionally filter
     )
@@ -110,5 +114,5 @@ async def update_queue_status(
 
     item.status = update.status
     await db.commit()
-    await db.refresh(item)
+    await db.refresh(item, ["doctor", "patient"])
     return item
