@@ -479,7 +479,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             {t('patients.file', { defaultValue: 'Файл' })}
           </label>
           <Input
-            className="h-8 text-xs"
+            className="h-8 text-[13px]"
             type="file"
             onChange={(e) => setUploadFile(e.target.files ? e.target.files[0] : null)}
           />
@@ -488,7 +488,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
           type="button"
           onClick={handleUpload}
           disabled={!uploadFile || busy}
-          className="h-8 text-xs"
+          className="h-8 text-[13px]"
         >
           {t('common.save', { defaultValue: 'Сохранить' })}
         </Button>
@@ -501,7 +501,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
           type="button"
           onClick={handleGenerateLinkCode}
           disabled={busy}
-          className="h-8 text-xs"
+          className="h-8 text-[13px]"
         >
           {t('patients.telegram_link_code', { defaultValue: 'Код привязки Telegram' })}
         </Button>
@@ -546,7 +546,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
                         type="button"
                         onClick={() => handleDownload(f.id, f.original_filename)}
                         disabled={busy}
-                        className="h-8 text-xs"
+                        className="h-8 text-[13px]"
                       >
                         {t('patients.download', { defaultValue: 'Скачать' })}
                       </Button>
@@ -556,7 +556,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
                         type="button"
                         onClick={() => handleSendTelegram(f.id)}
                         disabled={busy}
-                        className="h-8 text-xs"
+                        className="h-8 text-[13px]"
                       >
                         {t('patients.send_telegram', { defaultValue: 'В Telegram' })}
                       </Button>
@@ -577,7 +577,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="h-8 text-xs"
+            className="h-8 text-[13px]"
           >
             {t('common.prev', { defaultValue: 'Назад' })}
           </Button>
@@ -590,7 +590,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="h-8 text-xs"
+            className="h-8 text-[13px]"
           >
             {t('common.next', { defaultValue: 'Вперёд' })}
           </Button>
