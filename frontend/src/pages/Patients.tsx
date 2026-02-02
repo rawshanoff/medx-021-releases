@@ -96,16 +96,17 @@ export default function Patients() {
   };
 
   useEffect(() => {
-    // keep refs array in sync
+    // keep refs array in sync (no state updates here)
     filesBtnRefs.current = filesBtnRefs.current.slice(0, patients.length);
-    if (patients.length === 0) {
-      setFocusedRowIndex(null);
-      return;
-    }
-    if (focusedRowIndex != null && focusedRowIndex >= patients.length) {
-      setFocusedRowIndex(patients.length - 1);
-    }
-  }, [focusedRowIndex, patients.length]);
+  }, [patients.length]);
+
+  // Derive effective focus without setState-in-effect.
+  const effectiveFocusedRowIndex =
+    focusedRowIndex == null
+      ? null
+      : patients.length === 0
+        ? null
+        : Math.min(focusedRowIndex, patients.length - 1);
 
   return (
     <div className="flex h-full flex-col gap-3">
@@ -192,7 +193,7 @@ export default function Patients() {
                     onNavigate={(dir) => {
                       focusRow(idx + dir);
                     }}
-                    isFocused={focusedRowIndex === idx}
+                    isFocused={effectiveFocusedRowIndex === idx}
                   />
                 ))}
               </tbody>

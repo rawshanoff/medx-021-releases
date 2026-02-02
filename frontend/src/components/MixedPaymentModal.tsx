@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from './ui/modal';
 import { Input } from './ui/input';
@@ -31,26 +31,29 @@ export default function MixedPaymentModal({
     return 'error';
   }, [remaining]);
 
-  useEffect(() => {
-    // Reset when modal opens
-    if (isOpen) {
-      setCash(0);
-      setCard(0);
-      setTransfer(0);
-    }
-  }, [isOpen]);
+  const resetAmounts = () => {
+    setCash(0);
+    setCard(0);
+    setTransfer(0);
+  };
+
+  const handleClose = () => {
+    // Reset on close so the next open starts from zero without using effects.
+    resetAmounts();
+    onClose();
+  };
 
   const handleConfirm = () => {
     if (isValid) {
       onConfirm(cash, card, transfer);
-      onClose();
+      handleClose();
     }
   };
 
   return (
     <Modal
       open={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={t('reception.mixed_payment')}
       description={
         t('reception.total_amount') + `: ${totalAmount.toLocaleString()} ${t('common.currency')}`
@@ -114,7 +117,7 @@ export default function MixedPaymentModal({
       </div>
 
       <div className="mt-3 flex items-center justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={handleClose}>
           {t('common.cancel')}
         </Button>
         <Button onClick={handleConfirm} disabled={!isValid}>

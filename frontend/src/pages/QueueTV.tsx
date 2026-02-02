@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueue } from '../features/reception/hooks/useQueue';
 import type { QueueItem } from '../types/reception';
@@ -6,35 +6,9 @@ import type { QueueItem } from '../types/reception';
 export default function QueueTV() {
   const { t } = useTranslation();
   const { queue, refresh } = useQueue();
-  const [currentTicket, setCurrentTicket] = useState<QueueItem | null>(null);
-  const [previousTicketId, setPreviousTicketId] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const previousTicketIdRef = useRef<number | null>(null);
 
-  // Auto-refresh every 3 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refresh();
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [refresh]);
-
-  // Find the first WAITING ticket
-  useEffect(() => {
-    const waiting = queue.find((q) => q.status === 'WAITING');
-    if (waiting) {
-      setCurrentTicket(waiting);
-
-      // Play sound if this is a new ticket
-      if (previousTicketId !== null && waiting.id !== previousTicketId) {
-        playNotificationSound();
-      }
-      setPreviousTicketId(waiting.id);
-    } else {
-      setCurrentTicket(null);
-    }
-  }, [queue, previousTicketId]);
-
-  const playNotificationSound = () => {
+  const playNotificationSound = useCallback(() => {
     try {
       // Create a more noticeable beep sound using Web Audio API
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -60,7 +34,29 @@ export default function QueueTV() {
     } catch (e) {
       console.warn('Could not play notification sound', e);
     }
-  };
+  }, []);
+
+  const currentTicket: QueueItem | null = useMemo(() => {
+    return queue.find((q) => q.status === 'WAITING') ?? null;
+  }, [queue]);
+
+  // Auto-refresh every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refresh();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [refresh]);
+
+  // Sound notification when current ticket changes (no state updates here).
+  useEffect(() => {
+    const waiting = currentTicket;
+    const prev = previousTicketIdRef.current;
+    if (waiting && prev !== null && waiting.id !== prev) {
+      playNotificationSound();
+    }
+    previousTicketIdRef.current = waiting?.id ?? null;
+  }, [currentTicket, playNotificationSound]);
 
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center bg-gradient-to-br from-primary/10 via-background to-primary/5 p-8 overflow-hidden">

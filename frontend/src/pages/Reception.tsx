@@ -47,7 +47,6 @@ export default function Reception() {
     }
   };
   const [focusPatientId, setFocusPatientId] = useState<number | null>(null);
-  const [pendingFocusPatientId, setPendingFocusPatientId] = useState<number | null>(null);
 
   // History Modal
   const [historyState, setHistoryState] = useState<{
@@ -118,14 +117,6 @@ export default function Reception() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  useEffect(() => {
-    if (pendingFocusPatientId == null) return;
-    const found = patients.find((p) => p.id === pendingFocusPatientId);
-    if (!found) return;
-    setFocusPatientId(pendingFocusPatientId);
-    setPendingFocusPatientId(null);
-  }, [patients, pendingFocusPatientId]);
-
   const handleInlineCreate = async () => {
     if (!name && !surname && !phone) {
       showToast(t('reception.fill_required'), 'warning');
@@ -142,7 +133,7 @@ export default function Reception() {
         });
         const newId = Number(created?.data?.id);
         if (Number.isFinite(newId) && newId > 0) {
-          setPendingFocusPatientId(newId);
+          setFocusPatientId(newId);
         }
         showToast(t('reception.patient_created', { defaultValue: 'Пациент создан' }), 'success');
         await refreshPatients();

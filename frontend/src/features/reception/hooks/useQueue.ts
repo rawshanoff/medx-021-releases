@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import client from '../../../api/client';
 import type { QueueItem, QueueStatus } from '../../../types/reception';
-
-function todayKeyUtc() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function isSameLocalDay(iso: string, today: Date) {
   const d = new Date(iso);
@@ -17,7 +13,6 @@ function isSameLocalDay(iso: string, today: Date) {
 
 export function useQueue() {
   const [queue, setQueue] = useState<QueueItem[]>([]);
-  const [dayKey, setDayKey] = useState<string>(() => todayKeyUtc());
 
   const refresh = useCallback(async () => {
     const res = await client.get('/reception/queue');
@@ -42,20 +37,6 @@ export function useQueue() {
     },
     [refresh],
   );
-
-  // Day rollover: if day changed while app is open, clear and refetch today's queue.
-  useEffect(() => {
-    const tmr = setInterval(() => {
-      const key = todayKeyUtc();
-      setDayKey((prev) => (prev === key ? prev : key));
-    }, 30_000);
-    return () => clearInterval(tmr);
-  }, []);
-
-  useEffect(() => {
-    setQueue([]);
-    refresh();
-  }, [dayKey, refresh]);
 
   return { queue, refresh, updateStatus };
 }
