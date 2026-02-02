@@ -14,11 +14,15 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/", response_model=list[UserResponse])
 async def list_users(
+    include_deleted: bool = False,
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
 ):
     """List all users (admin only)"""
-    result = await db.execute(select(User))
+    stmt = select(User)
+    if not include_deleted:
+        stmt = stmt.where(User.deleted_at.is_(None))
+    result = await db.execute(stmt)
     users = result.scalars().all()
     return users
 
@@ -85,12 +89,13 @@ async def delete_user(
     db: AsyncSession = Depends(get_db),
     _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
 ):
-    """Delete user (admin only)"""
+    """Archive user (admin only)"""
     result = await db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    await db.delete(user)
+    user.soft_delete()
+    user.is_active = False
     await db.commit()
-    return {"message": "User deleted successfully"}
+    return {"message": "User archived successfully"}

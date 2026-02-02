@@ -1,10 +1,10 @@
-from backend.core.database import Base
+from backend.core.database import Base, SoftDeleteMixin
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class Appointment(Base):
+class Appointment(SoftDeleteMixin, Base):
     __tablename__ = "appointments"
 
     id = Column(Integer, primary_key=True, index=True)

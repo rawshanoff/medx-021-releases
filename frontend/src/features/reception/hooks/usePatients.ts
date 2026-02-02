@@ -3,7 +3,7 @@ import client from '../../../api/client';
 import type { Patient } from '../../../types/patients';
 import { dobUiToIso, normalizeHumanName } from '../../../utils/text';
 
-export function usePatientsSearch({
+export function usePatientsSearch<T extends Patient = Patient>({
   phone,
   name,
   surname,
@@ -16,7 +16,7 @@ export function usePatientsSearch({
   dob: string;
   debounceMs?: number;
 }) {
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patients, setPatients] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -37,7 +37,7 @@ export function usePatientsSearch({
           birth_date: birthDateIso,
         },
       });
-      setPatients(Array.isArray(res.data) ? res.data : []);
+      setPatients(Array.isArray(res.data) ? (res.data as T[]) : []);
     } finally {
       setLoading(false);
     }

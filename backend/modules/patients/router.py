@@ -81,7 +81,7 @@ async def search_patients(
         )
     ),
 ):
-    query = select(Patient)
+    query = select(Patient).where(Patient.deleted_at.is_(None))
 
     # Granular filters (AND logic)
     if phone:
@@ -137,7 +137,9 @@ async def get_patient(
         )
     ),
 ):
-    result = await db.execute(select(Patient).where(Patient.id == patient_id))
+    result = await db.execute(
+        select(Patient).where(Patient.id == patient_id, Patient.deleted_at.is_(None))
+    )
     patient = result.scalars().first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -159,7 +161,9 @@ async def update_patient(
         )
     ),
 ):
-    result = await db.execute(select(Patient).where(Patient.id == patient_id))
+    result = await db.execute(
+        select(Patient).where(Patient.id == patient_id, Patient.deleted_at.is_(None))
+    )
     patient = result.scalars().first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -190,7 +194,7 @@ async def get_patient_history(
     ),
 ):
     patient = await db.get(Patient, patient_id)
-    if not patient:
+    if not patient or patient.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
     tx_res = await db.execute(

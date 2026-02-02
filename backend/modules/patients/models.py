@@ -1,4 +1,4 @@
-from backend.core.database import Base
+from backend.core.database import Base, SoftDeleteMixin
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -13,7 +13,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class Patient(Base):
+class Patient(SoftDeleteMixin, Base):
     __tablename__ = "patients"
 
     id = Column(Integer, primary_key=True, index=True)

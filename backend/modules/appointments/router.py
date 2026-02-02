@@ -37,6 +37,7 @@ async def create_appointment(
             Appointment.start_time < appt.end_time,
             Appointment.end_time > appt.start_time,
             Appointment.status != "cancelled",
+            Appointment.deleted_at.is_(None),
         )
     )
     result = await db.execute(stmt)
@@ -102,7 +103,11 @@ async def list_appointments_v2(
     query = (
         select(Appointment)
         .options(selectinload(Appointment.patient))
-        .where(Appointment.start_time >= start, Appointment.start_time <= end)
+        .where(
+            Appointment.start_time >= start,
+            Appointment.start_time <= end,
+            Appointment.deleted_at.is_(None),
+        )
     )
     if doctor_id:
         query = query.where(Appointment.doctor_id == doctor_id)
@@ -128,9 +133,10 @@ async def cancel_appointment(
     ),
 ):
     appt = await db.get(Appointment, id)
-    if not appt:
+    if not appt or appt.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Appointment not found")
 
-    db.delete(appt)  # Or set status='cancelled'
+    appt.status = "cancelled"
+    appt.soft_delete()
     await db.commit()
-    return {"message": "Deleted"}
+    return {"message": "Cancelled"}

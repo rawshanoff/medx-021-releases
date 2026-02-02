@@ -1,22 +1,24 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import client from '../api/client';
-import { Plus, X, Check } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { dobUiToIso, formatDobInput, normalizeHumanName } from '../utils/text';
+import { dobUiToIso, normalizeHumanName } from '../utils/text';
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Skeleton } from '../components/ui/skeleton';
 import { useToast } from '../context/ToastContext';
+import { PatientSearch } from '../features/reception/PatientSearch';
+import { usePatientsSearch } from '../features/reception/hooks/usePatients';
 import type { PatientWithBalance } from '../types/patients';
 import type { PatientFile } from '../types/files';
 
 export default function Patients() {
   const { t } = useTranslation();
   const { showToast } = useToast();
-  const [patients, setPatients] = useState<PatientWithBalance[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PatientWithBalance | null>(null);
   const [isFilesOpen, setIsFilesOpen] = useState(false);
+  const [focusedRowIndex, setFocusedRowIndex] = useState<number | null>(null);
 
   // Search state (same geometry as Reception)
   const [phone, setPhone] = useState('');
@@ -28,33 +30,19 @@ export default function Patients() {
   const surnameRef = useRef<HTMLInputElement | null>(null);
   const dobRef = useRef<HTMLInputElement | null>(null);
   const createBtnRef = useRef<HTMLButtonElement | null>(null);
+  const filesBtnRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchPatients();
-    }, 350);
-    return () => clearTimeout(timer);
-  }, [phone, name, surname, dob]);
-
-  const fetchPatients = async () => {
-    setLoading(true);
-    try {
-      const full_name = normalizeHumanName((name + ' ' + surname).trim());
-      const birth_date = dobUiToIso(dob) || undefined;
-      const res = await client.get('/patients/', {
-        params: {
-          phone: phone || undefined,
-          full_name: full_name || undefined,
-          birth_date,
-        },
-      });
-      setPatients(res.data);
-    } catch (error) {
-      console.error('Failed to fetch patients', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    patients,
+    loading,
+    refresh: refreshPatients,
+  } = usePatientsSearch<PatientWithBalance>({
+    phone,
+    name,
+    surname,
+    dob,
+    debounceMs: 350,
+  });
 
   const handleCreatePatient = async () => {
     if (!name || !surname || !phone) {
@@ -73,7 +61,7 @@ export default function Patients() {
         birth_date: dobUiToIso(dob) || null,
       });
       // keep fields to continue registering quickly, but clear list refresh
-      fetchPatients();
+      await refreshPatients();
     } catch (error) {
       showToast(t('patients.create_failed', { defaultValue: 'Ошибка создания пациента' }), 'error');
     }
@@ -88,103 +76,63 @@ export default function Patients() {
     return p;
   };
 
+  const hasSearch = useMemo(() => {
+    return Boolean(
+      String(phone || '').trim() ||
+      String(name || '').trim() ||
+      String(surname || '').trim() ||
+      String(dob || '').trim(),
+    );
+  }, [dob, name, phone, surname]);
+
+  const focusRow = (idx: number) => {
+    if (idx < 0 || idx >= patients.length) return;
+    setFocusedRowIndex(idx);
+    const btn = filesBtnRefs.current[idx];
+    if (btn) {
+      btn.focus();
+      btn.scrollIntoView({ block: 'nearest' });
+    }
+  };
+
+  useEffect(() => {
+    // keep refs array in sync
+    filesBtnRefs.current = filesBtnRefs.current.slice(0, patients.length);
+    if (patients.length === 0) {
+      setFocusedRowIndex(null);
+      return;
+    }
+    if (focusedRowIndex != null && focusedRowIndex >= patients.length) {
+      setFocusedRowIndex(patients.length - 1);
+    }
+  }, [focusedRowIndex, patients.length]);
+
   return (
     <div className="flex h-full flex-col gap-3">
       <h1 className="text-xl font-medium">{t('patients.title')}</h1>
 
       <div className="min-h-0 flex flex-1 flex-col gap-3 overflow-hidden">
         {/* Search */}
-        <div className="rounded-md border border-border bg-card p-2">
-          <div className="grid grid-cols-2 items-end gap-2 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
-            <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">
-                {t('reception.phone')}
-              </label>
-              <Input
-                ref={phoneRef}
-                placeholder="+998..."
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="h-8 text-xs"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    nameRef.current?.focus();
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">
-                {t('reception.first_name')}
-              </label>
-              <Input
-                ref={nameRef}
-                placeholder={t('reception.sample_first_name')}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-8 text-xs"
-                onBlur={() => setName((v) => normalizeHumanName(v))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    surnameRef.current?.focus();
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">
-                {t('reception.last_name')}
-              </label>
-              <Input
-                ref={surnameRef}
-                placeholder={t('reception.sample_last_name')}
-                value={surname}
-                onChange={(e) => setSurname(e.target.value)}
-                className="h-8 text-xs"
-                onBlur={() => setSurname((v) => normalizeHumanName(v))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    dobRef.current?.focus();
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">
-                {t('reception.dob')}
-              </label>
-              <Input
-                ref={dobRef}
-                inputMode="numeric"
-                placeholder={t('reception.date_format')}
-                value={dob}
-                onChange={(e) => setDob(formatDobInput(e.target.value))}
-                className="h-8 text-xs"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    createBtnRef.current?.click();
-                  }
-                }}
-              />
-            </div>
-            <Button
-              ref={createBtnRef}
-              onClick={handleCreatePatient}
-              variant="default"
-              size="icon"
-              title={t('patients.new_patient', { defaultValue: 'Новый пациент' })}
-              disabled={!phone || !name || !surname}
-              type="button"
-              className="h-8 w-8 text-xs"
-            >
-              <Plus size={14} />
-            </Button>
-          </div>
-        </div>
+        <PatientSearch
+          phone={phone}
+          setPhone={setPhone}
+          name={name}
+          setName={setName}
+          surname={surname}
+          setSurname={setSurname}
+          dob={dob}
+          setDob={setDob}
+          phoneRef={phoneRef}
+          nameRef={nameRef}
+          surnameRef={surnameRef}
+          dobRef={dobRef}
+          createBtnRef={createBtnRef}
+          canCreate={Boolean(phone && name && surname)}
+          onCreate={handleCreatePatient}
+          onFocusFirstResult={() => {
+            if (patients.length > 0) focusRow(0);
+          }}
+        />
 
         {/* Table */}
         <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-border bg-card">
@@ -201,23 +149,50 @@ export default function Patients() {
               </thead>
               <tbody className="[&>tr]:border-t [&>tr]:border-border">
                 {loading ? (
-                  <tr className="h-9">
-                    <td colSpan={5} className="p-2 text-[12px] text-muted-foreground">
-                      {t('common.loading')}
+                  <>
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <tr key={`sk-${i}`} className="[&>td]:p-2">
+                        <td colSpan={5}>
+                          <Skeleton className="h-6 w-full" />
+                        </td>
+                      </tr>
+                    ))}
+                  </>
+                ) : null}
+
+                {!loading && patients.length === 0 && hasSearch ? (
+                  <tr>
+                    <td colSpan={5} className="p-5 text-center text-muted-foreground">
+                      {t('reception.no_results')}
                     </td>
                   </tr>
                 ) : null}
-                {patients.map((patient) => (
+
+                {!loading && patients.length === 0 && !hasSearch ? (
+                  <tr>
+                    <td colSpan={5} className="p-5 text-center text-muted-foreground">
+                      {t('reception.search_placeholder')}
+                    </td>
+                  </tr>
+                ) : null}
+                {patients.map((patient, idx) => (
                   <PatientRow
                     key={patient.id}
                     patient={patient}
                     formatID={formatID}
                     formatPhone={formatPhone}
-                    onUpdate={fetchPatients}
+                    onUpdate={refreshPatients}
                     onFiles={() => {
                       setSelectedPatient(patient);
                       setIsFilesOpen(true);
                     }}
+                    registerFilesBtnRef={(el) => {
+                      filesBtnRefs.current[idx] = el;
+                    }}
+                    onNavigate={(dir) => {
+                      focusRow(idx + dir);
+                    }}
+                    isFocused={focusedRowIndex === idx}
                   />
                 ))}
               </tbody>
@@ -245,12 +220,18 @@ function PatientRow({
   formatPhone,
   onUpdate,
   onFiles,
+  registerFilesBtnRef,
+  onNavigate,
+  isFocused,
 }: {
   patient: PatientWithBalance;
   formatID: (n: number) => string;
   formatPhone: (s: string) => string;
   onUpdate: () => void;
   onFiles: () => void;
+  registerFilesBtnRef: (el: HTMLButtonElement | null) => void;
+  onNavigate: (dir: -1 | 1) => void;
+  isFocused: boolean;
 }) {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -280,7 +261,7 @@ function PatientRow({
   };
 
   return (
-    <tr className="h-8">
+    <tr className={isFocused ? 'h-8 bg-muted/40' : 'h-8'}>
       <td className="p-2 font-mono text-[12px] text-muted-foreground">{formatID(patient.id)}</td>
 
       <td className="p-2">
@@ -357,6 +338,18 @@ function PatientRow({
               size="sm"
               type="button"
               className="h-8 text-xs"
+              ref={registerFilesBtnRef}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  onNavigate(1);
+                  return;
+                }
+                if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  onNavigate(-1);
+                }
+              }}
             >
               {t('patients.files', { defaultValue: 'Файлы' })}
             </Button>

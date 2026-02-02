@@ -106,15 +106,21 @@ def test_delete_doctor_removes_queue_items():
         await delete_doctor(doctor_id=d.id, db=db, _user=user)
 
         res = await db.execute(select(QueueItem).where(QueueItem.doctor_id == d.id))
-        assert res.scalars().all() == []
+        # Soft delete should not remove historical queue items
+        assert len(res.scalars().all()) == 1
 
         res_svc = await db.execute(
             select(DoctorService).where(DoctorService.doctor_id == d.id)
         )
-        assert res_svc.scalars().all() == []
+        svc_rows = res_svc.scalars().all()
+        assert len(svc_rows) == 1
+        assert svc_rows[0].deleted_at is not None
 
         res2 = await db.execute(select(Doctor).where(Doctor.id == d.id))
-        assert res2.scalars().first() is None
+        doc_row = res2.scalars().first()
+        assert doc_row is not None
+        assert doc_row.deleted_at is not None
+        assert doc_row.is_active is False
 
     asyncio.run(_with_db(_test))
 
@@ -149,7 +155,10 @@ def test_add_and_delete_service_via_routes():
         res2 = await db.execute(
             select(DoctorService).where(DoctorService.doctor_id == d.id)
         )
-        assert res2.scalars().all() == []
+        rows = res2.scalars().all()
+        assert len(rows) == 1
+        assert rows[0].id == service_id
+        assert rows[0].deleted_at is not None
 
     asyncio.run(_with_db(_test))
 
