@@ -79,7 +79,7 @@ export function QueueSidebar({
                   <div className="font-medium">{item.ticket_number}</div>
                   <span
                     className={cn(
-                      'inline-flex items-center rounded-sm px-1.5 py-0.5 text-[12px] font-medium',
+                      'inline-flex items-center rounded-sm px-1.5 py-0.5 text-[13px] font-medium',
                       item.status === 'WAITING'
                         ? 'bg-primary text-primary-foreground'
                         : item.status === 'COMPLETED'
