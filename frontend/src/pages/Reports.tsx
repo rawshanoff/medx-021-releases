@@ -59,8 +59,7 @@ export default function Reports() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <h1 className="text-2xl font-medium">{t('nav.reports')}</h1>
+      <div className="flex justify-end">
         <Button
           variant="secondary"
           size="sm"

@@ -17,6 +17,7 @@ import Doctors from './pages/Doctors';
 import System from './pages/System';
 import Reports from './pages/Reports';
 import QueueTV from './pages/QueueTV';
+import Archive from './pages/Archive';
 import { ToastProvider } from './context/ToastContext';
 
 // Simple Protected Route Component
@@ -106,6 +107,14 @@ function App() {
                 element={
                   <ProtectedRoute roles={['admin', 'owner', 'receptionist']}>
                     <Doctors />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/archive"
+                element={
+                  <ProtectedRoute roles={['admin', 'owner']}>
+                    <Archive />
                   </ProtectedRoute>
                 }
               />

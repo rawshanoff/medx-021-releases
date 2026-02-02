@@ -1,4 +1,5 @@
 import bcrypt
+from typing import List
 from backend.core.database import get_db
 from backend.core.schemas import MessageResponse
 from backend.modules.auth import require_roles
@@ -7,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User, UserRole
-from .schemas import UserCreate, UserResponse, UserUpdate
+from .schemas import UserCreate, UserRead, UserResponse, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -105,3 +106,38 @@ async def delete_user(
     user.is_active = False
     await db.commit()
     return {"message": "User archived successfully"}
+
+
+@router.get("/archived/", response_model=List[UserRead])
+async def get_archived_users(
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    """Get archived users. Admin only."""
+    result = await db.execute(
+        select(User)
+        .where(User.deleted_at.is_not(None))
+        .order_by(User.deleted_at.desc())
+    )
+    return result.scalars().all()
+
+
+@router.post("/{user_id}/restore", response_model=UserRead)
+async def restore_user(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    """Restore archived user. Admin only."""
+    result = await db.execute(
+        select(User).filter(User.id == user_id, User.deleted_at.is_not(None))
+    )
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Archived user not found")
+
+    user.restore()
+    user.is_active = True
+    await db.commit()
+    await db.refresh(user)
+    return user

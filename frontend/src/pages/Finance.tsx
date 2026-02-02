@@ -117,8 +117,7 @@ export default function Finance() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <h1 className="text-xl font-medium">{t('finance.title')}</h1>
+      <div className="flex flex-wrap justify-end gap-2">
         {!shift ? (
           <Button
             size="sm"
@@ -130,8 +129,8 @@ export default function Finance() {
             <Unlock size={14} /> {t('finance.open_shift')}
           </Button>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[13px] font-medium text-primary">
+          <>
+            <span className="self-center text-[13px] font-medium text-primary">
               {t('finance.shift_open', { id: shift.id })}
             </span>
             <Button
@@ -144,7 +143,7 @@ export default function Finance() {
             >
               <Lock size={14} /> {t('finance.close_shift')}
             </Button>
-          </div>
+          </>
         )}
       </div>
 

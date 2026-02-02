@@ -34,7 +34,8 @@
     "next": "Next",
     "type": "Type",
     "failed": "Error",
-    "create": "Create"
+    "create": "Create",
+    "notifications": "Notifications"
   },
   "nav": {
     "dashboard": "Reception",
@@ -44,10 +45,23 @@
     "reports": "Reports",
     "doctors": "Doctors",
     "system": "System",
+    "archive": "Archive",
     "appointments": "Appointments",
     "users": "Users",
     "logout": "Logout",
     "logout_confirm": "Are you sure you want to exit?"
+  },
+  "archive": {
+    "title": "Archive",
+    "description": "Restore deleted records",
+    "tabs": {
+      "patients": "Patients",
+      "doctors": "Doctors",
+      "users": "Users"
+    },
+    "empty": "No deleted records",
+    "restore": "Restore",
+    "restored": "Record restored"
   },
   "auth": {
     "session_expired": "Session expired. Please sign in again.",

@@ -34,7 +34,8 @@
     "next": "Keyingi",
     "type": "Turi",
     "failed": "Xatolik",
-    "create": "Yaratish"
+    "create": "Yaratish",
+    "notifications": "Bildirishnomalar"
   },
   "nav": {
     "dashboard": "Qabulxona",
@@ -44,10 +45,23 @@
     "reports": "Hisobotlar",
     "doctors": "Shifokorlar",
     "system": "Tizim",
+    "archive": "Arxiv",
     "appointments": "Qabul",
     "users": "Foydalanuvchilar",
     "logout": "Chiqish",
     "logout_confirm": "Tizimdan chiqmoqchimisiz?"
+  },
+  "archive": {
+    "title": "Arxiv",
+    "description": "O'chirilgan yozuvlarni tiklash",
+    "tabs": {
+      "patients": "Bemorlar",
+      "doctors": "Shifokorlar",
+      "users": "Foydalanuvchilar"
+    },
+    "empty": "O'chirilgan yozuvlar yo'q",
+    "restore": "Tiklash",
+    "restored": "Yozuv tiklandi"
   },
   "auth": {
     "session_expired": "Sessiya tugadi. Qayta kiring.",

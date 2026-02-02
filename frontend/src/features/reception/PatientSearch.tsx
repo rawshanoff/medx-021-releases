@@ -45,9 +45,9 @@ export function PatientSearch({
 
   return (
     <div className="rounded-md border border-border bg-card p-4">
-      <div className="grid grid-cols-2 items-end gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
+      <div className="grid grid-cols-2 items-end gap-3 lg:grid-cols-5">
         <div>
-          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
             {t('reception.phone')}
           </label>
           <Input
@@ -70,7 +70,7 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
             {t('reception.first_name')}
           </label>
           <Input
@@ -94,7 +94,7 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
             {t('reception.last_name')}
           </label>
           <Input
@@ -118,7 +118,7 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
             {t('reception.dob')}
           </label>
           <Input
@@ -145,13 +145,14 @@ export function PatientSearch({
           ref={createBtnRef}
           onClick={onCreate}
           variant="secondary"
-          size="icon"
+          size="sm"
           title={t('reception.create_new')}
           disabled={!canCreate}
-          className="h-[48px] w-[48px]"
+          className="h-[48px] w-full px-3 text-[13px]"
           type="button"
         >
           <Plus size={16} />
+          <span className="ml-1">{t('common.add')}</span>
         </Button>
       </div>
     </div>
