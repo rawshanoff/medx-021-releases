@@ -198,6 +198,16 @@
   "system": {
     "title": "System",
     "create_user": "Create User",
-    "create_user_desc": "Create a new system user."
+    "create_user_desc": "Create a new system user.",
+    "updates": "Updates",
+    "updates_desc": "Check and install system updates",
+    "checking_updates": "Checking for updates...",
+    "update_available": "Update available",
+    "update_not_available": "You are using the latest version",
+    "current_version": "Current version",
+    "latest_version": "Latest version",
+    "check_updates": "Check for Updates",
+    "install_update": "Install Update",
+    "update_url_not_configured": "Update check URL not configured"
   }
 }

@@ -198,6 +198,16 @@
   "system": {
     "title": "Tizim",
     "create_user": "Foydalanuvchi yaratish",
-    "create_user_desc": "Yangi tizim foydalanuvchisini yarating."
+    "create_user_desc": "Yangi tizim foydalanuvchisini yarating.",
+    "updates": "Yangilanishlar",
+    "updates_desc": "Tizim yangilanishlarini tekshirish va o'rnatish",
+    "checking_updates": "Yangilanishlar tekshirilmoqda...",
+    "update_available": "Yangilanish mavjud",
+    "update_not_available": "Siz eng so'nggi versiyadan foydalanmoqdasiz",
+    "current_version": "Joriy versiya",
+    "latest_version": "Eng so'nggi versiya",
+    "check_updates": "Yangilanishlarni tekshirish",
+    "install_update": "Yangilanishni o'rnatish",
+    "update_url_not_configured": "Yangilanish tekshirish URL konfiguratsiya qilinmagan"
   }
 }

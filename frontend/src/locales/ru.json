@@ -198,6 +198,16 @@
   "system": {
     "title": "Система",
     "create_user": "Создать пользователя",
-    "create_user_desc": "Создайте нового пользователя системы."
+    "create_user_desc": "Создайте нового пользователя системы.",
+    "updates": "Обновления",
+    "updates_desc": "Проверка и установка обновлений системы",
+    "checking_updates": "Проверка обновлений...",
+    "update_available": "Доступно обновление",
+    "update_not_available": "Установлена последняя версия",
+    "current_version": "Текущая версия",
+    "latest_version": "Последняя версия",
+    "check_updates": "Проверить обновления",
+    "install_update": "Установить обновление",
+    "update_url_not_configured": "URL для проверки обновлений не настроен"
   }
 }

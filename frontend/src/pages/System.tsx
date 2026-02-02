@@ -2,9 +2,11 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import client from '../api/client';
 import {
   Building2,
+  Download,
   FileText,
   KeyRound,
   Printer,
+  RefreshCw,
   Settings,
   ShieldCheck,
   Trash2,
@@ -35,7 +37,7 @@ interface User {
   is_active: boolean;
 }
 
-type SystemSection = 'requisites' | 'printer' | 'receipt' | 'license' | 'users';
+type SystemSection = 'requisites' | 'printer' | 'receipt' | 'license' | 'users' | 'updates';
 
 function SettingsModal({
   open,
@@ -98,6 +100,16 @@ export default function System() {
   const [licenseStatus, setLicenseStatus] = useState(t('common.unknown'));
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const [activeFeatures, setActiveFeatures] = useState<string[]>([]);
+
+  // Update States
+  const [updateInfo, setUpdateInfo] = useState<{
+    update_available: boolean;
+    latest_version: string;
+    current_version: string;
+    release_notes: string;
+    download_url: string | null;
+  } | null>(null);
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
   const [printSettings, setLocalPrintSettings] = useState(() => getPrintSettings());
   const [printers, setPrinters] = useState<
     Array<{ name: string; displayName: string; isDefault: boolean }>
@@ -127,6 +139,18 @@ export default function System() {
       fetchUsers();
     }
   }, []);
+
+  const checkForUpdates = async () => {
+    setCheckingUpdates(true);
+    try {
+      const res = await client.get('/system/update-check');
+      setUpdateInfo(res.data);
+    } catch (e) {
+      showToast('Failed to check for updates', 'error');
+    } finally {
+      setCheckingUpdates(false);
+    }
+  };
 
   const fetchSystemInfo = async () => {
     try {
@@ -240,6 +264,15 @@ export default function System() {
           subtitle="Статус, функции, загрузка ключа"
           icon={<KeyRound size={16} />}
           onClick={() => setOpenSection('license')}
+        />
+        <SettingsTile
+          title={t('system.updates')}
+          subtitle={t('system.updates_desc')}
+          icon={<Download size={16} />}
+          onClick={() => {
+            setOpenSection('updates');
+            checkForUpdates();
+          }}
         />
         {canManageUsers ? (
           <SettingsTile
@@ -1126,6 +1159,97 @@ export default function System() {
             </div>
           </form>
         </Modal>
+      )}
+
+      {/* Updates Modal */}
+      {openSection === 'updates' && (
+        <SettingsModal
+          open={true}
+          title={t('system.updates')}
+          description={t('system.updates_desc')}
+          onClose={() => setOpenSection(null)}
+          width={820}
+        >
+          <div className="rounded-md border border-border bg-secondary/30 p-3">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <div className="text-[13px] font-medium">{t('system.current_version')}</div>
+              <div className="text-[13px] font-medium text-foreground">{version}</div>
+            </div>
+
+            {checkingUpdates ? (
+              <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
+                <RefreshCw size={16} className="animate-spin" />
+                {t('system.checking_updates')}
+              </div>
+            ) : updateInfo ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[13px] font-medium">{t('system.latest_version')}</div>
+                  <div
+                    className={cn(
+                      'text-[13px] font-medium',
+                      updateInfo.update_available ? 'text-primary' : 'text-muted-foreground',
+                    )}
+                  >
+                    {updateInfo.latest_version}
+                  </div>
+                </div>
+
+                {updateInfo.release_notes && (
+                  <div className="rounded-md border border-border bg-background p-2">
+                    <div className="text-[12px] text-muted-foreground">
+                      {updateInfo.release_notes}
+                    </div>
+                  </div>
+                )}
+
+                {updateInfo.update_available ? (
+                  <div className="rounded-md border-2 border-primary bg-primary/10 p-3">
+                    <div className="mb-2 text-[13px] font-medium text-primary">
+                      {t('system.update_available')}: {updateInfo.latest_version}
+                    </div>
+                    {!updateInfo.download_url && (
+                      <div className="text-[12px] text-muted-foreground">
+                        {t('system.update_url_not_configured')}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-border bg-background p-3">
+                    <div className="text-[13px] font-medium text-muted-foreground">
+                      {t('system.update_not_available')}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={checkForUpdates}
+                disabled={checkingUpdates}
+              >
+                <RefreshCw size={14} className={checkingUpdates ? 'animate-spin' : ''} />{' '}
+                {t('system.check_updates')}
+              </Button>
+              {updateInfo?.update_available && updateInfo.download_url ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    showToast('Update installation will be implemented', 'info');
+                  }}
+                >
+                  <Download size={14} /> {t('system.install_update')}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </SettingsModal>
       )}
     </div>
   );
