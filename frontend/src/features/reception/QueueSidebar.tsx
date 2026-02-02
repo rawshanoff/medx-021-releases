@@ -20,16 +20,17 @@ export function QueueSidebar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card p-2">
-      <div className="mb-2 flex items-center justify-between gap-2">
+    <div className="flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card p-3">
+      <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Clock size={16} className="text-muted-foreground" />
-          <div className="text-[13px] font-medium">{t('reception.queue')}</div>
+          <Clock size={18} className="text-muted-foreground" />
+          <div className="text-[14px] font-medium">{t('reception.queue')}</div>
         </div>
 
         <Button
           variant="ghost"
           size="icon"
+          className="h-[40px] w-[40px]"
           title={t('reception.print', { defaultValue: 'Печать' })}
           onClick={() => {
             const settings = { ...getPrintSettings(), autoPrint: true };
@@ -59,7 +60,7 @@ export function QueueSidebar({
 
       <div className="min-h-0 flex-1 overflow-auto space-y-2">
         {queue.length === 0 ? (
-          <div className="text-[12px] text-muted-foreground">
+          <div className="rounded-md border border-border bg-background p-3 text-[13px] text-muted-foreground">
             {t('reception.no_queue_today', { defaultValue: 'Очередь на сегодня пустая' })}
           </div>
         ) : null}
@@ -68,7 +69,7 @@ export function QueueSidebar({
           <div
             key={item.id}
             className={cn(
-              'rounded-md border border-border p-2',
+              'rounded-md border border-border p-3',
               item.status === 'WAITING' ? 'bg-secondary/60' : 'bg-background',
             )}
           >
@@ -93,13 +94,14 @@ export function QueueSidebar({
                         : t('common.cancelled') || 'Cancelled'}
                   </span>
                 </div>
-                <div className="mt-0.5 truncate text-[13px]">{item.patient_name}</div>
-                <div className="truncate text-[12px] text-muted-foreground">{item.doctor_name}</div>
+                <div className="mt-0.5 truncate text-[14px]">{item.patient_name}</div>
+                <div className="truncate text-[13px] text-muted-foreground">{item.doctor_name}</div>
               </div>
 
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-[40px] w-[40px]"
                 title={t('reception.print_ticket', { defaultValue: 'Печать талона' })}
                 onClick={() => {
                   const settings = { ...getPrintSettings(), autoPrint: true };
