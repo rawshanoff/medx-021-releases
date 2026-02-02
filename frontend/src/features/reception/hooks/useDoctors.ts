@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import client from '../../../api/client';
-import type { Doctor } from '../../../types/reception';
+import type { Doctor } from '../../../types/doctors';
 
 export function useDoctors() {
     const [doctors, setDoctors] = useState<Doctor[]>([]);

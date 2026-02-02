@@ -7,34 +7,15 @@ import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useToast } from '../context/ToastContext';
-
-interface Patient {
-    id: number;
-    full_name: string;
-    phone: string;
-    balance: number;
-    category: string;
-    telegram_chat_id?: number | null;
-    telegram_username?: string | null;
-}
-
-interface PatientFile {
-    id: number;
-    patient_id: number;
-    file_type: string;
-    original_filename: string;
-    mime?: string | null;
-    size: number;
-    sha256: string;
-    created_at: string;
-}
+import type { PatientWithBalance } from '../types/patients';
+import type { PatientFile } from '../types/files';
 
 export default function Patients() {
     const { t } = useTranslation();
     const { showToast } = useToast();
-    const [patients, setPatients] = useState<Patient[]>([]);
+    const [patients, setPatients] = useState<PatientWithBalance[]>([]);
     const [loading, setLoading] = useState(false);
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [selectedPatient, setSelectedPatient] = useState<PatientWithBalance | null>(null);
     const [isFilesOpen, setIsFilesOpen] = useState(false);
 
     // Search state (same geometry as Reception)
@@ -254,7 +235,7 @@ function PatientRow({
     onUpdate,
     onFiles,
 }: {
-    patient: Patient;
+    patient: PatientWithBalance;
     formatID: (n: number) => string;
     formatPhone: (s: string) => string;
     onUpdate: () => void;
@@ -323,7 +304,7 @@ function PatientRow({
     );
 }
 
-function FilesModal({ patient, onClose }: { patient: Patient; onClose: () => void }) {
+function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose: () => void }) {
     const { t } = useTranslation();
     const { showToast } = useToast();
     const [files, setFiles] = useState<PatientFile[]>([]);

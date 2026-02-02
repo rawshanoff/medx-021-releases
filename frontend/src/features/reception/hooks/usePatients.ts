@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import client from '../../../api/client';
-import type { Patient } from '../../../types/reception';
+import type { Patient } from '../../../types/patients';
 import { dobUiToIso, normalizeHumanName } from '../../../utils/text';
 
 export function usePatientsSearch({

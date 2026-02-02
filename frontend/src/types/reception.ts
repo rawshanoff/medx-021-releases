@@ -1,26 +1,7 @@
 export type QueueStatus = 'WAITING' | 'COMPLETED' | 'CANCELLED';
 
-export interface Patient {
-    id: number;
-    full_name: string;
-    phone: string;
-    birth_date?: string;
-    history?: unknown[];
-}
-
-export interface Service {
-    id: number;
-    name: string;
-    price: number;
-    priority: number;
-}
-
-export interface Doctor {
-    id: number;
-    full_name: string;
-    specialty: string;
-    services: Service[];
-}
+export type { Doctor, Service } from './doctors';
+export type { Patient } from './patients';
 
 export interface QueueItem {
     id: number;

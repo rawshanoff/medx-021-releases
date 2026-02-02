@@ -6,22 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-
-interface Service {
-    id?: number;
-    name: string;
-    price: number;
-    priority: number;
-}
-
-interface Doctor {
-    id: number;
-    full_name: string;
-    specialty: string;
-    queue_prefix: string; // Added prefix
-    is_active: boolean;
-    services: Service[];
-}
+import type { DoctorAdmin } from '../types/doctors';
 
 interface LogEntry {
     time: string;
@@ -32,7 +17,7 @@ interface LogEntry {
 export default function Doctors() {
     const { t } = useTranslation();
     const { showToast } = useToast();
-    const [doctors, setDoctors] = useState<Doctor[]>([]);
+    const [doctors, setDoctors] = useState<DoctorAdmin[]>([]);
     const [loading, setLoading] = useState(false);
 
     // Create Doctor Modal
@@ -242,7 +227,17 @@ export default function Doctors() {
     );
 }
 
-function DoctorCard({ doctor, onUpdate, onDelete, addLog }: { doctor: Doctor, onUpdate: () => void, onDelete: () => void, addLog: (a: string, d: string) => void }) {
+function DoctorCard({
+    doctor,
+    onUpdate,
+    onDelete,
+    addLog,
+}: {
+    doctor: DoctorAdmin;
+    onUpdate: () => void;
+    onDelete: () => void;
+    addLog: (a: string, d: string) => void;
+}) {
     const { t } = useTranslation();
     const { showToast } = useToast();
 
