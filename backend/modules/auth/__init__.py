@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, timezone
 import bcrypt
 from backend.core.config import settings
 from backend.core.database import get_db
+from backend.core.rate_limit import limiter
 from backend.core.schemas import MessageResponse
 from backend.modules.users.models import User
 from backend.modules.users.schemas import LoginResponse, UserResponse
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy import select
@@ -88,8 +89,11 @@ def require_roles(*roles):
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit(settings.RATE_LIMIT_LOGIN)
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
 ):
     """Login endpoint"""
     # Find user (exclude deleted users)
@@ -109,6 +113,17 @@ async def login(
     if not bcrypt.checkpw(form_data.password.encode(), user.password_hash.encode()):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
+
+    # ⚠️ SECURITY: Проверка дефолтного пароля
+    # Если пользователь использует дефолтный пароль, требуем его смену
+    if (
+        user.username == "admin"
+        and user.password_hash == settings.DEFAULT_ADMIN_PASSWORD_HASH
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Default password detected. Please change your password before logging in.",
         )
 
     # Update last login

@@ -35,6 +35,23 @@ class Settings(BaseSettings):
     )
     CURRENT_VERSION: str = "1.0.0-mvp"  # Текущая версия приложения
 
+    # CORS
+    CORS_ORIGINS: str = (
+        "http://localhost:5173,http://127.0.0.1:5173"  # Разрешенные origins через запятую
+    )
+
+    # Rate Limiting
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_LOGIN: str = "5/minute"  # Лимит для логина
+    RATE_LIMIT_DEFAULT: str = (
+        "100/minute"  # Лимит по умолчанию для остальных эндпоинтов
+    )
+
+    # Default Admin Password (for security check)
+    DEFAULT_ADMIN_PASSWORD_HASH: str = (
+        "$2b$12$nr4PvI2HcWYkT0uR6cXMv.rUZH0s6rKK3lyOoR01XpCNj17ZH.tNC"  # Hash для 'admin123'
+    )
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.LICENSE_PUBLIC_KEY:
