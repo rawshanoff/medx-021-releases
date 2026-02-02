@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     LICENSE_PUBLIC_KEY: str = ""
     LICENSE_PUBLIC_KEY_PATH: str = "license_server/public_key.pem"
 
+    # Updates
+    UPDATE_CHECK_URL: str = (
+        ""  # URL для проверки обновлений (например, https://update.medx.com/latest.json)
+    )
+    CURRENT_VERSION: str = "1.0.0-mvp"  # Текущая версия приложения
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.LICENSE_PUBLIC_KEY:

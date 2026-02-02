@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import os
 import shutil
 import subprocess
@@ -6,6 +7,8 @@ import sys
 import time
 import zipfile
 from datetime import datetime
+
+import httpx
 
 
 def _wait_for_pid(pid: int, timeout_sec: int = 120) -> None:
@@ -86,20 +89,52 @@ def _run_migrations(app_dir: str) -> None:
     )
 
 
+def _download_update(url: str, output_path: str, expected_sha256: str | None = None) -> None:
+    """Скачивает обновление и проверяет SHA256 если указан"""
+    print(f"Downloading update from {url}...")
+    with httpx.Client(timeout=300.0) as client:
+        resp = client.get(url, follow_redirects=True)
+        resp.raise_for_status()
+        with open(output_path, "wb") as f:
+            f.write(resp.content)
+
+    if expected_sha256:
+        print("Verifying SHA256...")
+        sha256_hash = hashlib.sha256()
+        with open(output_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(chunk)
+        actual_sha256 = sha256_hash.hexdigest()
+        if actual_sha256.lower() != expected_sha256.lower():
+            os.remove(output_path)
+            raise ValueError(
+                f"SHA256 mismatch: expected {expected_sha256}, got {actual_sha256}"
+            )
+        print("SHA256 verified successfully")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pid", type=int, help="PID of the main process to wait for")
     parser.add_argument("--zip", type=str, help="Path to the downloaded zip file", default="update.zip")
+    parser.add_argument("--url", type=str, help="URL to download update zip from")
+    parser.add_argument("--sha256", type=str, help="Expected SHA256 hash of the update zip")
     parser.add_argument("--app-dir", type=str, default=".", help="Root directory of MedX app")
     args = parser.parse_args()
 
     app_dir = os.path.abspath(args.app_dir)
     zip_path = os.path.abspath(args.zip)
+
+    # Если указан URL, скачиваем обновление
+    if args.url:
+        _download_update(args.url, zip_path, args.sha256)
+
     if not os.path.exists(zip_path):
         raise SystemExit(f"Update zip not found: {zip_path}")
 
     print(f"Updater: waiting for PID {args.pid}...")
-    _wait_for_pid(args.pid, timeout_sec=120)
+    if args.pid:
+        _wait_for_pid(args.pid, timeout_sec=120)
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_dir = os.path.join(app_dir, "_update_backup", ts)

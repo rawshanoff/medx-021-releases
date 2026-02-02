@@ -11,6 +11,7 @@ class UpdateCheckResponse(BaseModel):
     latest_version: str
     current_version: str
     release_notes: str
+    download_url: str | None = None
 
 
 class DoctorInfo(BaseModel):
