@@ -55,3 +55,4 @@ loading: "Yuklanmoqda..."
 ```
 
 After updating, the login page will show proper text instead of keys!
+
