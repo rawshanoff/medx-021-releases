@@ -110,27 +110,24 @@ export default function Doctors() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        <h1 className="text-xl font-medium">{t('doctors.title')}</h1>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-10 px-3 text-[13px]"
-            type="button"
-            onClick={() => setHistoryOpen(true)}
-          >
-            <HistoryIcon size={14} /> {t('doctors.history_log', { defaultValue: 'История' })}
-          </Button>
-          <Button
-            size="sm"
-            className="h-10 px-3 text-[13px]"
-            type="button"
-            onClick={() => setCreateOpen(true)}
-          >
-            <UserPlus size={14} /> {t('doctors.add_doctor', { defaultValue: 'Добавить врача' })}
-          </Button>
-        </div>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="h-10 px-3 text-[13px]"
+          type="button"
+          onClick={() => setHistoryOpen(true)}
+        >
+          <HistoryIcon size={14} /> {t('doctors.history_log', { defaultValue: 'История' })}
+        </Button>
+        <Button
+          size="sm"
+          className="h-10 px-3 text-[13px]"
+          type="button"
+          onClick={() => setCreateOpen(true)}
+        >
+          <UserPlus size={14} /> {t('doctors.add_doctor', { defaultValue: 'Добавить врача' })}
+        </Button>
       </div>
 
       <Modal
@@ -521,7 +518,7 @@ function DoctorCard({
         <div className="overflow-hidden rounded-md border border-border">
           <table className="w-full text-[14px]">
             <thead className="bg-secondary text-[13px] text-muted-foreground">
-              <tr className="h-10 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
+              <tr className="h-12 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
                 <th>{t('doctors.service_name', { defaultValue: 'Услуга' })}</th>
                 <th className="w-[120px]">
                   {t('doctors.priority', { defaultValue: 'Приоритет' })}
@@ -543,7 +540,7 @@ function DoctorCard({
                   servicesPage * servicesPageSize + servicesPageSize,
                 )
                 .map((svc) => (
-                  <tr key={svc.id} className="h-10 [&>td]:px-3 [&>td]:py-2.5">
+                  <tr key={svc.id} className="h-12 [&>td]:px-3 [&>td]:py-2.5">
                     <td className="truncate">{svc.name}</td>
                     <td className="font-medium">{svc.priority}</td>
                     <td className="text-right font-medium">

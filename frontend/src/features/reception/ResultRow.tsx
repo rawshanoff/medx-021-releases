@@ -32,7 +32,7 @@ export function ResultRow({
   const { t } = useTranslation();
 
   return (
-    <tr className={cn('border-t border-border', requestFocus ? 'bg-primary/5' : '')}>
+    <tr className={cn('h-12 border-t border-border', requestFocus ? 'bg-primary/5' : '')}>
       <td className="px-3 py-3 align-top">
         <div className="text-[15px] font-medium leading-[20px]">{patient.full_name}</div>
         <Button

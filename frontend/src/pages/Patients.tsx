@@ -110,8 +110,6 @@ export default function Patients() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <h1 className="text-xl font-medium">{t('patients.title')}</h1>
-
       <div className="min-h-0 flex flex-1 flex-col gap-3 overflow-hidden">
         {/* Search */}
         <PatientSearch
@@ -140,7 +138,7 @@ export default function Patients() {
           <div className="h-full overflow-auto">
             <table className="w-full text-[14px]">
               <thead className="sticky top-0 z-10 bg-secondary text-[13px] text-muted-foreground">
-                <tr className="h-10 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
+                <tr className="h-12 [&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
                   <th className="w-[110px]">{t('patients.id')}</th>
                   <th>{t('reception.first_name')}</th>
                   <th>{t('reception.last_name')}</th>
@@ -262,7 +260,7 @@ function PatientRow({
   };
 
   return (
-    <tr className={isFocused ? 'h-10 bg-muted/40' : 'h-10'}>
+    <tr className={isFocused ? 'h-12 bg-muted/40' : 'h-12'}>
       <td className="p-3 font-mono text-[13px] text-muted-foreground">{formatID(patient.id)}</td>
 
       <td className="p-3">

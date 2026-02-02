@@ -235,13 +235,6 @@ export default function System() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <div>
-        <h1 className="text-2xl font-medium">{t('system.title')}</h1>
-        <div className="mt-1 text-[13px] text-muted-foreground">
-          {t('common.version')}: {version}
-        </div>
-      </div>
-
       <div className="grid grid-cols-3 gap-3">
         <SettingsTile
           title="Реквизиты"
@@ -978,7 +971,7 @@ export default function System() {
         <div className="overflow-hidden rounded-md border border-border bg-card">
           <table className="w-full text-[13px]">
             <thead className="bg-secondary text-[13px] text-muted-foreground">
-              <tr className="[&>th]:px-2.5 [&>th]:py-2 [&>th]:text-left [&>th]:font-medium">
+              <tr className="h-12 [&>th]:px-2.5 [&>th]:py-2 [&>th]:text-left [&>th]:font-medium">
                 <th className="w-[80px]">ID</th>
                 <th>Username</th>
                 <th>Full Name</th>
@@ -990,7 +983,7 @@ export default function System() {
               {users
                 .slice(usersPage * usersPageSize, usersPage * usersPageSize + usersPageSize)
                 .map((user) => (
-                  <tr key={user.id} className="[&>td]:px-2.5 [&>td]:py-2">
+                  <tr key={user.id} className="h-12 [&>td]:px-2.5 [&>td]:py-2">
                     <td className="text-muted-foreground">{user.id}</td>
                     <td className="font-medium">{user.username}</td>
                     <td>{user.full_name}</td>
