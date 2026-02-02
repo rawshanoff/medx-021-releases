@@ -77,9 +77,11 @@ export default function Login() {
             <div className="mt-2 text-base text-muted-foreground">{t('auth.welcome')}</div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">{t('auth.username')}</label>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-2.5">
+              <label className="text-sm font-medium text-muted-foreground">
+                {t('auth.username')}
+              </label>
               <div className="relative">
                 <UserIcon
                   size={18}
@@ -96,8 +98,10 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">{t('auth.password')}</label>
+            <div className="space-y-2.5">
+              <label className="text-sm font-medium text-muted-foreground">
+                {t('auth.password')}
+              </label>
               <div className="relative">
                 <Lock
                   size={18}
