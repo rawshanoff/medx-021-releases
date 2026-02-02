@@ -1,0 +1,38 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "MedX"
+    DATABASE_URL: str
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
+    DB_ECHO: bool = False
+
+    # Files / Telegram (paid modules)
+    FILE_STORAGE_DIR: str = "storage/patient_files"
+    PATIENT_BOT_TOKEN: str = ""  # Telegram bot token for sending files to patients
+    PATIENT_BOT_INTERNAL_TOKEN: str = ""  # shared secret for bot -> backend linking calls
+    
+    # Licensing
+    LICENSE_PUBLIC_KEY: str = ""
+    LICENSE_PUBLIC_KEY_PATH: str = "license_server/public_key.pem"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.LICENSE_PUBLIC_KEY:
+            self.LICENSE_PUBLIC_KEY = self._load_public_key()
+
+    def _load_public_key(self) -> str:
+        path = self.LICENSE_PUBLIC_KEY_PATH
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
+
+        raise FileNotFoundError(
+            f"LICENSE_PUBLIC_KEY not provided and key file not found at {path}"
+        )
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+settings = Settings()

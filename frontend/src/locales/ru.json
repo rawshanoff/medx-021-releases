@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "close": "Закрыть",
+    "expand_sidebar": "Развернуть меню",
+    "collapse_sidebar": "Свернуть меню",
+    "error": "Ошибка",
+    "add": "Добавить",
+    "done": "Готово",
+    "role": "Роль",
+    "cancelled": "Отменено",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "actions": "Действия",
+    "search": "Поиск...",
+    "unknown": "Неизвестно",
+    "version": "Версия",
+    "status": "Статус",
+    "license": "Лицензия",
+    "online": "Онлайн",
+    "active": "Активна",
+    "yes": "Да",
+    "no": "Нет",
+    "confirm": "Вы уверены?",
+    "or": "или",
+    "currency": "сум",
+    "refresh": "Обновить",
+    "prev": "Назад",
+    "next": "Вперёд"
+  },
+  "nav": {
+    "dashboard": "Ресепшн",
+    "registration": "Регистрация",
+    "patients": "Пациенты",
+    "finance": "Финансы",
+    "reports": "Отчёты",
+    "doctors": "Врачи",
+    "system": "Система",
+    "appointments": "Запись",
+    "users": "Пользователи",
+    "logout": "Выйти",
+    "logout_confirm": "Вы уверены, что хотите выйти?"
+  },
+  "auth": {
+    "session_expired": "Сессия истекла. Войдите снова.",
+    "reauth_required": "Нужна повторная авторизация."
+  }
+}
+

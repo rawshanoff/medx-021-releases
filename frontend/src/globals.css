@@ -1,0 +1,161 @@
+@config "../tailwind.config.cjs";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -----------------------------------------
+   Global Theme Tokens + Accessibility (WCAG)
+   Golden rules:
+   - semantic CSS vars
+   - dark via .dark class + [data-theme="dark"]
+   - no hardcoded colors in components
+   ----------------------------------------- */
+
+@layer base {
+  :root {
+    /* Base UI scale */
+    font-size: 14px;
+
+    /* Shadcn tokens (HSL channels, to support bg-.../10 opacity) */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 6px;
+
+    /* App semantic extras */
+    --success: 142.1 76.2% 36.3%;
+    --success-bg: 142.1 76.2% 95%;
+    --warning: 38 92% 50%;
+    --warning-bg: 38 92% 95%;
+    --destructive-bg: 0 84.2% 95%;
+
+    /* Minimal shadows */
+    --shadow-sm: 0 1px 0 rgba(2, 8, 23, 0.04);
+    --shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.2);
+
+    /* Scrollbar */
+    --scrollbar-width: 6px;
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: 215.4 16.3% 76%;
+    --scrollbar-thumb-hover: 215.4 16.3% 65%;
+  }
+
+  .dark,
+  [data-theme="dark"] {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    /* brighter secondary text for readability (≈ gray-300/400) */
+    --muted-foreground: 215 20% 76%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* visible borders/inputs in dark mode (≈ gray-600/700) */
+    --border: 215 18% 28%;
+    --input: 215 18% 28%;
+    --ring: 224.3 76.3% 48%;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.3);
+
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: 215 20.2% 35%;
+    --scrollbar-thumb-hover: 215 20.2% 45%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    /* base font-size is set in :root (14px) */
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+    /* High density: minimal backgrounds */
+    background-image: none;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden; /* prevent page scroll; scroll happens in .app-scroll */
+  }
+}
+
+/* -----------------------------------------
+   Custom scrollbars (6px, rounded, semantic)
+   ----------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: var(--radius-full);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: hsl(var(--scrollbar-thumb));
+  border-radius: var(--radius-full);
+  border: 2px solid var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--scrollbar-thumb-hover));
+}
+
+/* Glassmorphism Utilities (for overlays/cards only) */
+/* (legacy .glass removed — use Tailwind + tokens instead) */
+

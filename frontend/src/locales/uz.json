@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "close": "Yopish",
+    "expand_sidebar": "Menyuni ochish",
+    "collapse_sidebar": "Menyuni yig'ish",
+    "error": "Xatolik",
+    "add": "Qo'shish",
+    "done": "Tayyor",
+    "role": "Rol",
+    "cancelled": "Bekor qilindi",
+    "cancel": "Bekor qilish",
+    "save": "Saqlash",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "actions": "Amallar",
+    "search": "Qidirish...",
+    "unknown": "Noma'lum",
+    "version": "Versiya",
+    "status": "Holat",
+    "license": "Litsenziya",
+    "online": "Onlayn",
+    "active": "Faol",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "confirm": "Ishonchingiz komilmi?",
+    "or": "yoki",
+    "currency": "so'm",
+    "refresh": "Yangilash",
+    "prev": "Orqaga",
+    "next": "Keyingi"
+  },
+  "nav": {
+    "dashboard": "Qabulxona",
+    "registration": "Ro'yxatdan o'tkazish",
+    "patients": "Bemorlar",
+    "finance": "Moliya",
+    "reports": "Hisobotlar",
+    "doctors": "Shifokorlar",
+    "system": "Tizim",
+    "appointments": "Qabul",
+    "users": "Foydalanuvchilar",
+    "logout": "Chiqish",
+    "logout_confirm": "Tizimdan chiqmoqchimisiz?"
+  },
+  "auth": {
+    "session_expired": "Sessiya tugadi. Qayta kiring.",
+    "reauth_required": "Qayta avtorizatsiya kerak."
+  }
+}
+

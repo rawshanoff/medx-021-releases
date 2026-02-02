@@ -1,0 +1,13 @@
+---
+description: Frontend (React/TS): API env, auth UX, ошибки, роли
+globs: frontend/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend правила
+
+- **API URL**: только через `VITE_API_URL` (с безопасным дефолтом для localhost).
+- **Auth UX**: при `401/403` очищаем auth и ведём на `/login` с понятным сообщением.
+- **Роли в UI**: UI скрывает недоступные действия, но не заменяет backend-проверки.
+- **Единый UX ошибок**: все сетевые ошибки через общий механизм (toast/баннер), без “тихих” падений.
+- **Загрузки**: у страниц есть предсказуемые loading/empty/error состояния.

@@ -1,0 +1,61 @@
+{
+  "name": "medx-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "main": "main.cjs",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "electron .",
+    "dev:vite": "cd ../../frontend && npm run dev -- --port 3005 --strictPort",
+    "dev:electron": "cross-env ELECTRON_START_URL=http://localhost:3005 electron .",
+    "dev:app": "concurrently -k -n VITE,ELECTRON -c green,blue \"npm run dev:vite\" \"wait-on http://localhost:3005 && npm run dev:electron\"",
+    "build:frontend": "cd ../../frontend && npm run build",
+    "package": "npm run build:frontend && electron-builder --dir",
+    "dist": "npm run build:frontend && electron-builder"
+  },
+  "dependencies": {
+    "electron": "^32.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron-builder": "^24.13.3"
+    ,
+    "wait-on": "^8.0.5"
+  },
+  "build": {
+    "appId": "com.medx.desktop",
+    "productName": "MedX",
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "../../frontend/dist/**",
+      "../../backend/**",
+      "../../license_server/**",
+      "../../.env.example",
+      "../../start_all.bat",
+      "../../run_migrations.bat",
+      "../../scripts/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../../frontend/dist",
+        "to": "frontend_dist"
+      },
+      {
+        "from": "../../backend",
+        "to": "backend"
+      },
+      {
+        "from": "../../license_server",
+        "to": "license_server"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}
+

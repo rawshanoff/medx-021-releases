@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "close": "Close",
+    "expand_sidebar": "Expand sidebar",
+    "collapse_sidebar": "Collapse sidebar",
+    "error": "Error",
+    "add": "Add",
+    "done": "Done",
+    "role": "Role",
+    "cancelled": "Cancelled",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "actions": "Actions",
+    "search": "Search...",
+    "unknown": "Unknown",
+    "version": "Version",
+    "status": "Status",
+    "license": "License",
+    "online": "Online",
+    "active": "Active",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Are you sure?",
+    "or": "or",
+    "currency": "UZS",
+    "refresh": "Refresh",
+    "prev": "Prev",
+    "next": "Next"
+  },
+  "nav": {
+    "dashboard": "Reception",
+    "registration": "Registration",
+    "patients": "Patients",
+    "finance": "Finance",
+    "reports": "Reports",
+    "doctors": "Doctors",
+    "system": "System",
+    "appointments": "Appointments",
+    "users": "Users",
+    "logout": "Logout",
+    "logout_confirm": "Are you sure you want to exit?"
+  },
+  "auth": {
+    "session_expired": "Session expired. Please sign in again.",
+    "reauth_required": "Re-authorization required."
+  }
+}
+
