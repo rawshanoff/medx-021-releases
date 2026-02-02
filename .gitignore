@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+backend/.pytest_cache/
 .venv/
 env/
 venv/
