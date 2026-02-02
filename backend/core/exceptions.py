@@ -25,4 +25,3 @@ def forbidden(detail: str, code: str | None = None) -> AppException:
 
 def not_found(detail: str, code: str | None = None) -> AppException:
     return AppException(status_code=404, detail=detail, code=code)
-

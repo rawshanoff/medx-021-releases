@@ -1,10 +1,12 @@
-from jose import jwt, JWTError
-from datetime import datetime, timezone
 import os
-from typing import List, Dict, Optional
+from datetime import datetime, timezone
+from typing import Dict, List
+
 from backend.core.config import settings
+from jose import JWTError, jwt
 
 ALGORITHM = "RS256"
+
 
 class LicenseManager:
     def __init__(self, license_path: str = "license.key"):
@@ -22,11 +24,15 @@ class LicenseManager:
 
         try:
             # Verify signature using the Public Key
-            payload = jwt.decode(token, settings.LICENSE_PUBLIC_KEY, algorithms=[ALGORITHM])
-            
+            payload = jwt.decode(
+                token, settings.LICENSE_PUBLIC_KEY, algorithms=[ALGORITHM]
+            )
+
             # Check global expiration
             exp = payload.get("exp")
-            if exp and datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(timezone.utc):
+            if exp and datetime.fromtimestamp(exp, tz=timezone.utc) < datetime.now(
+                timezone.utc
+            ):
                 return {"error": "License expired"}
 
             self._cached_data = payload
@@ -39,7 +45,7 @@ class LicenseManager:
         payload = self.load_license()
         if "error" in payload:
             print(f"License Error: {payload['error']}")
-            return [] # Fail safe: no features
+            return []  # Fail safe: no features
 
         features = payload.get("features", {})
         active = []
@@ -48,16 +54,18 @@ class LicenseManager:
         for code, valid_until_str in features.items():
             try:
                 # Assuming format "YYYY-MM-DDTHH:MM:SS" or "9999..."
-                 if valid_until_str.startswith("9999"):
-                     active.append(code)
-                     continue
-                 
-                 valid_until = datetime.fromisoformat(valid_until_str).replace(tzinfo=timezone.utc)
-                 if valid_until > now:
-                     active.append(code)
+                if valid_until_str.startswith("9999"):
+                    active.append(code)
+                    continue
+
+                valid_until = datetime.fromisoformat(valid_until_str).replace(
+                    tzinfo=timezone.utc
+                )
+                if valid_until > now:
+                    active.append(code)
             except ValueError:
                 continue
-        
+
         return active
 
     def save_license_token(self, token: str) -> None:
@@ -71,6 +79,7 @@ class LicenseManager:
         self._cached_features = []
         self._cached_data = {}
 
+
 license_manager = LicenseManager()
 
 
@@ -79,14 +88,16 @@ def require_features(*required: str):
 
     Использовать на платных эндпойнтах (например files_results/telegram_patient).
     """
-    from fastapi import Depends, HTTPException
     from backend.modules.auth import get_current_user
+    from fastapi import Depends, HTTPException
 
     async def _dep(_user=Depends(get_current_user)):
         active = set(license_manager.get_active_features())
         missing = [c for c in required if c not in active]
         if missing:
-            raise HTTPException(status_code=403, detail=f"Feature not active: {', '.join(missing)}")
+            raise HTTPException(
+                status_code=403, detail=f"Feature not active: {', '.join(missing)}"
+            )
         return True
 
     return _dep

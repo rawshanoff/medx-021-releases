@@ -5,19 +5,25 @@ Revises: 006_add_users
 Create Date: 2026-01-31 20:12:00
 
 """
-from alembic import op
+
 import sqlalchemy as sa
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
-revision = '007_add_queue_prefix'
-down_revision = '006_add_users'
+revision = "007_add_queue_prefix"
+down_revision = "006_add_users"
 branch_labels = None
 depends_on = None
 
+
 def upgrade():
     # Add queue_prefix column to doctors table
-    op.add_column('doctors', sa.Column('queue_prefix', sa.String(1), server_default='A', nullable=False))
-    
+    op.add_column(
+        "doctors",
+        sa.Column("queue_prefix", sa.String(1), server_default="A", nullable=False),
+    )
+
     # Update existing doctors with different prefixes (A, B, C, etc.)
     op.execute("""
         WITH numbered_doctors AS (
@@ -30,5 +36,6 @@ def upgrade():
         WHERE doctors.id = numbered_doctors.id
     """)
 
+
 def downgrade():
-    op.drop_column('doctors', 'queue_prefix')
+    op.drop_column("doctors", "queue_prefix")

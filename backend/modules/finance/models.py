@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Float, Boolean
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from backend.core.database import Base
 import enum
+
+from backend.core.database import Base
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
 
 class PaymentMethod(str, enum.Enum):
     CASH = "CASH"
@@ -10,21 +12,23 @@ class PaymentMethod(str, enum.Enum):
     TRANSFER = "TRANSFER"
     MIXED = "MIXED"
 
+
 class Shift(Base):
     __tablename__ = "shifts"
 
     id = Column(Integer, primary_key=True, index=True)
-    cashier_id = Column(String, nullable=False) # In MVP just a string name or ID
+    cashier_id = Column(String, nullable=False)  # In MVP just a string name or ID
     start_time = Column(DateTime(timezone=True), server_default=func.now())
     end_time = Column(DateTime(timezone=True), nullable=True)
-    
+
     total_cash = Column(Integer, default=0)
     total_card = Column(Integer, default=0)
     total_transfer = Column(Integer, default=0)
-    
+
     is_closed = Column(Boolean, default=False)
-    
+
     transactions = relationship("Transaction", back_populates="shift")
+
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -32,18 +36,18 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True, index=True)
     shift_id = Column(Integer, ForeignKey("shifts.id"))
     patient_id = Column(Integer, ForeignKey("patients.id"))
-    
-    amount = Column(Integer, nullable=False) # Total amount
-    doctor_id = Column(String, nullable=True) # For commission/tracking
+
+    amount = Column(Integer, nullable=False)  # Total amount
+    doctor_id = Column(String, nullable=True)  # For commission/tracking
     payment_method = Column(String, default=PaymentMethod.CASH)
-    
-    cash_amount = Column(Integer, default=0) # If mixed
+
+    cash_amount = Column(Integer, default=0)  # If mixed
     card_amount = Column(Integer, default=0)
     transfer_amount = Column(Integer, default=0)
-    
-    description = Column(String, nullable=True) # e.g. "Consultation"
+
+    description = Column(String, nullable=True)  # e.g. "Consultation"
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
+
     shift = relationship("Shift", back_populates="transactions")
     patient = relationship("Patient")
 

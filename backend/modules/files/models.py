@@ -1,11 +1,10 @@
 import enum
 from uuid import uuid4
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, BigInteger, Boolean
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-
 from backend.core.database import Base
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class PatientFileType(str, enum.Enum):
@@ -44,7 +43,9 @@ class FileDeliveryLog(Base):
     __tablename__ = "file_delivery_log"
 
     id = Column(Integer, primary_key=True, index=True)
-    file_id = Column(Integer, ForeignKey("patient_files.id"), nullable=False, index=True)
+    file_id = Column(
+        Integer, ForeignKey("patient_files.id"), nullable=False, index=True
+    )
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False, index=True)
 
     channel = Column(String, nullable=False, default="telegram")
@@ -73,4 +74,3 @@ class TelegramLinkToken(Base):
     @staticmethod
     def new_code() -> str:
         return uuid4().hex
-

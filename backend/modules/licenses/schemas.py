@@ -8,4 +8,3 @@ class LicenseUpload(BaseModel):
 class LicenseStatus(BaseModel):
     active_features: list[str]
     error: str | None = None
-

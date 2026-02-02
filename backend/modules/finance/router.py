@@ -1,49 +1,73 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
 from datetime import datetime, timezone
+from typing import Optional
 
 from backend.core.database import get_db
-from backend.core.licenses import license_manager
 from backend.core.features import FEATURE_CORE, FEATURE_FINANCE_BASIC
+from backend.core.licenses import license_manager
 from backend.modules.auth import require_roles
-from backend.modules.users.models import UserRole, User
-from backend.modules.finance.models import Shift, Transaction, PaymentMethod, FinanceAuditLog
-from backend.modules.finance.schemas import ShiftCreate, ShiftRead, TransactionCreate, TransactionRead
+from backend.modules.finance.models import (
+    FinanceAuditLog,
+    PaymentMethod,
+    Shift,
+    Transaction,
+)
+from backend.modules.finance.schemas import (
+    ShiftCreate,
+    ShiftRead,
+    TransactionCreate,
+    TransactionRead,
+)
+from backend.modules.users.models import User, UserRole
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
+
 async def check_finance_license():
     features = license_manager.get_active_features()
-    if FEATURE_FINANCE_BASIC not in features and FEATURE_CORE not in features:  # core usually includes basic finance in MVP
-         # In MVP validation, we might skip this if "core" implies it, but let's be strict for demo
-         pass 
-         # Uncomment to enforce: raise HTTPException(status_code=403, detail="Finance module not active")
+    if (
+        FEATURE_FINANCE_BASIC not in features and FEATURE_CORE not in features
+    ):  # core usually includes basic finance in MVP
+        # In MVP validation, we might skip this if "core" implies it, but let's be strict for demo
+        pass
+        # Uncomment to enforce: raise HTTPException(status_code=403, detail="Finance module not active")
 
-from typing import Optional
 
+async def _audit(
+    db: AsyncSession, user: User | None, action: str, details: str | None = None
+) -> None:
+    db.add(
+        FinanceAuditLog(
+            user_id=user.id if user else None, action=action, details=details
+        )
+    )
 
-async def _audit(db: AsyncSession, user: User | None, action: str, details: str | None = None) -> None:
-    db.add(FinanceAuditLog(user_id=user.id if user else None, action=action, details=details))
 
 @router.get("/shifts/active", response_model=Optional[ShiftRead])
 async def get_active_shift(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER))
+    user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
+    ),
 ):
     await check_finance_license()
     existing = await db.execute(select(Shift).where(Shift.is_closed == False))
     shift = existing.scalars().first()
     return shift
 
+
 @router.post("/shifts/open", response_model=ShiftRead)
 async def open_shift(
     shift_data: ShiftCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER))
+    user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
+    ),
 ):
     await check_finance_license()
-    
+
     # Check if there is already an open shift
     existing = await db.execute(select(Shift).where(Shift.is_closed == False))
     if existing.scalars().first():
@@ -52,61 +76,87 @@ async def open_shift(
     new_shift = Shift(cashier_id=shift_data.cashier_id)
     db.add(new_shift)
     await db.flush()
-    await _audit(db, user, "shift_open", f"cashier_id={shift_data.cashier_id}, shift_id={new_shift.id}")
+    await _audit(
+        db,
+        user,
+        "shift_open",
+        f"cashier_id={shift_data.cashier_id}, shift_id={new_shift.id}",
+    )
     await db.commit()
     await db.refresh(new_shift)
     return new_shift
 
+
 @router.post("/shifts/close", response_model=ShiftRead)
 async def close_shift(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER))
+    user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
+    ),
 ):
     result = await db.execute(select(Shift).where(Shift.is_closed == False))
     shift = result.scalars().first()
     if not shift:
         raise HTTPException(status_code=400, detail="No open shift found")
-    
+
     shift.is_closed = True
     shift.end_time = datetime.now(timezone.utc)
-    
+
     # Recalculate totals (simple aggregation)
     # real app would use sum() query
-    
+
     await _audit(db, user, "shift_close", f"shift_id={shift.id}")
     await db.commit()
     await db.refresh(shift)
     return shift
 
+
 @router.post("/transactions", response_model=TransactionRead)
 async def process_payment(
     tx: TransactionCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER))
+    user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
+    ),
 ):
     await check_finance_license()
 
     # Требуем описание для отрицательных сумм (расход/возврат)
     if tx.amount < 0 and not (tx.description and tx.description.strip()):
-        raise HTTPException(status_code=400, detail="Description is required for negative transactions")
-    
+        raise HTTPException(
+            status_code=400, detail="Description is required for negative transactions"
+        )
+
     # Find current shift
     # Lock active shift row to prevent race conditions on running totals.
     # We still perform atomic UPDATE on totals, but the lock guarantees a single active shift is used consistently.
-    result = await db.execute(select(Shift).where(Shift.is_closed == False).with_for_update())
+    result = await db.execute(
+        select(Shift).where(Shift.is_closed == False).with_for_update()
+    )
     shift = result.scalars().first()
     if not shift:
-        raise HTTPException(status_code=400, detail="No open shift. Open a shift first.")
-    
-    new_tx = Transaction(
-        shift_id=shift.id, 
-        **tx.model_dump()
-    )
+        raise HTTPException(
+            status_code=400, detail="No open shift. Open a shift first."
+        )
+
+    new_tx = Transaction(shift_id=shift.id, **tx.model_dump())
 
     # Atomic running totals update (race-safe).
-    delta_cash = int(tx.cash_amount) if tx.payment_method == PaymentMethod.MIXED else (int(tx.amount) if tx.payment_method == PaymentMethod.CASH else 0)
-    delta_card = int(tx.card_amount) if tx.payment_method == PaymentMethod.MIXED else (int(tx.amount) if tx.payment_method == PaymentMethod.CARD else 0)
-    delta_transfer = int(tx.transfer_amount) if tx.payment_method == PaymentMethod.MIXED else (int(tx.amount) if tx.payment_method == PaymentMethod.TRANSFER else 0)
+    delta_cash = (
+        int(tx.cash_amount)
+        if tx.payment_method == PaymentMethod.MIXED
+        else (int(tx.amount) if tx.payment_method == PaymentMethod.CASH else 0)
+    )
+    delta_card = (
+        int(tx.card_amount)
+        if tx.payment_method == PaymentMethod.MIXED
+        else (int(tx.amount) if tx.payment_method == PaymentMethod.CARD else 0)
+    )
+    delta_transfer = (
+        int(tx.transfer_amount)
+        if tx.payment_method == PaymentMethod.MIXED
+        else (int(tx.amount) if tx.payment_method == PaymentMethod.TRANSFER else 0)
+    )
 
     db.add(new_tx)
     await db.flush()
@@ -131,16 +181,19 @@ async def process_payment(
     await db.refresh(new_tx)
     return new_tx
 
+
 @router.get("/reports/{type}")
 async def get_report(
     type: str,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER))
+    user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
+    ),
 ):
     # Check Active Shift
     res = await db.execute(select(Shift).where(Shift.is_closed == False))
     shift = res.scalars().first()
-    
+
     if type.upper() == "X":
         if not shift:
             raise HTTPException(status_code=400, detail="No active shift for X-Report")
@@ -154,22 +207,26 @@ async def get_report(
             "total_transfer": shift.total_transfer,
             "generated_at": datetime.now(timezone.utc),
         }
-    
+
     elif type.upper() == "Z":
         # Usually checking last closed shift or closing current
         # For simplicity, return last closed shift
-        res = await db.execute(select(Shift).where(Shift.is_closed == True).order_by(Shift.end_time.desc()))
+        res = await db.execute(
+            select(Shift).where(Shift.is_closed == True).order_by(Shift.end_time.desc())
+        )
         last_shift = res.scalars().first()
         if not last_shift:
             raise HTTPException(status_code=404, detail="No closed shifts found")
-             
+
         return {
             "type": "Z-Report",
             "shift_id": last_shift.id,
             "total_cash": last_shift.total_cash,
             "total_card": last_shift.total_card,
             "total_transfer": last_shift.total_transfer,
-            "total_income": last_shift.total_cash + last_shift.total_card + last_shift.total_transfer,
-            "closed_at": last_shift.end_time
+            "total_income": last_shift.total_cash
+            + last_shift.total_card
+            + last_shift.total_transfer,
+            "closed_at": last_shift.end_time,
         }
     raise HTTPException(status_code=400, detail="Unknown report type")

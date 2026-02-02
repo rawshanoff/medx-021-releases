@@ -4,7 +4,11 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I"]
-ignore = []
+ignore = [
+    "B008", # FastAPI dependency injection uses Depends(...) in defaults
+    "E501", # Let black handle wrapping/line length
+    "E712", # SQLAlchemy often compares to True/False; prefer explicit style per-project
+]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

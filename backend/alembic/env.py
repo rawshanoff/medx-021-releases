@@ -1,24 +1,15 @@
-import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import pool, create_engine
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
-from sqlalchemy.engine.url import make_url
-
-from alembic import context
+from backend.core.config import settings
 
 # Import your Base model here
 from backend.core.database import Base
-from backend.core.config import settings
 
 # Import all models explicitly to register with Base.metadata
-from backend.modules.patients.models import Patient
-from backend.modules.finance.models import Shift, Transaction, FinanceAuditLog
-from backend.modules.doctors.models import Doctor, DoctorService, AuditLog
-from backend.modules.appointments.models import Appointment
-from backend.modules.reception.models import QueueItem
-from backend.modules.files.models import PatientFile, FileDeliveryLog, TelegramLinkToken
+from sqlalchemy import create_engine, pool
+from sqlalchemy.engine.url import make_url
+
+from alembic import context
 
 config = context.config
 
@@ -26,6 +17,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
 
 def _get_sync_url() -> str:
     """Alembic работает через sync драйвер.
@@ -40,6 +32,7 @@ def _get_sync_url() -> str:
     # make_url просто валидирует строку и нормализует.
     return str(make_url(raw))
 
+
 def run_migrations_offline() -> None:
     url = _get_sync_url()
     context.configure(
@@ -52,21 +45,18 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online() -> None:
     sync_url = _get_sync_url()
 
-    connectable = create_engine(
-        sync_url, 
-        poolclass=pool.NullPool
-    )
+    connectable = create_engine(sync_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

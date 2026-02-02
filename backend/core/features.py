@@ -15,4 +15,3 @@ FEATURE_TV_QUEUE = "tv_queue"
 FEATURE_FINANCE_PRO = "finance_pro"
 FEATURE_CRM_BASIC = "crm_basic"
 FEATURE_CLOUD_OWNER = "cloud_owner"
-

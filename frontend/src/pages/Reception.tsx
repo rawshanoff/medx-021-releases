@@ -282,7 +282,6 @@ export default function Reception() {
                         <QueueSidebar queue={queue} onUpdateStatus={updateQueueStatus} />
                     </div>
                 </div>
-            </div>
 
             {/* History Modal */}
             {historyState && (

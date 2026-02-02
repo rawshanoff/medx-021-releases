@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel
+
 
 class AppointmentBase(BaseModel):
     patient_id: int
@@ -10,8 +12,10 @@ class AppointmentBase(BaseModel):
     notes: Optional[str] = None
     status: Optional[str] = "scheduled"
 
+
 class AppointmentCreate(AppointmentBase):
     pass
+
 
 class AppointmentUpdate(BaseModel):
     start_time: Optional[datetime] = None
@@ -20,10 +24,11 @@ class AppointmentUpdate(BaseModel):
     notes: Optional[str] = None
     doctor_id: Optional[str] = None
 
+
 class AppointmentRead(AppointmentBase):
     id: int
     created_at: datetime
-    patient_name: Optional[str] = None # Enriched field
+    patient_name: Optional[str] = None  # Enriched field
 
     class Config:
         from_attributes = True

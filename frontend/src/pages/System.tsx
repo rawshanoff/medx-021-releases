@@ -187,55 +187,54 @@ export default function System() {
     return (
         <div className="flex h-full flex-col gap-3">
             <div>
-                    <h1 className="text-2xl font-medium">{t('system.title')}</h1>
-                    <div className="mt-0.5 text-[12px] text-muted-foreground">
-                        {t('common.version')}: {version}
-                    </div>
+                <h1 className="text-2xl font-medium">{t('system.title')}</h1>
+                <div className="mt-0.5 text-[12px] text-muted-foreground">
+                    {t('common.version')}: {version}
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <SettingsTile
+                    title="Реквизиты"
+                    subtitle="Клиника, логотип, QR, текст под QR"
+                    icon={<Building2 size={16} />}
+                    onClick={() => setOpenSection('requisites')}
+                />
+                <SettingsTile
+                    title="Настройка принтера"
+                    subtitle="Выбор deviceName, бумага, silent‑печать"
+                    icon={<Printer size={16} />}
+                    onClick={() => setOpenSection('printer')}
+                />
+                <SettingsTile
+                    title="Настройка чека"
+                    subtitle="Шаблон, поля, предпросмотр и тест"
+                    icon={<FileText size={16} />}
+                    onClick={() => setOpenSection('receipt')}
+                />
+                <SettingsTile
+                    title="Активация / лицензия"
+                    subtitle="Статус, функции, загрузка ключа"
+                    icon={<KeyRound size={16} />}
+                    onClick={() => setOpenSection('license')}
+                />
+                {canManageUsers ? (
                     <SettingsTile
-                        title="Реквизиты"
-                        subtitle="Клиника, логотип, QR, текст под QR"
-                        icon={<Building2 size={16} />}
-                        onClick={() => setOpenSection('requisites')}
+                        title="Пользователи"
+                        subtitle="Создание, роли, удаление"
+                        icon={<Users size={16} />}
+                        onClick={() => setOpenSection('users')}
                     />
-                    <SettingsTile
-                        title="Настройка принтера"
-                        subtitle="Выбор deviceName, бумага, silent‑печать"
-                        icon={<Printer size={16} />}
-                        onClick={() => setOpenSection('printer')}
-                    />
-                    <SettingsTile
-                        title="Настройка чека"
-                        subtitle="Шаблон, поля, предпросмотр и тест"
-                        icon={<FileText size={16} />}
-                        onClick={() => setOpenSection('receipt')}
-                    />
-                    <SettingsTile
-                        title="Активация / лицензия"
-                        subtitle="Статус, функции, загрузка ключа"
-                        icon={<KeyRound size={16} />}
-                        onClick={() => setOpenSection('license')}
-                    />
-                    {canManageUsers ? (
-                        <SettingsTile
-                            title="Пользователи"
-                            subtitle="Создание, роли, удаление"
-                            icon={<Users size={16} />}
-                            onClick={() => setOpenSection('users')}
-                        />
-                    ) : null}
-                    <SettingsTile
-                        title="Сбросить настройки"
-                        subtitle="Вернуть значения по умолчанию"
-                        icon={<Settings size={16} />}
-                        onClick={() => {
-                            setLocalPrintSettings(getPrintSettings());
-                            showToast('Настройки загружены из сохранённых', 'success');
-                        }}
-                    />
-                </div>
+                ) : null}
+                <SettingsTile
+                    title="Сбросить настройки"
+                    subtitle="Вернуть значения по умолчанию"
+                    icon={<Settings size={16} />}
+                    onClick={() => {
+                        setLocalPrintSettings(getPrintSettings());
+                        showToast('Настройки загружены из сохранённых', 'success');
+                    }}
+                />
             </div>
 
             <SettingsModal

@@ -4,25 +4,29 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import httpx
-from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
-from fastapi.responses import FileResponse
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from backend.core.config import settings
 from backend.core.database import get_db
 from backend.core.features import FEATURE_FILES_RESULTS, FEATURE_TELEGRAM_PATIENT
 from backend.core.licenses import require_features
 from backend.modules.auth import require_roles
-from backend.modules.users.models import UserRole, User
-from backend.modules.patients.models import Patient
-from backend.modules.files.models import PatientFile, FileDeliveryLog, FileDeliveryStatus, TelegramLinkToken
+from backend.modules.files.models import (
+    FileDeliveryLog,
+    FileDeliveryStatus,
+    PatientFile,
+    TelegramLinkToken,
+)
 from backend.modules.files.schemas import (
     PatientFileRead,
     TelegramLinkCodeResponse,
     TelegramLinkRequest,
     TelegramLinkResult,
 )
+from backend.modules.patients.models import Patient
+from backend.modules.users.models import User, UserRole
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
@@ -42,7 +46,15 @@ async def upload_file(
     visit_id: int | None = Form(None),
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.DOCTOR)),
+    user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OWNER,
+            UserRole.RECEPTIONIST,
+            UserRole.CASHIER,
+            UserRole.DOCTOR,
+        )
+    ),
     _feat=Depends(require_features(FEATURE_FILES_RESULTS)),
 ):
     patient = await db.get(Patient, patient_id)
@@ -80,7 +92,15 @@ async def upload_file(
 async def download_file(
     file_id: int,
     db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.DOCTOR)),
+    _user=Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OWNER,
+            UserRole.RECEPTIONIST,
+            UserRole.CASHIER,
+            UserRole.DOCTOR,
+        )
+    ),
     _feat=Depends(require_features(FEATURE_FILES_RESULTS)),
 ):
     rec = await db.get(PatientFile, file_id)
@@ -91,17 +111,33 @@ async def download_file(
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="File missing on disk")
 
-    return FileResponse(path, media_type=rec.mime or "application/octet-stream", filename=rec.original_filename)
+    return FileResponse(
+        path,
+        media_type=rec.mime or "application/octet-stream",
+        filename=rec.original_filename,
+    )
 
 
 @router.get("/patient/{patient_id}", response_model=list[PatientFileRead])
 async def list_patient_files(
     patient_id: int,
     db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.DOCTOR)),
+    _user=Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OWNER,
+            UserRole.RECEPTIONIST,
+            UserRole.CASHIER,
+            UserRole.DOCTOR,
+        )
+    ),
     _feat=Depends(require_features(FEATURE_FILES_RESULTS)),
 ):
-    res = await db.execute(select(PatientFile).where(PatientFile.patient_id == patient_id).order_by(PatientFile.created_at.desc()))
+    res = await db.execute(
+        select(PatientFile)
+        .where(PatientFile.patient_id == patient_id)
+        .order_by(PatientFile.created_at.desc())
+    )
     return res.scalars().all()
 
 
@@ -109,11 +145,17 @@ async def list_patient_files(
 async def send_file_to_telegram(
     file_id: int,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.DOCTOR)),
+    user: User = Depends(
+        require_roles(
+            UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.DOCTOR
+        )
+    ),
     _feat=Depends(require_features(FEATURE_FILES_RESULTS, FEATURE_TELEGRAM_PATIENT)),
 ):
     if not settings.PATIENT_BOT_TOKEN:
-        raise HTTPException(status_code=500, detail="PATIENT_BOT_TOKEN is not configured")
+        raise HTTPException(
+            status_code=500, detail="PATIENT_BOT_TOKEN is not configured"
+        )
 
     rec = await db.get(PatientFile, file_id)
     if not rec:
@@ -135,8 +177,17 @@ async def send_file_to_telegram(
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             with open(path, "rb") as f:
-                files = {"document": (rec.original_filename, f, rec.mime or "application/octet-stream")}
-                data = {"chat_id": str(chat_id), "caption": "Результаты/файл из клиники"}
+                files = {
+                    "document": (
+                        rec.original_filename,
+                        f,
+                        rec.mime or "application/octet-stream",
+                    )
+                }
+                data = {
+                    "chat_id": str(chat_id),
+                    "caption": "Результаты/файл из клиники",
+                }
                 resp = await client.post(url, data=data, files=files)
                 ok = resp.status_code == 200 and resp.json().get("ok") is True
                 if not ok:
@@ -165,14 +216,22 @@ async def send_file_to_telegram(
             )
         )
         await db.commit()
-        raise HTTPException(status_code=502, detail="Failed to send via Telegram")
+        raise HTTPException(
+            status_code=502, detail="Failed to send via Telegram"
+        ) from e
 
 
-@router.post("/patient/{patient_id}/telegram/link-code", response_model=TelegramLinkCodeResponse)
+@router.post(
+    "/patient/{patient_id}/telegram/link-code", response_model=TelegramLinkCodeResponse
+)
 async def create_telegram_link_code(
     patient_id: int,
     db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.CASHIER)),
+    _user=Depends(
+        require_roles(
+            UserRole.ADMIN, UserRole.OWNER, UserRole.RECEPTIONIST, UserRole.CASHIER
+        )
+    ),
 ):
     patient = await db.get(Patient, patient_id)
     if not patient:
@@ -180,10 +239,14 @@ async def create_telegram_link_code(
 
     code = TelegramLinkToken.new_code()
     expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
-    token = TelegramLinkToken(patient_id=patient_id, code=code, expires_at=expires_at, used=False)
+    token = TelegramLinkToken(
+        patient_id=patient_id, code=code, expires_at=expires_at, used=False
+    )
     db.add(token)
     await db.commit()
-    return TelegramLinkCodeResponse(patient_id=patient_id, code=code, expires_at=expires_at)
+    return TelegramLinkCodeResponse(
+        patient_id=patient_id, code=code, expires_at=expires_at
+    )
 
 
 @router.post("/telegram/link", response_model=TelegramLinkResult)
@@ -192,10 +255,15 @@ async def telegram_link(
     db: AsyncSession = Depends(get_db),
     x_bot_token: str | None = Header(None),
 ):
-    if not settings.PATIENT_BOT_INTERNAL_TOKEN or x_bot_token != settings.PATIENT_BOT_INTERNAL_TOKEN:
+    if (
+        not settings.PATIENT_BOT_INTERNAL_TOKEN
+        or x_bot_token != settings.PATIENT_BOT_INTERNAL_TOKEN
+    ):
         raise HTTPException(status_code=403, detail="Invalid bot token")
 
-    res = await db.execute(select(TelegramLinkToken).where(TelegramLinkToken.code == req.code))
+    res = await db.execute(
+        select(TelegramLinkToken).where(TelegramLinkToken.code == req.code)
+    )
     token = res.scalar_one_or_none()
     if not token:
         raise HTTPException(status_code=404, detail="Invalid code")
@@ -209,10 +277,13 @@ async def telegram_link(
         raise HTTPException(status_code=404, detail="Patient not found")
 
     # Store on patient record (simple MVP approach)
-    setattr(patient, "telegram_chat_id", int(req.chat_id))
-    setattr(patient, "telegram_username", req.username)
+    patient.telegram_chat_id = int(req.chat_id)
+    patient.telegram_username = req.username
     token.used = True
 
     await db.commit()
-    return TelegramLinkResult(patient_id=patient.id, telegram_chat_id=int(req.chat_id), telegram_username=req.username)
-
+    return TelegramLinkResult(
+        patient_id=patient.id,
+        telegram_chat_id=int(req.chat_id),
+        telegram_username=req.username,
+    )

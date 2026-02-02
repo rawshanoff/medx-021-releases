@@ -1,3 +1,5 @@
+import type { Dispatch, RefObject, SetStateAction } from 'react';
+
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';
@@ -23,18 +25,18 @@ export function PatientSearch({
     onFocusFirstResult,
 }: {
     phone: string;
-    setPhone: (v: string) => void;
+    setPhone: Dispatch<SetStateAction<string>>;
     name: string;
-    setName: (v: string) => void;
+    setName: Dispatch<SetStateAction<string>>;
     surname: string;
-    setSurname: (v: string) => void;
+    setSurname: Dispatch<SetStateAction<string>>;
     dob: string;
-    setDob: (v: string) => void;
-    phoneRef: React.RefObject<HTMLInputElement>;
-    nameRef: React.RefObject<HTMLInputElement>;
-    surnameRef: React.RefObject<HTMLInputElement>;
-    dobRef: React.RefObject<HTMLInputElement>;
-    createBtnRef: React.RefObject<HTMLButtonElement>;
+    setDob: Dispatch<SetStateAction<string>>;
+    phoneRef: RefObject<HTMLInputElement>;
+    nameRef: RefObject<HTMLInputElement>;
+    surnameRef: RefObject<HTMLInputElement>;
+    dobRef: RefObject<HTMLInputElement>;
+    createBtnRef: RefObject<HTMLButtonElement>;
     canCreate: boolean;
     onCreate: () => void;
     onFocusFirstResult: () => void;

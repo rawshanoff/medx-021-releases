@@ -1,23 +1,33 @@
 import asyncio
 
 import pytest
+from backend.core.config import settings
+from backend.modules.appointments import models as _appointments_models  # noqa: F401
+from backend.modules.finance.models import (
+    FinanceAuditLog,
+    PaymentMethod,
+    Shift,
+    Transaction,
+)
+from backend.modules.finance.router import close_shift, open_shift, process_payment
+from backend.modules.finance.schemas import ShiftCreate, TransactionCreate
+from backend.modules.patients import models as _patients_models  # noqa: F401
+from backend.modules.users.models import User, UserRole
 from fastapi import HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from backend.core.config import settings
-from backend.modules.finance.models import FinanceAuditLog, PaymentMethod, Shift, Transaction
-from backend.modules.finance.router import close_shift, open_shift, process_payment
-from backend.modules.finance.schemas import ShiftCreate, TransactionCreate
-from backend.modules.appointments import models as _appointments_models  # noqa: F401
-from backend.modules.patients import models as _patients_models  # noqa: F401
-from backend.modules.users.models import User, UserRole
-
 
 def _dummy_cashier() -> User:
     # Not persisted; audit log uses nullable user_id.
-    return User(username="test_cashier", password_hash="x", full_name="Test Cashier", role=UserRole.CASHIER, is_active=True)
+    return User(
+        username="test_cashier",
+        password_hash="x",
+        full_name="Test Cashier",
+        role=UserRole.CASHIER,
+        is_active=True,
+    )
 
 
 async def _with_db(fn):
@@ -47,7 +57,12 @@ def test_open_shift_and_cash_payment_updates_totals():
         assert shift.total_transfer == 0
 
         tx = await process_payment(
-            TransactionCreate(patient_id=None, amount=100, payment_method=PaymentMethod.CASH, description="Consultation"),
+            TransactionCreate(
+                patient_id=None,
+                amount=100,
+                payment_method=PaymentMethod.CASH,
+                description="Consultation",
+            ),
             db=db,
             user=user,
         )
@@ -97,7 +112,12 @@ def test_negative_transaction_requires_description():
 
         with pytest.raises(HTTPException) as e:
             await process_payment(
-                TransactionCreate(patient_id=None, amount=-10, payment_method=PaymentMethod.CASH, description=""),
+                TransactionCreate(
+                    patient_id=None,
+                    amount=-10,
+                    payment_method=PaymentMethod.CASH,
+                    description="",
+                ),
                 db=db,
                 user=user,
             )
@@ -118,4 +138,3 @@ def test_close_shift_marks_closed():
         assert closed.end_time is not None
 
     asyncio.run(_with_db(_test))
-

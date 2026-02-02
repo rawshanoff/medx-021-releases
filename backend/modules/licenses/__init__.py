@@ -1,2 +1,1 @@
 """Licensing endpoints (upload/status)."""
-

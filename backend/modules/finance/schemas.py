@@ -1,7 +1,9 @@
-from pydantic import BaseModel
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
 from backend.modules.finance.models import PaymentMethod
+from pydantic import BaseModel
+
 
 class TransactionCreate(BaseModel):
     patient_id: Optional[int] = None
@@ -13,16 +15,19 @@ class TransactionCreate(BaseModel):
     transfer_amount: int = 0
     description: Optional[str] = None
 
+
 class TransactionRead(TransactionCreate):
     id: int
     shift_id: int
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
+
 class ShiftCreate(BaseModel):
     cashier_id: str
+
 
 class ShiftRead(ShiftCreate):
     id: int
@@ -32,5 +37,6 @@ class ShiftRead(ShiftCreate):
     total_cash: int
     total_card: int
     total_transfer: int
+
     class Config:
         from_attributes = True

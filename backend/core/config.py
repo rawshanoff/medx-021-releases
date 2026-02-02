@@ -1,5 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "MedX"
@@ -12,8 +14,10 @@ class Settings(BaseSettings):
     # Files / Telegram (paid modules)
     FILE_STORAGE_DIR: str = "storage/patient_files"
     PATIENT_BOT_TOKEN: str = ""  # Telegram bot token for sending files to patients
-    PATIENT_BOT_INTERNAL_TOKEN: str = ""  # shared secret for bot -> backend linking calls
-    
+    PATIENT_BOT_INTERNAL_TOKEN: str = (
+        ""  # shared secret for bot -> backend linking calls
+    )
+
     # Licensing
     LICENSE_PUBLIC_KEY: str = ""
     LICENSE_PUBLIC_KEY_PATH: str = "license_server/public_key.pem"
@@ -34,5 +38,6 @@ class Settings(BaseSettings):
         )
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
 
 settings = Settings()

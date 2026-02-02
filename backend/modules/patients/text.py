@@ -156,4 +156,3 @@ def normalize_full_name(value: str) -> str:
                 rebuilt.append(_cap(p))
         out_words.append("".join(rebuilt))
     return " ".join(out_words)
-

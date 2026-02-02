@@ -36,4 +36,3 @@ class TelegramLinkResult(BaseModel):
     patient_id: int
     telegram_chat_id: int
     telegram_username: Optional[str] = None
-
