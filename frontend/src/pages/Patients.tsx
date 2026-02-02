@@ -455,7 +455,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
     >
       <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_2fr_auto] md:items-end">
         <div>
-          <label className="mb-1 block text-[12px] text-muted-foreground">
+          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
             {t('common.type', { defaultValue: 'Тип' })}
           </label>
           <select
@@ -475,7 +475,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-[12px] text-muted-foreground">
+          <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
             {t('patients.file', { defaultValue: 'Файл' })}
           </label>
           <Input
@@ -506,7 +506,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
           {t('patients.telegram_link_code', { defaultValue: 'Код привязки Telegram' })}
         </Button>
         {linkCode ? (
-          <div className="font-mono text-[12px] text-muted-foreground">
+          <div className="font-mono text-[13px] text-muted-foreground">
             {t('patients.code', { defaultValue: 'Код' })}:{' '}
             <span className="font-semibold text-foreground">{linkCode}</span>
           </div>
@@ -528,7 +528,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
           <tbody className="[&>tr]:border-t [&>tr]:border-border">
             {files.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-2 text-[12px] text-muted-foreground">
+                <td colSpan={4} className="p-2 text-[13px] text-muted-foreground">
                   {t('patients.no_files', { defaultValue: 'Нет файлов' })}
                 </td>
               </tr>
@@ -581,7 +581,7 @@ function FilesModal({ patient, onClose }: { patient: PatientWithBalance; onClose
           >
             {t('common.prev', { defaultValue: 'Назад' })}
           </Button>
-          <div className="text-[12px] text-muted-foreground">
+          <div className="text-[13px] text-muted-foreground">
             {page + 1} / {totalPages}
           </div>
           <Button

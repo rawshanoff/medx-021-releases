@@ -352,7 +352,7 @@ export default function System() {
               accept=".key"
               onChange={(e) => setLicenseFile(e.target.files ? e.target.files[0] : null)}
             />
-            <div className="text-[12px] text-muted-foreground">
+            <div className="text-[13px] text-muted-foreground">
               {licenseFile ? licenseFile.name : t('auth.click_upload')}
             </div>
             <Button
@@ -554,7 +554,7 @@ export default function System() {
       >
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="mb-1 block text-[12px] text-muted-foreground">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               Название принтера (для интерфейса)
             </label>
             <Input
@@ -598,7 +598,9 @@ export default function System() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">Размер бумаги</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Размер бумаги
+            </label>
             <select
               className="h-10 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.paperSize}
@@ -612,7 +614,7 @@ export default function System() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               Масштаб печати (%)
             </label>
             <Input
@@ -634,7 +636,7 @@ export default function System() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               Режим silent‑печати
             </label>
             <select
@@ -696,7 +698,9 @@ export default function System() {
       >
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">Шаблон чека</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Шаблон чека
+            </label>
             <select
               className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.receiptTemplateId}
@@ -710,7 +714,9 @@ export default function System() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[12px] text-muted-foreground">Ширина чека</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              Ширина чека
+            </label>
             <select
               className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={printSettings.receiptWidthMode || 'standard'}
@@ -724,7 +730,7 @@ export default function System() {
           </div>
 
           <div className="md:col-span-2 grid gap-2">
-            <label className="text-[12px] text-muted-foreground">Поля чека</label>
+            <label className="text-[13px] font-medium text-muted-foreground">Поля чека</label>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <label className="flex items-center gap-2 text-[13px]">
                 <input
@@ -909,7 +915,7 @@ export default function System() {
           </div>
 
           {lastSilentPrint ? (
-            <div className="mt-3 space-y-1 text-[12px] text-muted-foreground">
+            <div className="mt-3 space-y-1 text-[13px] text-muted-foreground">
               <div>
                 <span className="font-medium text-foreground">Результат:</span>{' '}
                 {String(lastSilentPrint?.ok)}
@@ -1052,7 +1058,7 @@ export default function System() {
         >
           <div className="grid gap-2">
             {printers.length === 0 ? (
-              <div className="text-[12px] text-muted-foreground">Список пуст</div>
+              <div className="text-[13px] text-muted-foreground">Список пуст</div>
             ) : (
               printers
                 .slice(
@@ -1080,7 +1086,7 @@ export default function System() {
                     <span className="min-w-0 flex-1 truncate text-left">
                       {p.displayName || p.name}
                     </span>
-                    <span className="text-[12px] text-muted-foreground">
+                    <span className="text-[13px] text-muted-foreground">
                       {p.isDefault ? 'Default' : ''}
                     </span>
                   </Button>
@@ -1118,7 +1124,7 @@ export default function System() {
             </div>
           ) : null}
 
-          <div className="mt-3 text-[12px] text-muted-foreground">
+          <div className="mt-3 text-[13px] text-muted-foreground">
             Это выбирает <code>deviceName</code> для silent‑печати в Electron.
           </div>
         </Modal>
@@ -1137,7 +1143,9 @@ export default function System() {
         >
           <form onSubmit={handleCreateUser} className="grid gap-3">
             <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">Username</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+                Username
+              </label>
               <Input
                 required
                 value={formData.username}
@@ -1145,7 +1153,9 @@ export default function System() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">Password</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+                Password
+              </label>
               <Input
                 required
                 type="password"
@@ -1154,14 +1164,18 @@ export default function System() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">Full Name</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+                Full Name
+              </label>
               <Input
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
               />
             </div>
             <div>
-              <label className="mb-1 block text-[12px] text-muted-foreground">Role</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+                Role
+              </label>
               <select
                 className="h-8 w-full rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 value={formData.role}
@@ -1228,7 +1242,7 @@ export default function System() {
 
                 {updateInfo.release_notes && (
                   <div className="rounded-md border border-border bg-background p-2">
-                    <div className="text-[12px] text-muted-foreground">
+                    <div className="text-[13px] text-muted-foreground">
                       {updateInfo.release_notes}
                     </div>
                   </div>
@@ -1240,7 +1254,7 @@ export default function System() {
                       {t('system.update_available')}: {updateInfo.latest_version}
                     </div>
                     {!updateInfo.download_url && (
-                      <div className="text-[12px] text-muted-foreground">
+                      <div className="text-[13px] text-muted-foreground">
                         {t('system.update_url_not_configured')}
                       </div>
                     )}
