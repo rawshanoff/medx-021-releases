@@ -1,0 +1,23 @@
+/* Electron / Desktop overrides (1366x768, fixed scale) */
+
+/* Better text rendering on Windows/Electron */
+html,
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Prevent accidental selections in dense UI.
+   Allow selection only in editable fields. */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable='true'],
+.select-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
