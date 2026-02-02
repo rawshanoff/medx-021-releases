@@ -21,3 +21,23 @@ license.key
 *.pem
 *.key
 license_server/license_registry.json
+
+# Electron
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.snap
+*.appimage
+
+# Temporary files
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+
+# Archive docs (not tracked)
+docs/archive/
