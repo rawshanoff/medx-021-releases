@@ -156,13 +156,7 @@ export default function Reception() {
       };
       const res = await client.post('/reception/queue', payload);
       await refreshQueue();
-      showToast(
-        t('reception.added_to_queue', {
-          ticket: res.data.ticket_number,
-          defaultValue: `Добавлен в очередь: ${res.data.ticket_number}`,
-        }),
-        'success',
-      );
+      showToast(`Добавлен в очередь: ${res.data.ticket_number}`, 'success');
       return res.data.ticket_number;
     } catch (e) {
       const errorMsg =
