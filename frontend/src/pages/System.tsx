@@ -27,6 +27,7 @@ import {
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { SettingHistory } from '../components/ui/setting-history';
 import { cn } from '../lib/cn';
 
 interface User {
@@ -136,11 +137,22 @@ export default function System() {
   });
 
   useEffect(() => {
-    fetchSystemInfo();
-    if (canManageUsers) {
-      fetchUsers();
-    }
-  }, []);
+    const initializeSettings = async () => {
+      fetchSystemInfo();
+      if (canManageUsers) {
+        fetchUsers();
+      }
+      // Load print settings from server
+      try {
+        const settings = await getPrintSettings();
+        setLocalPrintSettings(settings);
+      } catch (e) {
+        console.error('Failed to load print settings:', e);
+        // Will use defaults if loading fails
+      }
+    };
+    initializeSettings();
+  }, [canManageUsers]);
 
   const checkForUpdates = async () => {
     setCheckingUpdates(true);
@@ -520,20 +532,31 @@ export default function System() {
           <Button
             className="h-10 px-3 text-[13px]"
             type="button"
-            onClick={() => {
-              setPrintSettings(printSettings);
-              showToast('Сохранено', 'success');
+            onClick={async () => {
+              try {
+                await setPrintSettings(printSettings);
+                showToast(t('common.saved') || 'Сохранено', 'success');
+              } catch (e) {
+                showToast(t('common.error') || 'Ошибка сохранения', 'error');
+              }
             }}
           >
-            Сохранить
+            {t('common.save') || 'Сохранить'}
           </Button>
           <Button
             variant="secondary"
             className="h-10 px-3 text-[13px]"
             type="button"
-            onClick={() => setLocalPrintSettings(getPrintSettings())}
+            onClick={async () => {
+              try {
+                const settings = await getPrintSettings();
+                setLocalPrintSettings(settings);
+              } catch (e) {
+                console.error('Failed to load print settings:', e);
+              }
+            }}
           >
-            Сбросить
+            {t('common.reset') || 'Сбросить'}
           </Button>
         </div>
       </SettingsModal>
@@ -664,21 +687,41 @@ export default function System() {
           <Button
             className="h-10 px-3 text-[13px]"
             type="button"
-            onClick={() => {
-              setPrintSettings(printSettings);
-              showToast('Сохранено', 'success');
+            onClick={async () => {
+              try {
+                await setPrintSettings(printSettings);
+                showToast(t('common.saved') || 'Сохранено', 'success');
+              } catch (e) {
+                showToast(t('common.error') || 'Ошибка сохранения', 'error');
+              }
             }}
           >
-            Сохранить
+            {t('common.save') || 'Сохранить'}
           </Button>
           <Button
             variant="secondary"
             className="h-10 px-3 text-[13px]"
             type="button"
-            onClick={() => setLocalPrintSettings(getPrintSettings())}
+            onClick={async () => {
+              try {
+                const settings = await getPrintSettings();
+                setLocalPrintSettings(settings);
+              } catch (e) {
+                console.error('Failed to load print settings:', e);
+              }
+            }}
           >
-            Сбросить
+            {t('common.reset') || 'Сбросить'}
           </Button>
+        </div>
+
+        <div className="mt-4 border-t border-border pt-4">
+          <SettingHistory
+            settingKey="print_config"
+            onRollback={() => {
+              showToast('Откат выполнен', 'success');
+            }}
+          />
         </div>
       </SettingsModal>
 
@@ -729,6 +772,116 @@ export default function System() {
                 <input
                   className="h-4 w-4 accent-primary"
                   type="checkbox"
+                  checked={printSettings.showLogo !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showLogo: e.target.checked }))
+                  }
+                />
+                <span>Показывать логотип</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showClinicName !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showClinicName: e.target.checked }))
+                  }
+                />
+                <span>Показывать название клиники</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showClinicAddress !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showClinicAddress: e.target.checked }))
+                  }
+                />
+                <span>Показывать адрес</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showClinicPhone !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showClinicPhone: e.target.checked }))
+                  }
+                />
+                <span>Показывать телефон</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showDateTime !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showDateTime: e.target.checked }))
+                  }
+                />
+                <span>Показывать дату/время</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showPatientName !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showPatientName: e.target.checked }))
+                  }
+                />
+                <span>Показывать пациента</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showQueue !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showQueue: e.target.checked }))
+                  }
+                />
+                <span>Показывать номер очереди</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showDoctor !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showDoctor: e.target.checked }))
+                  }
+                />
+                <span>Показывать врача</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showDoctorRoom !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showDoctorRoom: e.target.checked }))
+                  }
+                />
+                <span>Показывать кабинет врача</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showServices !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showServices: e.target.checked }))
+                  }
+                />
+                <span>Показывать услуги</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
                   checked={printSettings.showTotalAmount !== false}
                   onChange={(e) =>
                     setLocalPrintSettings((p) => ({ ...p, showTotalAmount: e.target.checked }))
@@ -746,6 +899,37 @@ export default function System() {
                   }
                 />
                 <span>Показывать тип оплаты</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showQr !== false}
+                  onChange={(e) => setLocalPrintSettings((p) => ({ ...p, showQr: e.target.checked }))}
+                />
+                <span>Показывать QR</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showUnderQrText !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showUnderQrText: e.target.checked }))
+                  }
+                />
+                <span>Показывать текст под QR</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px]">
+                <input
+                  className="h-4 w-4 accent-primary"
+                  type="checkbox"
+                  checked={printSettings.showFooterNote !== false}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showFooterNote: e.target.checked }))
+                  }
+                />
+                <span>Показывать нижнюю подпись</span>
               </label>
               <label className="flex items-center gap-2 text-[13px]">
                 <input
@@ -777,6 +961,8 @@ export default function System() {
                     ticket: 'A-021',
                     createdAtIso: now,
                     patientName: "Rahmonov Ulug'bek",
+                    doctorName: 'Shuxrat Holmatovich',
+                    doctorRoom: '3',
                     serviceName: 'Vrach qabuli',
                     amount: 75000,
                     currency: "so'm",
@@ -811,6 +997,8 @@ export default function System() {
                     ticket: 'T-001',
                     createdAtIso: now,
                     patientName: 'Test Patient',
+                    doctorName: 'Test Doctor',
+                    doctorRoom: '7',
                     serviceName: 'Test Service',
                     amount: 12345,
                     currency: "so'm",
@@ -861,6 +1049,8 @@ export default function System() {
                     ticket: 'T-002',
                     createdAtIso: now,
                     patientName: 'Test Patient',
+                    doctorName: 'Test Doctor',
+                    doctorRoom: '7',
                     serviceName: 'Test Service',
                     amount: 12345,
                     currency: "so'm",
@@ -932,19 +1122,30 @@ export default function System() {
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
             type="button"
-            onClick={() => {
-              setPrintSettings(printSettings);
-              showToast('Сохранено', 'success');
+            onClick={async () => {
+              try {
+                await setPrintSettings(printSettings);
+                showToast(t('common.saved') || 'Сохранено', 'success');
+              } catch (e) {
+                showToast(t('common.error') || 'Ошибка сохранения', 'error');
+              }
             }}
           >
-            Сохранить
+            {t('common.save') || 'Сохранить'}
           </Button>
           <Button
             variant="secondary"
             type="button"
-            onClick={() => setLocalPrintSettings(getPrintSettings())}
+            onClick={async () => {
+              try {
+                const settings = await getPrintSettings();
+                setLocalPrintSettings(settings);
+              } catch (e) {
+                console.error('Failed to load print settings:', e);
+              }
+            }}
           >
-            Сбросить
+            {t('common.reset') || 'Сбросить'}
           </Button>
         </div>
       </SettingsModal>
