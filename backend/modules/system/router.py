@@ -11,6 +11,7 @@ from backend.modules.system.schemas import (
     SystemSettingRead,
     SystemSettingUpdate,
     PrintSettingsValue,
+    SystemAuditLogRead,
 )
 from backend.core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
@@ -220,7 +221,7 @@ async def get_all_system_settings(
 # ============================================================================
 
 
-@router.get("/settings/audit/{setting_key}")
+@router.get("/settings/audit/{setting_key}", response_model=list[SystemAuditLogRead])
 async def get_setting_audit_history(
     setting_key: str,
     limit: int = 50,
@@ -243,15 +244,91 @@ async def get_setting_audit_history(
     )
     logs = result.scalars().all()
     
-    return [
-        {
-            "id": log.id,
-            "action": log.action,
-            "setting_key": log.setting_key,
-            "old_value": log.old_value,
-            "new_value": log.new_value,
-            "details": log.details,
-            "created_at": log.created_at.isoformat() if log.created_at else None,
-        }
-        for log in logs
-    ]
+    return logs
+
+
+@router.post("/settings/{setting_key}/rollback/{audit_id}")
+async def rollback_setting(
+    setting_key: str,
+    audit_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Rollback a system setting to a previous version based on audit log.
+    
+    Example: POST /api/system/settings/print_config/rollback/123
+    
+    This endpoint:
+    1. Finds the audit log entry
+    2. Extracts the old_value from that entry
+    3. Restores the setting to that value
+    4. Logs the rollback action
+    """
+    # Find the audit log entry
+    result = await db.execute(
+        select(SystemAuditLog).where(
+            SystemAuditLog.id == audit_id,
+            SystemAuditLog.user_id == user.id,
+            SystemAuditLog.setting_key == setting_key,
+            SystemAuditLog.deleted_at.is_(None),
+        )
+    )
+    audit_log = result.scalars().first()
+    
+    if not audit_log:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Audit log entry {audit_id} not found",
+        )
+    
+    # The value to restore is the old_value from the audit log
+    rollback_value = audit_log.old_value
+    if rollback_value is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot rollback: no previous value available (this was the first creation)",
+        )
+    
+    # Find the current setting
+    result = await db.execute(
+        select(SystemSetting).where(
+            SystemSetting.user_id == user.id,
+            SystemSetting.key == setting_key,
+            SystemSetting.deleted_at.is_(None),
+        )
+    )
+    setting = result.scalars().first()
+    
+    if not setting:
+        # Setting was deleted, recreate it
+        setting = SystemSetting(
+            user_id=user.id,
+            key=setting_key,
+            value=rollback_value,
+        )
+        db.add(setting)
+    else:
+        # Update existing setting
+        old_value_before_rollback = setting.value
+        setting.value = rollback_value
+    
+    # Log the rollback action
+    await _audit(
+        db=db,
+        user=user,
+        action="rollback",
+        setting_key=setting_key,
+        old_value=setting.value if setting else rollback_value,
+        new_value=rollback_value,
+        details=f"Rolled back from audit entry #{audit_id}",
+    )
+    
+    await db.commit()
+    await db.refresh(setting)
+    
+    logger.info(
+        f"System setting '{setting_key}' rolled back to audit entry {audit_id} "
+        f"for user {user.id}"
+    )
+    return setting
+
