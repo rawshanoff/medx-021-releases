@@ -1,5 +1,7 @@
 import logging
 import json
+from typing import Any
+
 from backend.modules.auth import require_roles, get_current_user
 from backend.modules.users.models import UserRole, User
 from backend.modules.system.models import SystemSetting, SystemAuditLog
@@ -20,6 +22,106 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger("medx")
 router = APIRouter()
+
+
+# ============================================================================
+# Validation Functions
+# ============================================================================
+
+
+def validate_print_config(value: Any) -> None:
+    """Validate print_config setting value.
+    
+    Raises HTTPException if validation fails.
+    """
+    if not isinstance(value, dict):
+        raise HTTPException(
+            status_code=400,
+            detail="print_config value must be a JSON object",
+        )
+    
+    # Validate silentScalePercent is within 10-200 range
+    if "silentScalePercent" in value:
+        scale = value.get("silentScalePercent")
+        if not isinstance(scale, int) or not (10 <= scale <= 200):
+            raise HTTPException(
+                status_code=400,
+                detail="silentScalePercent must be an integer between 10 and 200",
+            )
+    
+    # Validate silentPrintMode is one of allowed values
+    if "silentPrintMode" in value:
+        mode = value.get("silentPrintMode")
+        if mode not in ("html", "image"):
+            raise HTTPException(
+                status_code=400,
+                detail="silentPrintMode must be 'html' or 'image'",
+            )
+    
+    # Validate receiptWidthMode
+    if "receiptWidthMode" in value:
+        width_mode = value.get("receiptWidthMode")
+        if width_mode not in ("standard", "safe"):
+            raise HTTPException(
+                status_code=400,
+                detail="receiptWidthMode must be 'standard' or 'safe'",
+            )
+    
+    # Validate paperSize
+    if "paperSize" in value:
+        paper = value.get("paperSize")
+        if paper not in ("58", "80"):
+            raise HTTPException(
+                status_code=400,
+                detail="paperSize must be '58' or '80'",
+            )
+    
+    # Validate receiptTemplateId
+    if "receiptTemplateId" in value:
+        template = value.get("receiptTemplateId")
+        if template not in ("check-4-58", "check-1", "check-6"):
+            raise HTTPException(
+                status_code=400,
+                detail="receiptTemplateId must be one of: check-4-58, check-1, check-6",
+            )
+    
+    # Validate string fields are not too long
+    for field in ("clinicName", "clinicPhone", "clinicAddress", "footerNote", "underQrText"):
+        if field in value:
+            val = value.get(field)
+            if not isinstance(val, str):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{field} must be a string",
+                )
+            if len(val) > 500:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{field} must be less than 500 characters",
+                )
+    
+    # Validate boolean fields
+    for field in ("autoPrint", "boldAllText", "showTotalAmount", "showPaymentType",
+                  "showLogo", "showClinicName", "showClinicPhone", "showClinicAddress",
+                  "showDateTime", "showQueue", "showPatientName", "showDoctor",
+                  "showDoctorRoom", "showServices", "showQr", "showUnderQrText",
+                  "showFooterNote"):
+        if field in value:
+            val = value.get(field)
+            if not isinstance(val, bool):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{field} must be a boolean (true/false)",
+                )
+
+
+def validate_setting_value(setting_key: str, value: Any) -> None:
+    """Route to appropriate validation function based on setting key."""
+    if setting_key == "print_config":
+        validate_print_config(value)
+    # Add more validators for other setting keys as needed
+    # elif setting_key == "ui_preferences":
+    #     validate_ui_preferences(value)
 
 
 async def _audit(
@@ -150,7 +252,12 @@ async def update_system_setting(
     
     Example: PUT /api/system/settings/print_config
     Body: {"value": {...}}
+    
+    Validates the value before saving.
     """
+    # Validate the value first
+    validate_setting_value(key, data.value)
+    
     # Try to find existing setting
     result = await db.execute(
         select(SystemSetting).where(
