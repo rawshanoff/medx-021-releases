@@ -73,9 +73,9 @@ class LicenseManager:
         if "error" in payload:
             if not self.dev_mode:
                 print(f"License Error: {payload['error']}")
-            # Fail-closed: if license is invalid/expired/missing, disable all features.
+            # Fail-closed for paid features, but keep free lifetime features enabled.
             # Dev-mode explicitly bypasses this in load_license().
-            return []
+            return [FEATURE_CORE, FEATURE_FINANCE_BASIC, FEATURE_REPORTS_BASIC]
 
         features = payload.get("features", {})
         active = []

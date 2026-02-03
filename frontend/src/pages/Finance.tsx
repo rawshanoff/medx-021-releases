@@ -83,6 +83,7 @@ export default function Finance() {
       const res = await client.get('/finance/recent-transactions?limit=5');
       setRecentTransactions(res.data || []);
     } catch (e) {
+      showToast('Не удалось загрузить транзакции', 'error');
       console.error('Failed to fetch recent transactions', e);
     }
   };

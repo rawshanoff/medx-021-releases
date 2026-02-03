@@ -30,6 +30,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
+# File size limit: 10 MB
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
 
 def _storage_path(stored_filename: str) -> str:
     os.makedirs(settings.FILE_STORAGE_DIR, exist_ok=True)
@@ -64,6 +67,13 @@ async def upload_file(
     raw = await file.read()
     if not raw:
         raise HTTPException(status_code=400, detail="Empty file")
+
+    # Validate file size
+    if len(raw) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE / 1024 / 1024:.0f} MB",
+        )
 
     sha256 = hashlib.sha256(raw).hexdigest()
     stored_filename = f"{uuid4().hex}_{os.path.basename(file.filename or 'file')}"

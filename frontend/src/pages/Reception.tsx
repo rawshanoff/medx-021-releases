@@ -156,8 +156,19 @@ export default function Reception() {
       };
       const res = await client.post('/reception/queue', payload);
       await refreshQueue();
+      showToast(
+        t('reception.added_to_queue', {
+          ticket: res.data.ticket_number,
+          defaultValue: `Добавлен в очередь: ${res.data.ticket_number}`,
+        }),
+        'success',
+      );
       return res.data.ticket_number;
     } catch (e) {
+      const errorMsg =
+        getErrorDetail(e) ||
+        t('reception.queue_add_failed', { defaultValue: 'Не удалось добавить в очередь' });
+      showToast(errorMsg, 'error');
       console.error('Failed to add to queue', e);
       return '';
     }
