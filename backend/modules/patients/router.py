@@ -124,6 +124,39 @@ async def search_patients(
     return result.scalars().all()
 
 
+@router.get("/archived", response_model=List[PatientRead])
+@router.get("/archived/", response_model=List[PatientRead])
+async def list_archived_patients(
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    result = await db.execute(
+        select(Patient)
+        .where(Patient.deleted_at.is_not(None))
+        .order_by(Patient.full_name)
+        .limit(500)
+    )
+    return result.scalars().all()
+
+
+@router.post("/{patient_id}/restore", response_model=MessageResponse)
+async def restore_patient(
+    patient_id: int,
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    result = await db.execute(select(Patient).where(Patient.id == patient_id))
+    patient = result.scalars().first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    if patient.deleted_at is None:
+        return {"message": "Patient is already active"}
+
+    patient.deleted_at = None
+    await db.commit()
+    return {"message": "Patient restored successfully"}
+
+
 @router.get("/{patient_id}", response_model=PatientRead)
 async def get_patient(
     patient_id: int,
@@ -254,37 +287,3 @@ async def get_patient_history(
             for x in a_res.scalars().all()
         ],
     )
-
-
-@router.get("/archived/", response_model=List[PatientRead])
-async def get_archived_patients(
-    skip: int = 0,
-    limit: int = 50,
-    db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
-):
-    """Get archived (soft deleted) patients. Admin only."""
-    query = select(Patient).where(Patient.deleted_at.is_not(None))
-    query = query.offset(skip).limit(limit).order_by(Patient.deleted_at.desc())
-    result = await db.execute(query)
-    return result.scalars().all()
-
-
-@router.post("/{patient_id}/restore", response_model=PatientRead)
-async def restore_patient(
-    patient_id: int,
-    db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
-):
-    """Restore archived patient. Admin only."""
-    result = await db.execute(
-        select(Patient).where(Patient.id == patient_id, Patient.deleted_at.is_not(None))
-    )
-    patient = result.scalars().first()
-    if not patient:
-        raise HTTPException(status_code=404, detail="Archived patient not found")
-
-    patient.restore()
-    await db.commit()
-    await db.refresh(patient)
-    return patient

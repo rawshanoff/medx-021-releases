@@ -1,6 +1,22 @@
+# ruff: noqa: E402
+
 import logging
+import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+
+# Ensure `backend` package is importable even when running from `backend/` folder:
+#   cd backend && python -m uvicorn main:app ...
+_repo_root = Path(__file__).resolve().parents[1]
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
+
+
+# IMPORTANT:
+# Always import via the `backend.*` package to avoid loading the same models twice
+# (e.g., `backend.modules.users.models` and `modules.users.models`) which breaks
+# SQLAlchemy metadata with "Table 'users' is already defined".
+from datetime import datetime, timezone
 
 from backend.core.config import settings
 from backend.core.database import init_db
@@ -17,6 +33,7 @@ from backend.modules.reception.router import router as reception_router
 from backend.modules.system.router import router as system_router
 from backend.modules.users.router import router as users_router
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
@@ -65,7 +82,14 @@ cors_origins = [
 ]
 # Если origins не указаны, используем безопасные дефолты для разработки
 if not cors_origins:
-    cors_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    cors_origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3005",
+        "http://127.0.0.1:3005",
+    ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -87,6 +111,12 @@ async def app_exception_handler(_request: Request, exc: AppException):
     if exc.code:
         content["code"] = exc.code
     return JSONResponse(status_code=exc.status_code, content=content)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Keep FastAPI default shape
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
 
 @app.exception_handler(Exception)
@@ -117,4 +147,8 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "running"}
+    return {
+        "status": "running",
+        "version": settings.CURRENT_VERSION,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }

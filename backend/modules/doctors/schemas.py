@@ -48,6 +48,7 @@ class DoctorServiceRead(DoctorServiceBase):
 class DoctorBase(BaseModel):
     full_name: str
     specialty: Optional[str] = None
+    room_number: Optional[str] = None
     queue_prefix: Optional[str] = "A"
     is_active: bool = True
 
@@ -70,6 +71,7 @@ class DoctorCreate(DoctorBase):
 class DoctorUpdate(BaseModel):
     full_name: Optional[str] = None
     specialty: Optional[str] = None
+    room_number: Optional[str] = None
     queue_prefix: Optional[str] = None
     is_active: Optional[bool] = None
 

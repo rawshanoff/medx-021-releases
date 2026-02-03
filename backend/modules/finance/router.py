@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -23,11 +24,13 @@ from backend.modules.finance.schemas import (
 )
 from backend.modules.users.models import User, UserRole
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, text, update
+from sqlalchemy import func, select, text, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 router = APIRouter()
+logger = logging.getLogger("medx")
 
 
 async def _acquire_shift_lock(db: AsyncSession) -> None:
@@ -43,13 +46,17 @@ async def _acquire_shift_lock(db: AsyncSession) -> None:
 
 
 async def check_finance_license():
+    """Check if Finance module is licensed.
+
+    Raises HTTPException if finance features are not activated.
+    Finance requires either FEATURE_FINANCE_BASIC or FEATURE_CORE license.
+    """
     features = license_manager.get_active_features()
-    if (
-        FEATURE_FINANCE_BASIC not in features and FEATURE_CORE not in features
-    ):  # core usually includes basic finance in MVP
-        # In MVP validation, we might skip this if "core" implies it, but let's be strict for demo
-        pass
-        # Uncomment to enforce: raise HTTPException(status_code=403, detail="Finance module not active")
+    if FEATURE_FINANCE_BASIC not in features and FEATURE_CORE not in features:
+        raise HTTPException(
+            status_code=403,
+            detail="Finance module not active. Please upgrade your license.",
+        )
 
 
 async def _audit(
@@ -116,6 +123,8 @@ async def close_shift(
         require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
     ),
 ):
+    """Close current shift and verify totals match transactions."""
+    await check_finance_license()
     await _acquire_shift_lock(db)
     result = await db.execute(
         select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
@@ -124,13 +133,87 @@ async def close_shift(
     if not shift:
         raise HTTPException(status_code=400, detail="No open shift found")
 
+    # Calculate running totals from transactions for verification
+    cash_result = await db.execute(
+        select(func.sum(Transaction.cash_amount)).where(
+            Transaction.shift_id == shift.id,
+            Transaction.payment_method == PaymentMethod.MIXED,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    mixed_cash = cash_result.scalar() or 0
+
+    card_result = await db.execute(
+        select(func.sum(Transaction.card_amount)).where(
+            Transaction.shift_id == shift.id,
+            Transaction.payment_method == PaymentMethod.MIXED,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    mixed_card = card_result.scalar() or 0
+
+    transfer_result = await db.execute(
+        select(func.sum(Transaction.transfer_amount)).where(
+            Transaction.shift_id == shift.id,
+            Transaction.payment_method == PaymentMethod.MIXED,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    mixed_transfer = transfer_result.scalar() or 0
+
+    # Calculate totals for non-mixed payments
+    cash_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.shift_id == shift.id,
+            Transaction.payment_method == PaymentMethod.CASH,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    cash_total = (cash_tx_result.scalar() or 0) + mixed_cash
+
+    card_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.shift_id == shift.id,
+            Transaction.payment_method == PaymentMethod.CARD,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    card_total = (card_tx_result.scalar() or 0) + mixed_card
+
+    transfer_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.shift_id == shift.id,
+            Transaction.payment_method == PaymentMethod.TRANSFER,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    transfer_total = (transfer_tx_result.scalar() or 0) + mixed_transfer
+
+    # Verify stored totals match calculated
+    if (
+        shift.total_cash != cash_total
+        or shift.total_card != card_total
+        or shift.total_transfer != transfer_total
+    ):
+        logger.error(
+            f"Shift #{shift.id} total mismatch on close! "
+            f"Stored: cash={shift.total_cash}, card={shift.total_card}, transfer={shift.total_transfer} "
+            f"Calculated: cash={cash_total}, card={card_total}, transfer={transfer_total}"
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="Shift totals do not match transactions. Contact support.",
+        )
+
     shift.is_closed = True
     shift.end_time = datetime.now(timezone.utc)
 
-    # Recalculate totals (simple aggregation)
-    # real app would use sum() query
-
-    await _audit(db, user, "shift_close", f"shift_id={shift.id}")
+    await _audit(
+        db,
+        user,
+        "shift_close",
+        f"shift_id={shift.id}, total_cash={shift.total_cash}, total_card={shift.total_card}, total_transfer={shift.total_transfer}",
+    )
     await db.commit()
     await db.refresh(shift)
     return shift
@@ -144,8 +227,28 @@ async def process_payment(
         require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)
     ),
 ):
+    logger.info(f"Processing payment: {tx.model_dump()}, user: {user.id}")
     await check_finance_license()
     await _acquire_shift_lock(db)
+
+    # Idempotency check
+    if tx.idempotency_key:
+        existing = await db.execute(
+            select(Transaction).where(
+                Transaction.idempotency_key == tx.idempotency_key,
+                Transaction.deleted_at.is_(None),
+            )
+        )
+        if found := existing.scalars().first():
+            logger.info(f"Idempotent hit: {tx.idempotency_key}")
+            return found
+
+    # Validate amount is within limits
+    if abs(tx.amount) > 10_000_000:
+        raise HTTPException(
+            status_code=400,
+            detail="Transaction amount exceeds maximum limit of 10,000,000",
+        )
 
     # Требуем описание для отрицательных сумм (расход/возврат)
     if tx.amount < 0 and not (tx.description and tx.description.strip()):
@@ -156,18 +259,23 @@ async def process_payment(
     # Find current shift
     # Lock active shift row to prevent race conditions on running totals.
     # We still perform atomic UPDATE on totals, but the lock guarantees a single active shift is used consistently.
+    logger.info("Looking for open shift")
     result = await db.execute(
         select(Shift)
         .where(Shift.is_closed == False, Shift.deleted_at.is_(None))
         .with_for_update()
     )
     shift = result.scalars().first()
+    logger.info(f"Found shift: {shift}")
     if not shift:
+        logger.warning("No open shift found")
         raise HTTPException(
             status_code=400, detail="No open shift. Open a shift first."
         )
 
+    logger.info(f"Creating transaction with shift_id: {shift.id}")
     new_tx = Transaction(shift_id=shift.id, **tx.model_dump())
+    logger.info(f"Transaction created: {new_tx.id}")
 
     # Atomic running totals update (race-safe).
     delta_cash = (
@@ -185,9 +293,13 @@ async def process_payment(
         if tx.payment_method == PaymentMethod.MIXED
         else (int(tx.amount) if tx.payment_method == PaymentMethod.TRANSFER else 0)
     )
+    logger.info(
+        f"Deltas: cash={delta_cash}, card={delta_card}, transfer={delta_transfer}"
+    )
 
     db.add(new_tx)
     await db.flush()
+    logger.info("Transaction flushed")
 
     await db.execute(
         update(Shift)
@@ -200,6 +312,7 @@ async def process_payment(
             total_transfer=Shift.total_transfer + delta_transfer,
         )
     )
+    logger.info("Shift updated")
 
     await _audit(
         db,
@@ -207,7 +320,24 @@ async def process_payment(
         "transaction",
         f"tx_id={new_tx.id}, amount={tx.amount}, method={tx.payment_method}, patient_id={tx.patient_id}",
     )
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        # Most likely a concurrent duplicate idempotency_key.
+        await db.rollback()
+        if tx.idempotency_key:
+            existing = await db.execute(
+                select(Transaction).where(
+                    Transaction.idempotency_key == tx.idempotency_key,
+                    Transaction.deleted_at.is_(None),
+                )
+            )
+            if found := existing.scalars().first():
+                logger.info(f"Idempotent race hit: {tx.idempotency_key}")
+                return found
+        raise
+
+    logger.info("Transaction committed")
     await db.refresh(new_tx)
     return new_tx
 
@@ -277,6 +407,7 @@ async def refund_payment(
         card_amount=-abs(original_tx.card_amount),
         transfer_amount=-abs(original_tx.transfer_amount),
         description=f"Refund: {reason.strip()} (original TX #{original_tx.id})",
+        related_transaction_id=original_tx.id,
     )
 
     # Atomic running totals update (negative values for refund)
@@ -320,15 +451,14 @@ async def refund_payment(
     )
 
     db.add(refund_tx)
-    await db.commit()
-    await db.refresh(refund_tx)
-
     await _audit(
         db,
         user,
-        "Refund Payment",
+        "refund_payment",
         f"Refunded TX #{original_tx.id} for {abs(original_tx.amount)} (reason: {reason})",
     )
+    await db.commit()
+    await db.refresh(refund_tx)
 
     return refund_tx
 
@@ -460,3 +590,35 @@ async def get_report(
             "closed_at": last_shift.end_time,
         }
     raise HTTPException(status_code=400, detail="Unknown report type")
+
+
+@router.get("/recent-transactions", response_model=list[TransactionRead])
+async def get_recent_transactions(
+    limit: int = 5,
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER, UserRole.CASHIER)),
+):
+    """Get recent transactions for current shift or last transactions"""
+    # Get current active shift
+    shift_res = await db.execute(
+        select(Shift).where(Shift.is_closed == False, Shift.deleted_at.is_(None))
+    )
+    active_shift = shift_res.scalars().first()
+
+    if active_shift:
+        # Get transactions for active shift
+        res = await db.execute(
+            select(Transaction)
+            .where(Transaction.shift_id == active_shift.id)
+            .order_by(Transaction.created_at.desc())
+            .limit(limit)
+        )
+    else:
+        # Get last transactions regardless of shift
+        res = await db.execute(
+            select(Transaction).order_by(Transaction.created_at.desc()).limit(limit)
+        )
+
+    transactions = res.scalars().all()
+
+    return transactions

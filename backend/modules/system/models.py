@@ -1,11 +1,21 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey, UniqueConstraint, Index
+from backend.core.database import Base, SoftDeleteMixin
+from sqlalchemy import (
+    JSON,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from backend.core.database import Base, SoftDeleteMixin
 
 
 class SystemSetting(SoftDeleteMixin, Base):
     """User-specific system settings (e.g., print configuration, UI preferences)."""
+
     __tablename__ = "system_settings"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -13,7 +23,9 @@ class SystemSetting(SoftDeleteMixin, Base):
     key = Column(String, nullable=False, index=True)
     value = Column(JSON, nullable=False)  # Can store any JSON-serializable value
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # Constraints & Indices
     __table_args__ = (
@@ -27,6 +39,7 @@ class SystemSetting(SoftDeleteMixin, Base):
 
 class SystemAuditLog(SoftDeleteMixin, Base):
     """Audit log for system settings changes (who changed what, when, old value -> new value)."""
+
     __tablename__ = "system_audit_log"
 
     id = Column(Integer, primary_key=True, index=True)

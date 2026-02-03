@@ -46,10 +46,16 @@ class Transaction(SoftDeleteMixin, Base):
     transfer_amount = Column(Integer, default=0)
 
     description = Column(String, nullable=True)  # e.g. "Consultation"
+    idempotency_key = Column(String, unique=True, index=True, nullable=True)
+    related_transaction_id = Column(
+        Integer, ForeignKey("transactions.id"), nullable=True
+    )
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     shift = relationship("Shift", back_populates="transactions")
     patient = relationship("Patient")
+    related_transaction = relationship("Transaction", remote_side=[id])
 
 
 class FinanceAuditLog(SoftDeleteMixin, Base):

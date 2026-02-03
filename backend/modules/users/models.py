@@ -1,6 +1,7 @@
 import enum
 
 from backend.core.database import Base, SoftDeleteMixin
+from backend.modules.system import models as _system_models  # noqa: F401
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
@@ -28,4 +29,6 @@ class User(SoftDeleteMixin, Base):
     last_login = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    system_settings = relationship("SystemSetting", back_populates="user", cascade="all, delete-orphan")
+    system_settings = relationship(
+        "SystemSetting", back_populates="user", cascade="all, delete-orphan"
+    )

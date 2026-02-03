@@ -10,6 +10,7 @@ class Doctor(SoftDeleteMixin, Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True, nullable=False)
     specialty = Column(String, nullable=True)
+    room_number = Column(String, nullable=True)  # e.g. "3", "12A"
     queue_prefix = Column(
         String(1), default="A", nullable=False
     )  # A, B, C for queue numbering

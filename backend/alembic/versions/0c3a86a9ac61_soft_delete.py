@@ -20,30 +20,36 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    tables = [
-        "patients",
-        "doctors",
-        "doctor_services",
-        "users",
-        "appointments",
-    ]
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    existing_tables = set(inspector.get_table_names())
+
+    tables = ["patients", "doctors", "doctor_services", "users", "appointments"]
 
     for t in tables:
-        op.add_column(
-            t, sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True)
-        )
-        op.create_index(op.f(f"ix_{t}_deleted_at"), t, ["deleted_at"], unique=False)
+        if t not in existing_tables:
+            continue
+        cols = {c["name"] for c in inspector.get_columns(t)}
+        if "deleted_at" not in cols:
+            op.add_column(
+                t, sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True)
+            )
+        # Postgres-safe idempotent index creation
+        op.execute(f"CREATE INDEX IF NOT EXISTS ix_{t}_deleted_at ON {t} (deleted_at)")
 
 
 def downgrade() -> None:
-    tables = [
-        "appointments",
-        "users",
-        "doctor_services",
-        "doctors",
-        "patients",
-    ]
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    existing_tables = set(inspector.get_table_names())
+
+    tables = ["appointments", "users", "doctor_services", "doctors", "patients"]
 
     for t in tables:
-        op.drop_index(op.f(f"ix_{t}_deleted_at"), table_name=t)
-        op.drop_column(t, "deleted_at")
+        if t not in existing_tables:
+            continue
+        cols = {c["name"] for c in inspector.get_columns(t)}
+        # Drop index if it exists (IF EXISTS avoids hard failure)
+        op.execute(f"DROP INDEX IF EXISTS ix_{t}_deleted_at")
+        if "deleted_at" in cols:
+            op.drop_column(t, "deleted_at")

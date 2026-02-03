@@ -1,22 +1,22 @@
 import logging
-import json
 from typing import Any
 
-from backend.modules.auth import require_roles, get_current_user
-from backend.modules.users.models import UserRole, User
-from backend.modules.system.models import SystemSetting, SystemAuditLog
+from backend.core.config import settings
+from backend.core.database import get_db
+from backend.core.updater import updater
+from backend.modules.auth import get_current_user, require_roles
+from backend.modules.system.models import SystemAuditLog, SystemSetting
 from backend.modules.system.schemas import (
-    VersionResponse,
-    UpdateCheckResponse,
-    DoctorInfo,
-    SystemSettingCreate,
-    SystemSettingRead,
-    SystemSettingUpdate,
     PrintSettingsValue,
     SystemAuditLogRead,
+    SystemSettingRead,
+    SystemSettingUpdate,
+    UpdateCheckResponse,
+    VersionResponse,
 )
-from backend.core.database import get_db
+from backend.modules.users.models import User, UserRole
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,7 +31,7 @@ router = APIRouter()
 
 def validate_print_config(value: Any) -> None:
     """Validate print_config setting value.
-    
+
     Raises HTTPException if validation fails.
     """
     if not isinstance(value, dict):
@@ -39,7 +39,7 @@ def validate_print_config(value: Any) -> None:
             status_code=400,
             detail="print_config value must be a JSON object",
         )
-    
+
     # Validate silentScalePercent is within 10-200 range
     if "silentScalePercent" in value:
         scale = value.get("silentScalePercent")
@@ -48,7 +48,7 @@ def validate_print_config(value: Any) -> None:
                 status_code=400,
                 detail="silentScalePercent must be an integer between 10 and 200",
             )
-    
+
     # Validate silentPrintMode is one of allowed values
     if "silentPrintMode" in value:
         mode = value.get("silentPrintMode")
@@ -57,7 +57,7 @@ def validate_print_config(value: Any) -> None:
                 status_code=400,
                 detail="silentPrintMode must be 'html' or 'image'",
             )
-    
+
     # Validate receiptWidthMode
     if "receiptWidthMode" in value:
         width_mode = value.get("receiptWidthMode")
@@ -66,7 +66,7 @@ def validate_print_config(value: Any) -> None:
                 status_code=400,
                 detail="receiptWidthMode must be 'standard' or 'safe'",
             )
-    
+
     # Validate paperSize
     if "paperSize" in value:
         paper = value.get("paperSize")
@@ -75,7 +75,7 @@ def validate_print_config(value: Any) -> None:
                 status_code=400,
                 detail="paperSize must be '58' or '80'",
             )
-    
+
     # Validate receiptTemplateId
     if "receiptTemplateId" in value:
         template = value.get("receiptTemplateId")
@@ -84,9 +84,15 @@ def validate_print_config(value: Any) -> None:
                 status_code=400,
                 detail="receiptTemplateId must be one of: check-4-58, check-1, check-6",
             )
-    
+
     # Validate string fields are not too long
-    for field in ("clinicName", "clinicPhone", "clinicAddress", "footerNote", "underQrText"):
+    for field in (
+        "clinicName",
+        "clinicPhone",
+        "clinicAddress",
+        "footerNote",
+        "underQrText",
+    ):
         if field in value:
             val = value.get(field)
             if not isinstance(val, str):
@@ -99,13 +105,27 @@ def validate_print_config(value: Any) -> None:
                     status_code=400,
                     detail=f"{field} must be less than 500 characters",
                 )
-    
+
     # Validate boolean fields
-    for field in ("autoPrint", "boldAllText", "showTotalAmount", "showPaymentType",
-                  "showLogo", "showClinicName", "showClinicPhone", "showClinicAddress",
-                  "showDateTime", "showQueue", "showPatientName", "showDoctor",
-                  "showDoctorRoom", "showServices", "showQr", "showUnderQrText",
-                  "showFooterNote"):
+    for field in (
+        "autoPrint",
+        "boldAllText",
+        "showTotalAmount",
+        "showPaymentType",
+        "showLogo",
+        "showClinicName",
+        "showClinicPhone",
+        "showClinicAddress",
+        "showDateTime",
+        "showQueue",
+        "showPatientName",
+        "showDoctor",
+        "showDoctorRoom",
+        "showServices",
+        "showQr",
+        "showUnderQrText",
+        "showFooterNote",
+    ):
         if field in value:
             val = value.get(field)
             if not isinstance(val, bool):
@@ -158,7 +178,7 @@ def get_version(
         )
     )
 ):
-    return {"version": "1.0.0-mvp", "status": "active"}
+    return {"version": settings.CURRENT_VERSION, "status": "active"}
 
 
 @router.get("/update-check", response_model=UpdateCheckResponse)
@@ -173,12 +193,22 @@ async def check_update(
         )
     )
 ):
-    # Mock update check
+    update_info = await updater.check_for_updates()
+
+    if update_info:
+        return {
+            "update_available": True,
+            "latest_version": update_info["latest"],
+            "current_version": settings.CURRENT_VERSION,
+            "release_notes": "Update available",
+            "download_url": update_info["url"],
+        }
+
     return {
         "update_available": False,
-        "latest_version": "1.0.0",
-        "current_version": "1.0.0",
-        "release_notes": "Initial release",
+        "latest_version": settings.CURRENT_VERSION,
+        "current_version": settings.CURRENT_VERSION,
+        "release_notes": "Up to date",
     }
 
 
@@ -213,6 +243,50 @@ async def get_doctors(
 # ============================================================================
 
 
+@router.get("/print-settings", response_model=PrintSettingsValue)
+async def get_print_settings(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Convenience endpoint for print settings (alias for key=print_config)."""
+    result = await db.execute(
+        select(SystemSetting).where(
+            SystemSetting.user_id == user.id,
+            SystemSetting.key == "print_config",
+            SystemSetting.deleted_at.is_(None),
+        )
+    )
+    setting = result.scalars().first()
+
+    if not setting or not isinstance(setting.value, dict):
+        return PrintSettingsValue()
+
+    try:
+        return PrintSettingsValue(**setting.value)
+    except ValidationError:
+        # Fail-safe: if DB contains invalid/legacy value, return defaults.
+        return PrintSettingsValue()
+
+
+@router.put("/print-settings", response_model=PrintSettingsValue)
+async def update_print_settings(
+    value: PrintSettingsValue,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Convenience endpoint for print settings (alias for key=print_config)."""
+    updated = await update_system_setting(
+        key="print_config",
+        data=SystemSettingUpdate(value=value.model_dump()),
+        db=db,
+        user=user,
+    )
+    try:
+        return PrintSettingsValue(**(updated.value or {}))
+    except ValidationError:
+        return PrintSettingsValue()
+
+
 @router.get("/settings/{key}", response_model=SystemSettingRead)
 async def get_system_setting(
     key: str,
@@ -220,7 +294,7 @@ async def get_system_setting(
     user: User = Depends(get_current_user),
 ):
     """Get a system setting for the current user.
-    
+
     Example: GET /api/system/settings/print_config
     """
     result = await db.execute(
@@ -231,13 +305,13 @@ async def get_system_setting(
         )
     )
     setting = result.scalars().first()
-    
+
     if not setting:
         raise HTTPException(
             status_code=404,
             detail=f"Setting '{key}' not found for user",
         )
-    
+
     return setting
 
 
@@ -249,15 +323,15 @@ async def update_system_setting(
     user: User = Depends(get_current_user),
 ):
     """Create or update a system setting for the current user.
-    
+
     Example: PUT /api/system/settings/print_config
     Body: {"value": {...}}
-    
+
     Validates the value before saving.
     """
     # Validate the value first
     validate_setting_value(key, data.value)
-    
+
     # Try to find existing setting
     result = await db.execute(
         select(SystemSetting).where(
@@ -267,7 +341,7 @@ async def update_system_setting(
         )
     )
     setting = result.scalars().first()
-    
+
     old_value = None
     if setting:
         # Update existing
@@ -283,7 +357,7 @@ async def update_system_setting(
         )
         db.add(setting)
         action = "create"
-    
+
     # Log audit before commit
     await _audit(
         db=db,
@@ -293,10 +367,10 @@ async def update_system_setting(
         old_value=old_value,
         new_value=data.value,
     )
-    
+
     await db.commit()
     await db.refresh(setting)
-    
+
     logger.info(f"System setting '{key}' {action}d for user {user.id}")
     return setting
 
@@ -307,7 +381,7 @@ async def get_all_system_settings(
     user: User = Depends(get_current_user),
 ):
     """Get all system settings for the current user.
-    
+
     Returns dict with keys as setting keys and values as setting values.
     """
     result = await db.execute(
@@ -317,7 +391,7 @@ async def get_all_system_settings(
         )
     )
     settings = result.scalars().all()
-    
+
     # Convert to dict: key -> value
     settings_dict = {s.key: s.value for s in settings}
     return settings_dict
@@ -336,7 +410,7 @@ async def get_setting_audit_history(
     user: User = Depends(get_current_user),
 ):
     """Get audit history for a specific setting key (for current user).
-    
+
     Example: GET /api/system/settings/audit/print_config?limit=20
     """
     result = await db.execute(
@@ -350,7 +424,7 @@ async def get_setting_audit_history(
         .limit(limit)
     )
     logs = result.scalars().all()
-    
+
     return logs
 
 
@@ -362,9 +436,9 @@ async def rollback_setting(
     user: User = Depends(get_current_user),
 ):
     """Rollback a system setting to a previous version based on audit log.
-    
+
     Example: POST /api/system/settings/print_config/rollback/123
-    
+
     This endpoint:
     1. Finds the audit log entry
     2. Extracts the old_value from that entry
@@ -381,13 +455,13 @@ async def rollback_setting(
         )
     )
     audit_log = result.scalars().first()
-    
+
     if not audit_log:
         raise HTTPException(
             status_code=404,
             detail=f"Audit log entry {audit_id} not found",
         )
-    
+
     # The value to restore is the old_value from the audit log
     rollback_value = audit_log.old_value
     if rollback_value is None:
@@ -395,7 +469,7 @@ async def rollback_setting(
             status_code=400,
             detail="Cannot rollback: no previous value available (this was the first creation)",
         )
-    
+
     # Find the current setting
     result = await db.execute(
         select(SystemSetting).where(
@@ -405,9 +479,10 @@ async def rollback_setting(
         )
     )
     setting = result.scalars().first()
-    
+
     if not setting:
         # Setting was deleted, recreate it
+        old_value_before_rollback = None
         setting = SystemSetting(
             user_id=user.id,
             key=setting_key,
@@ -418,24 +493,23 @@ async def rollback_setting(
         # Update existing setting
         old_value_before_rollback = setting.value
         setting.value = rollback_value
-    
+
     # Log the rollback action
     await _audit(
         db=db,
         user=user,
         action="rollback",
         setting_key=setting_key,
-        old_value=setting.value if setting else rollback_value,
+        old_value=old_value_before_rollback,
         new_value=rollback_value,
         details=f"Rolled back from audit entry #{audit_id}",
     )
-    
+
     await db.commit()
     await db.refresh(setting)
-    
+
     logger.info(
         f"System setting '{setting_key}' rolled back to audit entry {audit_id} "
         f"for user {user.id}"
     )
     return setting
-

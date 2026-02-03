@@ -8,16 +8,55 @@ from backend.modules.doctors.schemas import (
     DoctorCreate,
     DoctorRead,
     DoctorServiceCreate,
-    DoctorServiceRead,
     DoctorUpdate,
 )
 from backend.modules.users.models import UserRole
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, with_loader_criteria
+from sqlalchemy.orm import selectinload
 
 router = APIRouter()
+
+
+@router.get("/archived", response_model=List[DoctorRead])
+@router.get("/archived/", response_model=List[DoctorRead])
+async def list_archived_doctors(
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    result = await db.execute(
+        select(Doctor)
+        .options(selectinload(Doctor.services))
+        .where(Doctor.deleted_at.is_not(None))
+        .order_by(Doctor.full_name)
+        .limit(500)
+    )
+    return result.scalars().all()
+
+
+@router.post("/{doctor_id}/restore", response_model=MessageResponse)
+async def restore_doctor(
+    doctor_id: int,
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    doctor = await db.get(Doctor, doctor_id)
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    if doctor.deleted_at is None:
+        return {"message": "Doctor is already active"}
+
+    doctor.deleted_at = None
+    doctor.is_active = True
+    # Restore services too
+    svc_res = await db.execute(
+        select(DoctorService).where(DoctorService.doctor_id == doctor_id)
+    )
+    for svc in svc_res.scalars().all():
+        svc.deleted_at = None
+    await db.commit()
+    return {"message": "Doctor restored successfully"}
 
 
 @router.post("/", response_model=DoctorRead)
@@ -51,13 +90,7 @@ async def create_doctor(
     # Eager load relationships for response
     result = await db.execute(
         select(Doctor)
-        .options(
-            selectinload(Doctor.services),
-            with_loader_criteria(
-                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
-            ),
-        )
-        .where(Doctor.deleted_at.is_(None))
+        .options(selectinload(Doctor.services))
         .where(Doctor.id == new_doctor.id)
     )
     return result.scalars().first()
@@ -65,23 +98,15 @@ async def create_doctor(
 
 @router.get("/", response_model=List[DoctorRead])
 async def list_doctors(
-    include_deleted: bool = False,
     db: AsyncSession = Depends(get_db),
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
-    stmt = (
+    result = await db.execute(
         select(Doctor)
-        .options(
-            selectinload(Doctor.services),
-            with_loader_criteria(
-                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
-            ),
-        )
+        .options(selectinload(Doctor.services))
+        .where(Doctor.deleted_at.is_(None))
         .order_by(Doctor.full_name)
     )
-    if not include_deleted:
-        stmt = stmt.where(Doctor.deleted_at.is_(None))
-    result = await db.execute(stmt)
     return result.scalars().all()
 
 
@@ -93,7 +118,7 @@ async def add_service(
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
     doctor = await db.get(Doctor, doctor_id)
-    if not doctor or doctor.deleted_at is not None:
+    if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
 
     new_svc = DoctorService(doctor_id=doctor_id, **service.model_dump())
@@ -110,7 +135,7 @@ async def update_doctor(
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
     doctor = await db.get(Doctor, doctor_id)
-    if not doctor or doctor.deleted_at is not None:
+    if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
 
     if doctor_update.full_name is not None:
@@ -131,13 +156,7 @@ async def update_doctor(
     # Re-fetch with services
     result = await db.execute(
         select(Doctor)
-        .options(
-            selectinload(Doctor.services),
-            with_loader_criteria(
-                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
-            ),
-        )
-        .where(Doctor.deleted_at.is_(None))
+        .options(selectinload(Doctor.services))
         .where(Doctor.id == doctor_id)
     )
     return result.scalars().first()
@@ -150,10 +169,11 @@ async def delete_doctor(
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
     doctor = await db.get(Doctor, doctor_id)
-    if not doctor or doctor.deleted_at is not None:
+    if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
 
     try:
+        # Soft delete (supports Archive restore)
         doctor.soft_delete()
         doctor.is_active = False
         # Archive services too
@@ -162,6 +182,7 @@ async def delete_doctor(
         )
         for svc in svc_res.scalars().all():
             svc.soft_delete()
+        # Keep historical queue items (do not delete)
 
         log = AuditLog(action="Delete Doctor", details=f"Deleted doctor ID {doctor_id}")
         db.add(log)
@@ -183,117 +204,17 @@ async def delete_service(
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
     svc = await db.get(DoctorService, service_id)
-    if not svc or svc.deleted_at is not None:
+    if not svc:
         raise HTTPException(status_code=404, detail="Service not found")
 
+    # Soft delete to preserve history / allow restore
     svc.soft_delete()
 
     log = AuditLog(action="Delete Service", details=f"Deleted service {svc.name}")
     db.add(log)
 
     await db.commit()
-    return {"message": "Service archived"}
-
-
-@router.get("/archived/", response_model=List[DoctorRead])
-async def get_archived_doctors(
-    db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN)),
-):
-    """Get archived doctors. Admin only."""
-    result = await db.execute(
-        select(Doctor)
-        .where(Doctor.deleted_at.is_not(None))
-        .order_by(Doctor.deleted_at.desc())
-    )
-    doctors = result.scalars().all()
-
-    # Add services data for each doctor
-    for doc in doctors:
-        svc_result = await db.execute(
-            select(DoctorService).where(
-                DoctorService.doctor_id == doc.id, DoctorService.deleted_at.is_(None)
-            )
-        )
-        doc.services = svc_result.scalars().all()
-
-    return doctors
-
-
-@router.post("/{doctor_id}/restore", response_model=DoctorRead)
-async def restore_doctor(
-    doctor_id: int,
-    db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN)),
-):
-    """Restore archived doctor. Admin only."""
-    doctor = await db.get(Doctor, doctor_id)
-    if not doctor or doctor.deleted_at is None:
-        raise HTTPException(status_code=404, detail="Archived doctor not found")
-
-    doctor.restore()
-    doctor.is_active = True
-
-    # Restore services too
-    svc_res = await db.execute(
-        select(DoctorService).where(DoctorService.doctor_id == doctor_id)
-    )
-    for svc in svc_res.scalars().all():
-        svc.restore()
-
-    log = AuditLog(
-        action="Restore Doctor", details=f"Restored doctor {doctor.full_name}"
-    )
-    db.add(log)
-
-    await db.commit()
-    await db.refresh(doctor)
-
-    # Load services for response
-    svc_result = await db.execute(
-        select(DoctorService).where(
-            DoctorService.doctor_id == doctor.id, DoctorService.deleted_at.is_(None)
-        )
-    )
-    doctor.services = svc_result.scalars().all()
-
-    return doctor
-
-
-@router.get("/services/archived/", response_model=List[DoctorServiceRead])
-async def get_archived_services(
-    db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN)),
-):
-    """Get archived services. Admin only."""
-    result = await db.execute(
-        select(DoctorService)
-        .options(selectinload(DoctorService.doctor))
-        .where(DoctorService.deleted_at.is_not(None))
-        .order_by(DoctorService.deleted_at.desc())
-    )
-    return result.scalars().all()
-
-
-@router.post("/services/{service_id}/restore", response_model=DoctorServiceRead)
-async def restore_service(
-    service_id: int,
-    db: AsyncSession = Depends(get_db),
-    _user=Depends(require_roles(UserRole.ADMIN)),
-):
-    """Restore archived service. Admin only."""
-    svc = await db.get(DoctorService, service_id)
-    if not svc or svc.deleted_at is None:
-        raise HTTPException(status_code=404, detail="Archived service not found")
-
-    svc.restore()
-
-    log = AuditLog(action="Restore Service", details=f"Restored service {svc.name}")
-    db.add(log)
-
-    await db.commit()
-    await db.refresh(svc)
-    return svc
+    return {"message": "Service deleted"}
 
 
 @router.get("/history", response_model=List[dict])

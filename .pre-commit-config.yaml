@@ -3,7 +3,7 @@ repos:
     hooks:
       - id: ruff-backend
         name: ruff (backend)
-        entry: ruff check backend --fix
+        entry: ruff check backend --fix --no-cache
         language: python
         additional_dependencies: ["ruff"]
         types: [python]

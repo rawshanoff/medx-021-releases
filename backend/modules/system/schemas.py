@@ -1,6 +1,7 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Any, Optional
+
+from pydantic import BaseModel
 
 
 class VersionResponse(BaseModel):
@@ -95,4 +96,3 @@ class SystemAuditLogRead(BaseModel):
 
     class Config:
         from_attributes = True
-

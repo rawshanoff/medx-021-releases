@@ -3,19 +3,46 @@ from datetime import datetime, timezone
 from typing import Dict, List
 
 from backend.core.config import settings
+from backend.core.features import (
+    FEATURE_CORE,
+    FEATURE_FILES_RESULTS,
+    FEATURE_FINANCE_BASIC,
+    FEATURE_REPORTS_BASIC,
+    FEATURE_TELEGRAM_PATIENT,
+)
 from jose import JWTError, jwt
 
 ALGORITHM = "RS256"
 
 
 class LicenseManager:
-    def __init__(self, license_path: str = "license.key"):
+    def __init__(self, license_path: str = "license.key", dev_mode: bool = False):
         self.license_path = license_path
         self._cached_features: List[str] = []
         self._cached_data: Dict = {}
+        # Dev mode: all features enabled without license verification
+        self.dev_mode = dev_mode or os.getenv("LICENSE_DEV_MODE", "").lower() in (
+            "true",
+            "1",
+            "yes",
+        )
 
     def load_license(self) -> Dict:
         """Loads and verifies the license file."""
+        # In dev mode, return all features enabled
+        if self.dev_mode:
+            return {
+                "features": {
+                    # IMPORTANT: feature codes must match backend/core/features.py values
+                    # (e.g. "core", "finance_basic", ...)
+                    FEATURE_CORE: "9999-12-31T23:59:59",
+                    FEATURE_FINANCE_BASIC: "9999-12-31T23:59:59",
+                    FEATURE_REPORTS_BASIC: "9999-12-31T23:59:59",
+                    FEATURE_FILES_RESULTS: "9999-12-31T23:59:59",
+                    FEATURE_TELEGRAM_PATIENT: "9999-12-31T23:59:59",
+                }
+            }
+
         if not os.path.exists(self.license_path):
             return {"error": "License file not found"}
 
@@ -44,8 +71,11 @@ class LicenseManager:
         """Returns a list of active features based on current time."""
         payload = self.load_license()
         if "error" in payload:
-            print(f"License Error: {payload['error']}")
-            return []  # Fail safe: no features
+            if not self.dev_mode:
+                print(f"License Error: {payload['error']}")
+            # Fail-closed: if license is invalid/expired/missing, disable all features.
+            # Dev-mode explicitly bypasses this in load_license().
+            return []
 
         features = payload.get("features", {})
         active = []
@@ -80,7 +110,8 @@ class LicenseManager:
         self._cached_data = {}
 
 
-license_manager = LicenseManager()
+# Dev mode is controlled via env LICENSE_DEV_MODE=true/1/yes.
+license_manager = LicenseManager(dev_mode=False)
 
 
 def require_features(*required: str):

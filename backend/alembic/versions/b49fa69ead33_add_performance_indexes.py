@@ -18,70 +18,60 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Appointments
-    op.create_index(
-        op.f("ix_appointments_patient_id"), "appointments", ["patient_id"], unique=False
+    # Appointments - create only if they don't exist
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_appointments_patient_id ON appointments (patient_id)"
     )
-    op.create_index(
-        op.f("ix_appointments_doctor_id"), "appointments", ["doctor_id"], unique=False
-    )
-
-    # Transactions
-    op.create_index(
-        op.f("ix_transactions_patient_id"), "transactions", ["patient_id"], unique=False
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_appointments_doctor_id ON appointments (doctor_id)"
     )
 
-    # Queue
-    op.create_index(
-        op.f("ix_queue_items_status"), "queue_items", ["status"], unique=False
-    )
-    op.create_index(
-        op.f("ix_queue_items_queue_date"), "queue_items", ["queue_date"], unique=False
+    # Transactions - create only if they don't exist
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_transactions_patient_id ON transactions (patient_id)"
     )
 
-    # Soft delete indexes (critical for performance)
-    op.create_index(
-        op.f("ix_patients_deleted_at"), "patients", ["deleted_at"], unique=False
+    # Queue - create only if they don't exist
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_queue_items_status ON queue_items (status)"
     )
-    op.create_index(
-        op.f("ix_doctors_deleted_at"), "doctors", ["deleted_at"], unique=False
-    )
-    op.create_index(
-        op.f("ix_users_deleted_at"), "users", ["deleted_at"], unique=False
-    )
-    op.create_index(
-        op.f("ix_appointments_deleted_at"), "appointments", ["deleted_at"], unique=False
-    )
-    op.create_index(
-        op.f("ix_transactions_deleted_at"), "transactions", ["deleted_at"], unique=False
-    )
-    op.create_index(
-        op.f("ix_shifts_deleted_at"), "shifts", ["deleted_at"], unique=False
-    )
-    op.create_index(
-        op.f("ix_queue_items_deleted_at"), "queue_items", ["deleted_at"], unique=False
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_queue_items_queue_date ON queue_items (queue_date)"
     )
 
-    # Patient search indexes
-    op.create_index(
-        op.f("ix_patients_phone"), "patients", ["phone"], unique=False
+    # Soft delete indexes (critical for performance) - create only if they don't exist
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_patients_deleted_at ON patients (deleted_at)"
     )
-    op.create_index(
-        op.f("ix_patients_full_name"), "patients", ["full_name"], unique=False
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_doctors_deleted_at ON doctors (deleted_at)"
     )
-    op.create_index(
-        op.f("ix_patients_birth_date"), "patients", ["birth_date"], unique=False
+    op.execute("CREATE INDEX IF NOT EXISTS ix_users_deleted_at ON users (deleted_at)")
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_appointments_deleted_at ON appointments (deleted_at)"
+    )
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_transactions_deleted_at ON transactions (deleted_at)"
+    )
+    op.execute("CREATE INDEX IF NOT EXISTS ix_shifts_deleted_at ON shifts (deleted_at)")
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_queue_items_deleted_at ON queue_items (deleted_at)"
     )
 
-    # Doctor search indexes
-    op.create_index(
-        op.f("ix_doctors_full_name"), "doctors", ["full_name"], unique=False
+    # Patient search indexes - create only if they don't exist
+    op.execute("CREATE INDEX IF NOT EXISTS ix_patients_phone ON patients (phone)")
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_patients_full_name ON patients (full_name)"
+    )
+    op.execute(
+        "CREATE INDEX IF NOT EXISTS ix_patients_birth_date ON patients (birth_date)"
     )
 
-    # User search indexes
-    op.create_index(
-        op.f("ix_users_username"), "users", ["username"], unique=False
-    )
+    # Doctor search indexes - create only if they don't exist
+    op.execute("CREATE INDEX IF NOT EXISTS ix_doctors_full_name ON doctors (full_name)")
+
+    # User search indexes - create only if they don't exist
+    op.execute("CREATE INDEX IF NOT EXISTS ix_users_username ON users (username)")
 
 
 def downgrade() -> None:
@@ -90,13 +80,15 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_patients_birth_date"), table_name="patients")
     op.drop_index(op.f("ix_patients_full_name"), table_name="patients")
     op.drop_index(op.f("ix_patients_phone"), table_name="patients")
-    op.drop_index(op.f("ix_queue_items_deleted_at"), table_name="queue_items")
-    op.drop_index(op.f("ix_shifts_deleted_at"), table_name="shifts")
-    op.drop_index(op.f("ix_transactions_deleted_at"), table_name="transactions")
-    op.drop_index(op.f("ix_appointments_deleted_at"), table_name="appointments")
-    op.drop_index(op.f("ix_users_deleted_at"), table_name="users")
-    op.drop_index(op.f("ix_doctors_deleted_at"), table_name="doctors")
-    op.drop_index(op.f("ix_patients_deleted_at"), table_name="patients")
+
+    # Drop soft delete indexes only if they exist
+    op.execute("DROP INDEX IF EXISTS ix_queue_items_deleted_at")
+    op.execute("DROP INDEX IF EXISTS ix_shifts_deleted_at")
+    op.execute("DROP INDEX IF EXISTS ix_transactions_deleted_at")
+    op.execute("DROP INDEX IF EXISTS ix_appointments_deleted_at")
+    op.execute("DROP INDEX IF EXISTS ix_users_deleted_at")
+    op.execute("DROP INDEX IF EXISTS ix_doctors_deleted_at")
+    op.execute("DROP INDEX IF EXISTS ix_patients_deleted_at")
 
     op.drop_index(op.f("ix_queue_items_queue_date"), table_name="queue_items")
     op.drop_index(op.f("ix_queue_items_status"), table_name="queue_items")

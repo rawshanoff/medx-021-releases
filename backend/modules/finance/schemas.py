@@ -15,6 +15,7 @@ class TransactionCreate(BaseModel):
     card_amount: int = Field(default=0, ge=0, le=10_000_000)
     transfer_amount: int = Field(default=0, ge=0, le=10_000_000)
     description: Optional[str] = None
+    idempotency_key: Optional[str] = None
 
     @field_validator("amount")
     @classmethod
@@ -51,6 +52,7 @@ class TransactionRead(TransactionCreate):
     id: int
     shift_id: int
     created_at: datetime
+    related_transaction_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -76,7 +78,7 @@ class ShiftRead(ShiftCreate):
 class ReportXRead(BaseModel):
     type: str
     shift_id: int
-    cashier: int | None
+    cashier: str | None
     total_cash: int
     total_card: int
     total_transfer: int

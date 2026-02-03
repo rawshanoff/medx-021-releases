@@ -1,6 +1,6 @@
 import enum
 
-from backend.core.database import Base, SoftDeleteMixin
+from backend.core.database import Base
 from sqlalchemy import (
     Column,
     Date,
@@ -20,7 +20,7 @@ class QueueStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
 
 
-class QueueItem(SoftDeleteMixin, Base):
+class QueueItem(Base):
     __tablename__ = "queue_items"
     __table_args__ = (
         UniqueConstraint(

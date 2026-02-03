@@ -41,3 +41,10 @@ license_server/license_registry.json
 
 # Archive docs (not tracked)
 docs/archive/
+
+# Frontend test coverage output
+frontend/coverage/
+
+# Root-level accidental Node artifacts (frontend has its own)
+/package.json
+/package-lock.json

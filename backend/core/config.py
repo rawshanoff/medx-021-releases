@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -30,10 +31,8 @@ class Settings(BaseSettings):
     LICENSE_PUBLIC_KEY_PATH: str = "license_server/public_key.pem"
 
     # Updates
-    UPDATE_CHECK_URL: str = (
-        ""  # URL для проверки обновлений (например, https://update.medx.com/latest.json)
-    )
-    CURRENT_VERSION: str = "1.0.0-mvp"  # Текущая версия приложения
+    UPDATE_CHECK_URL: str = ""  # URL для проверки обновлений (через .env)
+    CURRENT_VERSION: str = "1.0.0-mvp"  # Will be overwritten by _load_version
 
     # CORS
     CORS_ORIGINS: str = (
@@ -55,20 +54,46 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if not self.LICENSE_PUBLIC_KEY:
+        # License public key is optional for dev; paid features will be fail-closed.
+        # If a path is provided, we'll try to load it.
+        if not self.LICENSE_PUBLIC_KEY and self.LICENSE_PUBLIC_KEY_PATH:
             self.LICENSE_PUBLIC_KEY = self._load_public_key()
+
+        # Load version from file if exists
+        self.CURRENT_VERSION = self._load_version()
+
+    def _load_version(self) -> str:
+        try:
+            repo_root = Path(__file__).resolve().parents[2]
+            version_file = repo_root / "VERSION"
+            if version_file.exists():
+                return version_file.read_text(encoding="utf-8").strip()
+        except Exception:
+            pass
+        return "1.0.0-mvp"
 
     def _load_public_key(self) -> str:
         path = self.LICENSE_PUBLIC_KEY_PATH
+        if not path:
+            return ""
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 return f.read()
 
-        raise FileNotFoundError(
-            f"LICENSE_PUBLIC_KEY not provided and key file not found at {path}"
-        )
+        # If key file is missing, do not crash the whole app: paid features will be disabled.
+        # (Still fail-closed: require_features() will see no active features.)
+        return ""
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    _REPO_ROOT = Path(__file__).resolve().parents[2]
+    model_config = SettingsConfigDict(
+        # Support both repo-root ".env" and "backend/.env" to make local dev painless.
+        env_file=(
+            str(_REPO_ROOT / ".env"),
+            str(_REPO_ROOT / "backend" / ".env"),
+        ),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()
