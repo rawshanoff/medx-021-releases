@@ -3,6 +3,7 @@ import enum
 from backend.core.database import Base, SoftDeleteMixin
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
@@ -25,3 +26,6 @@ class User(SoftDeleteMixin, Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    system_settings = relationship("SystemSetting", back_populates="user", cascade="all, delete-orphan")

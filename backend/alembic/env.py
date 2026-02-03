@@ -6,6 +6,13 @@ from backend.core.config import settings
 from backend.core.database import Base
 
 # Import all models explicitly to register with Base.metadata
+from backend.modules.users.models import User
+from backend.modules.doctors.models import Doctor
+from backend.modules.patients.models import Patient
+from backend.modules.finance.models import Shift, Transaction, FinanceAuditLog
+from backend.modules.files.models import PatientFile
+from backend.modules.system.models import SystemSetting, SystemAuditLog
+
 from sqlalchemy import create_engine, pool
 from sqlalchemy.engine.url import make_url
 
