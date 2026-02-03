@@ -1148,6 +1148,15 @@ export default function System() {
             {t('common.reset') || 'Сбросить'}
           </Button>
         </div>
+
+        <div className="mt-4 border-t border-border pt-4">
+          <SettingHistory
+            settingKey="print_config"
+            onRollback={() => {
+              showToast('Откат выполнен', 'success');
+            }}
+          />
+        </div>
       </SettingsModal>
 
       <SettingsModal
