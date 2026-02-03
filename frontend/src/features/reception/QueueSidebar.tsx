@@ -32,8 +32,9 @@ export function QueueSidebar({
           size="icon"
           className="h-[40px] w-[40px]"
           title={t('reception.print', { defaultValue: 'Печать' })}
-          onClick={() => {
-            const settings = { ...getPrintSettings(), autoPrint: true };
+          onClick={async () => {
+            const loadedSettings = await getPrintSettings();
+            const settings = { ...loadedSettings, autoPrint: true };
             const first = queue.find((q) => q.status === 'WAITING') || queue[0];
             if (!first) return;
             const cached = loadReceiptForTicket(first.ticket_number);
@@ -103,8 +104,9 @@ export function QueueSidebar({
                 size="icon"
                 className="h-[40px] w-[40px]"
                 title={t('reception.print_ticket', { defaultValue: 'Печать талона' })}
-                onClick={() => {
-                  const settings = { ...getPrintSettings(), autoPrint: true };
+                onClick={async () => {
+                  const loadedSettings = await getPrintSettings();
+                  const settings = { ...loadedSettings, autoPrint: true };
                   const cached = loadReceiptForTicket(item.ticket_number);
                   if (cached) {
                     printReceipt(cached, settings);

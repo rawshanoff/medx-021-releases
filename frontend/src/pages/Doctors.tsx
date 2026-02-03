@@ -25,6 +25,7 @@ export default function Doctors() {
   const [newDocName, setNewDocName] = useState('');
   const [newDocSpec, setNewDocSpec] = useState('');
   const [newDocPrefix, setNewDocPrefix] = useState(''); // Added prefix state
+  const [newDocRoom, setNewDocRoom] = useState('');
 
   // Logs
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -75,6 +76,7 @@ export default function Doctors() {
       const payload: Record<string, unknown> = {
         full_name: newDocName,
         specialty: newDocSpec,
+        room_number: newDocRoom.trim() || undefined,
         is_active: true,
         services: [],
       };
@@ -88,6 +90,7 @@ export default function Doctors() {
       setNewDocName('');
       setNewDocSpec('');
       setNewDocPrefix('');
+      setNewDocRoom('');
       fetchDoctors();
       addLog('Create Doctor', `Created ${newDocName} (Prefix: ${newDocPrefix})`);
       showToast(t('doctors.created', { defaultValue: 'Врач создан' }), 'success');
@@ -139,7 +142,7 @@ export default function Doctors() {
         onClose={() => setCreateOpen(false)}
         width={860}
       >
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1.2fr_0.7fr]">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1.2fr_0.7fr_0.9fr]">
           <div>
             <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               {t('doctors.full_name', { defaultValue: 'ФИО' })}
@@ -172,6 +175,18 @@ export default function Doctors() {
               value={newDocPrefix}
               onChange={(e) => setNewDocPrefix(e.target.value)}
               maxLength={1}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              {t('doctors.room_number', { defaultValue: 'Кабинет' })}
+            </label>
+            <Input
+              className="h-10 text-[13px]"
+              placeholder={t('doctors.room_number_placeholder', { defaultValue: 'Напр. 3' })}
+              value={newDocRoom}
+              onChange={(e) => setNewDocRoom(e.target.value)}
+              maxLength={32}
             />
           </div>
         </div>
@@ -324,6 +339,7 @@ function DoctorCard({
   const [editName, setEditName] = useState(doctor.full_name);
   const [editSpec, setEditSpec] = useState(doctor.specialty);
   const [editPrefix, setEditPrefix] = useState(doctor.queue_prefix || '');
+  const [editRoom, setEditRoom] = useState(doctor.room_number || '');
 
   const handleAddService = async () => {
     if (!svcName) return;
@@ -376,6 +392,7 @@ function DoctorCard({
       await client.put(`/doctors/${doctor.id}`, {
         full_name: editName,
         specialty: editSpec,
+        room_number: editRoom.trim() || null,
         queue_prefix: prefix.slice(0, 1),
       });
       setEditOpen(false);
@@ -399,6 +416,11 @@ function DoctorCard({
               <div className="max-w-[520px] truncate text-[15px] font-medium leading-[20px]">
                 {doctor.full_name}
               </div>
+              {doctor.room_number ? (
+                <span className="rounded-sm bg-secondary px-2 py-0.5 text-[13px] font-medium text-secondary-foreground">
+                  {t('doctors.room', { defaultValue: 'Каб.' })} {doctor.room_number}
+                </span>
+              ) : null}
               <span className="rounded-sm bg-primary px-2 py-0.5 text-[13px] font-medium text-primary-foreground">
                 {doctor.queue_prefix}
               </span>
@@ -607,7 +629,7 @@ function DoctorCard({
         onClose={() => setEditOpen(false)}
         width={860}
       >
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1.2fr_0.7fr]">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1.2fr_0.7fr_0.9fr]">
           <div>
             <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
               {t('doctors.full_name', { defaultValue: 'ФИО' })}
@@ -637,6 +659,18 @@ function DoctorCard({
               value={editPrefix}
               onChange={(e) => setEditPrefix(e.target.value)}
               maxLength={1}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[13px] font-medium text-muted-foreground">
+              {t('doctors.room_number', { defaultValue: 'Кабинет' })}
+            </label>
+            <Input
+              className="h-10 text-[13px]"
+              value={editRoom}
+              onChange={(e) => setEditRoom(e.target.value)}
+              maxLength={32}
+              placeholder={t('doctors.room_number_placeholder', { defaultValue: 'Напр. 3' })}
             />
           </div>
         </div>

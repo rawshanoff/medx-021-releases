@@ -35,7 +35,8 @@
     "type": "Тип",
     "failed": "Ошибка",
     "create": "Создать",
-    "notifications": "Уведомления"
+    "notifications": "Уведомления",
+    "error_occurred": "Произошла ошибка"
   },
   "nav": {
     "dashboard": "Ресепшн",
@@ -134,6 +135,18 @@
     "remaining": "Осталось",
     "excess": "Излишек",
     "payment_complete": "Оплата завершена!",
+    "total_paid": "Оплачено",
+    "amount_remaining": "Осталось оплатить",
+    "progress": "Прогресс оплаты",
+    "pay_all_cash": "Всё наличными",
+    "pay_remaining_card": "Остаток картой",
+    "split_half": "Разделить пополам",
+    "suggestion": "Подсказка",
+    "suggest_cash": "рекомендуем оплатить наличными",
+    "suggest_card": "рекомендуем оплатить картой",
+    "overpayment": "Переплата",
+    "keyboard_hint": "Подсказка по клавиатуре",
+    "to_navigate": "для навигации",
     "no_results": "Пациенты не найдены",
     "create_new": "Создать нового пациента",
     "sample_first_name": "Улугбек или Ulug'bek",
@@ -149,7 +162,9 @@
     "refund_confirm": "Вы уверены, что хотите вернуть оплату?",
     "refund_success": "Возврат выполнен",
     "refund_failed": "Ошибка возврата",
-    "refund_only_waiting": "Возврат возможен только для неначатых приемов"
+    "refund_only_waiting": "Возврат возможен только для неначатых приемов",
+    "service": "Услуга",
+    "select_doctor_service": "Выберите врача и услугу"
   },
   "patients": {
     "title": "Пациенты",
@@ -203,7 +218,10 @@
     "service_added": "Услуга добавлена",
     "service_add_failed": "Не удалось добавить услугу",
     "service_deleted": "Услуга удалена",
-    "service_delete_failed": "Не удалось удалить услугу"
+    "service_delete_failed": "Не удалось удалить услугу",
+    "room": "Каб.",
+    "room_number": "Кабинет",
+    "room_number_placeholder": "Напр. 3"
   },
   "finance": {
     "title": "Финансы",
@@ -222,7 +240,25 @@
     "cash": "Наличные",
     "card": "Карта",
     "x_report": "X-отчёт",
-    "z_report": "Z-отчёт"
+    "z_report": "Z-отчёт",
+    "cash_flow": "Касса / Cash Flow",
+    "shift_hint": "Управление сменами, расходы, отчёты",
+    "new_transaction": "Новый расход",
+    "reports_desc": "X/Z отчёты + PRO отчёты",
+    "day_cash": "Касса за день",
+    "day_cash_desc": "Доступно в PRO отчётах",
+    "expense_modal_desc": "Создайте новый расход для текущей смены",
+    "total_amount": "Сумма",
+    "payment_method": "Тип оплаты",
+    "expense_placeholder": "Например: Покупка канцтоваров",
+    "processing": "Обработка…",
+    "charge_btn": "Списать",
+    "recent_transactions": "Последние операции",
+    "no_transactions": "Нет операций",
+    "close_shift_confirm": "Закрыть смену?",
+    "close_shift_desc": "Проверьте финальный отчет перед закрытием смены",
+    "final_report": "Финальный отчет смены",
+    "close_shift_warning": "После закрытия смены данные будут зафиксированы и больше нельзя будет добавлять операции."
   },
   "reports": {
     "basic": "Базовые отчёты (бесплатно)",
@@ -253,6 +289,28 @@
     "latest_version": "Последняя версия",
     "check_updates": "Проверить обновления",
     "install_update": "Установить обновление",
-    "update_url_not_configured": "URL для проверки обновлений не настроен"
+    "update_url_not_configured": "URL для проверки обновлений не настроен",
+    "failed_check_updates": "Не удалось проверить обновления",
+    "license_load_failed": "Не удалось загрузить лицензию",
+    "user_created": "Пользователь создан",
+    "user_create_failed": "Не удалось создать пользователя. Имя пользователя может существовать.",
+    "user_deleted": "Пользователь удалён",
+    "user_delete_failed": "Не удалось удалить пользователя",
+    "settings_loaded": "Настройки загружены из сохранённых",
+    "remove_logo": "Удалить логотип",
+    "generate_qr": "Сгенерировать QR",
+    "qr_link_required": "Сначала укажите QR ссылку",
+    "qr_saved": "QR сохранён",
+    "saved": "Сохранено",
+    "printers_electron_only": "Список принтеров доступен только в Electron",
+    "test_electron_only": "Тест доступен только в Electron",
+    "printer_required": "Сначала выберите deviceName принтера",
+    "sent_to_print": "Отправлено в печать",
+    "printing_error": "Ошибка печати",
+    "electron_only": "Доступно только в Electron",
+    "debug_copied": "Debug скопирован",
+    "debug_copy_failed": "Не удалось скопировать debug",
+    "printer_selected": "Выбран принтер",
+    "update_installation_todo": "Установка обновлений будет реализована"
   }
 }

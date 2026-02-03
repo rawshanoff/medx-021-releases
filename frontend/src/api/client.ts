@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { clearAuth, getToken, isTokenExpired } from '../utils/auth';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+// Prefer relative URL in dev/prod when frontend is served behind a proxy.
+// You can still override via VITE_API_URL, e.g. http://127.0.0.1:8000/api
+export const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
 
 const client = axios.create({
   baseURL: API_URL,
@@ -28,11 +30,6 @@ client.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  const licenseKey = localStorage.getItem('medx_license_key');
-  if (licenseKey) {
-    config.headers['X-License-Key'] = licenseKey;
-  }
-
   return config;
 });
 
@@ -45,13 +42,20 @@ client.interceptors.response.use(
     emitEvent('api:loading', { delta: -1 });
 
     const status = error?.response?.status;
+
     if (status === 401) {
       clearAuth();
       emitEvent('auth:logout', { reason: 'unauthorized' });
       return Promise.reject(error);
     }
 
-    const message = error?.response?.data?.detail || error?.message || 'Ошибка запроса';
+    const detail = error?.response?.data?.detail;
+    const message =
+      typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail) && detail[0]?.msg
+          ? String(detail[0].msg)
+          : error?.message || 'Ошибка запроса';
     if (status === 403) {
       emitEvent('api:error', { message: message || 'Нет доступа' });
       return Promise.reject(error);

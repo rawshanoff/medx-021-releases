@@ -5,7 +5,7 @@ import { cn } from '../lib/cn';
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface Toast {
-  id: number;
+  id: string;
   message: string;
   type: ToastType;
 }
@@ -28,7 +28,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = Date.now();
+    // Date.now() can collide when multiple toasts are created in the same ms.
+    const id =
+      globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     setToasts((prev) => [...prev, { id, message, type }]);
 
     setTimeout(() => {
@@ -36,7 +38,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, 5000);
   }, []);
 
-  const removeToast = (id: number) => {
+  const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 

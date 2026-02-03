@@ -19,6 +19,7 @@ import { useToast } from '../context/ToastContext';
 import { hasAnyRole } from '../utils/auth';
 import {
   buildReceiptHtml,
+  defaultSettings,
   getPrintSettings,
   openPrintWindow,
   printReceipt,
@@ -113,7 +114,7 @@ export default function System() {
     download_url: string | null;
   } | null>(null);
   const [checkingUpdates, setCheckingUpdates] = useState(false);
-  const [printSettings, setLocalPrintSettings] = useState(() => getPrintSettings());
+  const [printSettings, setLocalPrintSettings] = useState(defaultSettings());
   const [printers, setPrinters] = useState<
     Array<{ name: string; displayName: string; isDefault: boolean }>
   >([]);
@@ -200,7 +201,7 @@ export default function System() {
       try {
         const res = await client.post('/licenses/upload', { token: content });
         // keep local copy for convenience (client may show/hide features)
-        localStorage.setItem('medx_license_key', content);
+        // localStorage.setItem('medx_license_key', content); - REMOVED for security
         if (res.data?.error) {
           setLicenseStatus(`${t('common.inactive')}: ${res.data.error}`);
           setActiveFeatures([]);
@@ -294,9 +295,26 @@ export default function System() {
           subtitle={t('system.reset_settings_desc')}
           icon={<Settings size={18} />}
           onClick={() => {
-            setLocalPrintSettings(getPrintSettings());
-            showToast('Настройки загружены из сохранённых', 'success');
+            getPrintSettings()
+              .then((s) => {
+                setLocalPrintSettings(s);
+                showToast(t('system.settings_loaded'), 'success');
+              })
+              .catch(() => {
+                showToast(
+                  t('system.settings_load_failed', {
+                    defaultValue: 'Не удалось загрузить настройки',
+                  }),
+                  'error',
+                );
+              });
           }}
+        />
+        <SettingsTile
+          title={t('system.audit_log', { defaultValue: 'История изменений' })}
+          subtitle={t('system.audit_log_desc', { defaultValue: 'Кто и когда менял настройки' })}
+          icon={<Settings size={18} />}
+          onClick={() => navigate('/system/audit')}
         />
       </div>
 
@@ -412,7 +430,7 @@ export default function System() {
                   type="button"
                   onClick={() => setLocalPrintSettings((p) => ({ ...p, logoDataUrl: '' }))}
                 >
-                  Удалить логотип
+                  {t('system.remove_logo')}
                 </Button>
               </div>
             ) : null}
@@ -503,7 +521,7 @@ export default function System() {
                   reader.readAsDataURL(blob);
                 }}
               >
-                Сгенерировать QR
+                {t('system.generate_qr')}
               </Button>
             </div>
 
@@ -905,7 +923,9 @@ export default function System() {
                   className="h-4 w-4 accent-primary"
                   type="checkbox"
                   checked={printSettings.showQr !== false}
-                  onChange={(e) => setLocalPrintSettings((p) => ({ ...p, showQr: e.target.checked }))}
+                  onChange={(e) =>
+                    setLocalPrintSettings((p) => ({ ...p, showQr: e.target.checked }))
+                  }
                 />
                 <span>Показывать QR</span>
               </label>

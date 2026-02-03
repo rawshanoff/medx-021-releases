@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import '../i18n';
 import { Button } from '../components/ui/button';
 import { cn } from '../lib/cn';
+import client from '../api/client';
 
 export default function Activation() {
   const { t } = useTranslation();
@@ -32,8 +33,8 @@ export default function Activation() {
     reader.onload = async (e) => {
       const content = e.target?.result as string;
       try {
-        localStorage.setItem('medx_license_key', content);
-        setTimeout(() => navigate('/'), 1000);
+        await client.post('/licenses/upload', { token: content });
+        navigate('/');
       } catch (err) {
         setError(t('auth.invalid_key'));
       } finally {

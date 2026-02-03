@@ -1,3 +1,5 @@
+import client from '../api/client';
+
 export type PrintSettings = {
   clinicName: string;
   clinicPhone: string;
@@ -11,6 +13,20 @@ export type PrintSettings = {
   boldAllText: boolean; // make whole receipt bold for readability
   showTotalAmount: boolean; // show money totals / amounts on receipt
   showPaymentType: boolean; // show payment type line on receipt
+  // Fine-grained receipt visibility toggles
+  showLogo: boolean;
+  showClinicName: boolean;
+  showClinicPhone: boolean;
+  showClinicAddress: boolean;
+  showDateTime: boolean;
+  showQueue: boolean;
+  showPatientName: boolean;
+  showDoctor: boolean;
+  showDoctorRoom: boolean;
+  showServices: boolean;
+  showQr: boolean;
+  showUnderQrText: boolean;
+  showFooterNote: boolean;
   silentPrintMode: 'html' | 'image'; // Electron silent printing mode
   silentScalePercent: number; // Electron webContents.print scaleFactor (10..200)
   receiptWidthMode: 'standard' | 'safe'; // full width vs safe width with margins
@@ -20,27 +36,51 @@ export type PrintSettings = {
   qrImageDataUrl: string; // generated once; used instead of remote QR
 };
 
-const STORAGE_KEY = 'medx-print-settings';
 const RECEIPT_STORAGE_PREFIX = 'medx-receipt:';
 
 export type ReceiptTemplateId = 'check-4-58' | 'check-1' | 'check-6';
 
-export function getPrintSettings(): PrintSettings {
+/**
+ * Get print settings from server (via API).
+ * Falls back to defaults if not found.
+ *
+ * Called on app startup or manually refreshed.
+ */
+export async function getPrintSettings(): Promise<PrintSettings> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultSettings();
-    const parsed = JSON.parse(raw) as Partial<PrintSettings>;
-    return { ...defaultSettings(), ...parsed };
-  } catch {
-    return defaultSettings();
+    const response = await client.get('/system/settings/print_config');
+    const value = response.data?.value || response.data;
+    if (value && typeof value === 'object') {
+      return { ...defaultSettings(), ...value } as PrintSettings;
+    }
+  } catch (e) {
+    console.warn('Failed to load print settings from server, using defaults:', e);
   }
+  return defaultSettings();
 }
 
-export function setPrintSettings(next: PrintSettings) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+/**
+ * Save print settings to server (via API).
+ *
+ * Returns the saved settings from server.
+ */
+export async function setPrintSettings(next: PrintSettings): Promise<PrintSettings> {
+  try {
+    const response = await client.put('/system/settings/print_config', {
+      value: next,
+    });
+    const value = response.data?.value || response.data;
+    if (value && typeof value === 'object') {
+      return value as PrintSettings;
+    }
+  } catch (e) {
+    console.error('Failed to save print settings to server:', e);
+    throw e;
+  }
+  return next;
 }
 
-function defaultSettings(): PrintSettings {
+export function defaultSettings(): PrintSettings {
   return {
     clinicName: 'MedX Clinic',
     clinicPhone: '',
@@ -54,6 +94,19 @@ function defaultSettings(): PrintSettings {
     boldAllText: true,
     showTotalAmount: true,
     showPaymentType: true,
+    showLogo: true,
+    showClinicName: true,
+    showClinicPhone: true,
+    showClinicAddress: true,
+    showDateTime: true,
+    showQueue: true,
+    showPatientName: true,
+    showDoctor: true,
+    showDoctorRoom: true,
+    showServices: true,
+    showQr: true,
+    showUnderQrText: true,
+    showFooterNote: true,
     silentPrintMode: 'image',
     silentScalePercent: 100,
     receiptWidthMode: 'standard',
@@ -199,6 +252,8 @@ export type ReceiptPayload = {
   ticket: string; // A-021
   createdAtIso: string; // ISO string
   patientName: string;
+  doctorName?: string;
+  doctorRoom?: string;
   serviceName: string;
   amount: number;
   currency: string;
@@ -260,6 +315,8 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
   const showTotal = s.showTotalAmount !== false;
   const showPayment = s.showPaymentType !== false;
   const payLabel = formatPaymentUz(p.paymentMethod, p.paymentBreakdown, p.currency, showTotal);
+  const doctor = (p.doctorName || '').trim();
+  const doctorRoom = (p.doctorRoom || '').trim();
   const widthMm = s.paperSize === '58' ? 58 : 80;
   const contentMm = s.receiptWidthMode === 'safe' ? (s.paperSize === '58' ? 54 : 76) : widthMm;
   const qr = s.qrUrl ? escapeHtml(s.qrUrl) : '';
@@ -267,6 +324,13 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
   const logo = (s.logoDataUrl || '').trim();
   const qrImage = (s.qrImageDataUrl || '').trim();
   const boldAll = Boolean(s.boldAllText);
+
+  const doctorLine =
+    s.showDoctor !== false && doctor
+      ? `<div class="queue-doctor">${escapeHtml(
+          doctor + (s.showDoctorRoom !== false && doctorRoom ? ` — ${doctorRoom}` : ''),
+        )}</div>`
+      : '';
 
   const commonHead = `
     <meta charset="UTF-8" />
@@ -290,6 +354,7 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
       .queue { text-align:center; margin: 8px 0; }
       .queue-label { font-size: 11px; text-transform: uppercase; }
       .queue-num { font-size: ${widthMm === 58 ? '42px' : '44px'}; font-weight: 900; letter-spacing: 2px; line-height: 1; }
+      .queue-doctor { margin-top: 4px; font-size: ${widthMm === 58 ? '12px' : '13px'}; font-weight: 900; }
       .title { font-weight: 800; margin-top: 4px; font-size: 12px; }
       .value { font-weight: 900; font-size: 13px; word-break: break-word; }
       .total { display:flex; justify-content:space-between; font-weight: 900; font-size: 14px; }
@@ -301,35 +366,55 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
 
   const headerBlock = `
     <div class="center">
-      <div class="logo">${escapeHtml(s.clinicName || 'KLINIKA')}</div>
+      ${
+        s.showClinicName !== false
+          ? `<div class="logo">${escapeHtml(s.clinicName || 'KLINIKA')}</div>`
+          : ``
+      }
       <div class="sub">
-        ${s.clinicAddress ? `${escapeHtml(s.clinicAddress)}<br>` : ''}
-        ${s.clinicPhone ? `tel: ${escapeHtml(s.clinicPhone)}` : ''}
+        ${
+          s.showClinicAddress !== false && s.clinicAddress
+            ? `${escapeHtml(s.clinicAddress)}<br>`
+            : ``
+        }
+        ${s.showClinicPhone !== false && s.clinicPhone ? `tel: ${escapeHtml(s.clinicPhone)}` : ``}
       </div>
     </div>
   `;
 
-  const logoBlock = `
+  const logoBlock =
+    s.showLogo !== false
+      ? `
     <div class="logo-slot">
       ${logo ? `<img class="logo-img" src="${escapeHtml(logo)}" alt="logo" />` : ''}
     </div>
-  `;
+  `
+      : ``;
 
-  const footer = `
+  const footer =
+    s.showFooterNote !== false
+      ? `
     <div class="divider"></div>
     <div class="center small">
       ${s.footerNote ? escapeHtml(s.footerNote) : 'Спасибо за доверие!'}
     </div>
-  `;
+  `
+      : ``;
 
-  const underQrLine = underQr ? `<div class="underqr">${escapeHtml(underQr)}</div>` : '';
+  const underQrLine =
+    s.showUnderQrText !== false && underQr
+      ? `<div class="underqr">${escapeHtml(underQr)}</div>`
+      : '';
 
-  const qrImg = qrImage
-    ? `<img class="qr" src="${escapeHtml(qrImage)}" alt="QR">`
-    : qr
-      ? `<img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data=${encodeURIComponent(
-          s.qrUrl,
-        )}" alt="QR">`
+  const qrImg =
+    s.showQr !== false
+      ? qrImage
+        ? `<img class="qr" src="${escapeHtml(qrImage)}" alt="QR">`
+        : qr
+          ? `<img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data=${encodeURIComponent(
+              s.qrUrl,
+            )}" alt="QR">`
+          : ''
       : '';
 
   if (s.receiptTemplateId === 'check-4-58') {
@@ -351,21 +436,38 @@ ${commonHead}
     ${logoBlock}
     ${headerBlock}
     <div class="divider"></div>
-    <div class="row"><span>${escapeHtml(dateStr)} ${escapeHtml(timeStr)}</span><span></span></div>
+    ${
+      s.showDateTime !== false
+        ? `<div class="row"><span>${escapeHtml(dateStr)} ${escapeHtml(timeStr)}</span><span></span></div>`
+        : ``
+    }
     <div class="divider"></div>
 
-    <div class="queue queue-box">
+    ${
+      s.showQueue !== false
+        ? `<div class="queue queue-box">
       <div class="queue-label">NAVBAT RAQAMINGIZ</div>
       <div class="queue-num">${escapeHtml(p.ticket)}</div>
-    </div>
+      ${doctorLine}
+    </div>`
+        : ``
+    }
 
-    <div class="title">Bemor (Mijoz):</div>
-    <div class="value">${escapeHtml(p.patientName)}</div>
+    ${
+      s.showPatientName !== false
+        ? `<div class="title">Bemor (Mijoz):</div>
+    <div class="value">${escapeHtml(p.patientName)}</div>`
+        : ``
+    }
 
     <div class="divider"></div>
 
-    <div class="title">Xizmat turi:</div>
-    <div class="value">${escapeHtml(p.serviceName)}</div>
+    ${
+      s.showServices !== false
+        ? `<div class="title">Xizmat turi:</div>
+    <div class="value">${escapeHtml(p.serviceName)}</div>`
+        : ``
+    }
 
     <div class="divider"></div>
 
@@ -410,15 +512,28 @@ ${commonHead}
     <div class="wrap">
       ${headerBlock}
       <div class="divider"></div>
-      <div class="center"><strong>${escapeHtml(dateStr)} ${escapeHtml(timeStr)}</strong></div>
+      ${
+        s.showDateTime !== false
+          ? `<div class="center"><strong>${escapeHtml(dateStr)} ${escapeHtml(timeStr)}</strong></div>`
+          : ``
+      }
       <div class="divider"></div>
-      <div style="text-align:left">
-        Bemor: <strong>${escapeHtml(p.patientName)}</strong><br><br>
-        Sizning navbat raqamingiz:
-      </div>
-      <div class="queue-num">${escapeHtml(p.ticket)}</div>
+      ${
+        s.showPatientName !== false || s.showQueue !== false
+          ? `<div style="text-align:left">
+        ${s.showPatientName !== false ? `Bemor: <strong>${escapeHtml(p.patientName)}</strong><br><br>` : ``}
+        ${s.showQueue !== false ? `Sizning navbat raqamingiz:` : ``}
+      </div>`
+          : ``
+      }
+      ${
+        s.showQueue !== false
+          ? `<div class="queue-num">${escapeHtml(p.ticket)}</div>${doctorLine}`
+          : ``
+      }
+      ${doctorLine}
       <div class="divider"></div>
-      <div class="service">${escapeHtml(p.serviceName)}</div>
+      ${s.showServices !== false ? `<div class="service">${escapeHtml(p.serviceName)}</div>` : ``}
       ${showTotal ? `<div class="price">${escapeHtml(money)} ${escapeHtml(p.currency)}</div>` : ``}
       <div class="divider"></div>
       ${showPayment ? `<div class="small">To'lov turi: ${escapeHtml(payLabel)}</div>` : ``}
@@ -450,21 +565,36 @@ ${commonHead}
     ${logoBlock}
     ${headerBlock}
     <div class="divider"></div>
-    <div class="row"><span>Sana:</span><span>${escapeHtml(dateStr)}</span></div>
-    <div class="row"><span>Vaqt:</span><span>${escapeHtml(timeStr)}</span></div>
+    ${
+      s.showDateTime !== false
+        ? `<div class="row"><span>Sana:</span><span>${escapeHtml(dateStr)}</span></div>
+    <div class="row"><span>Vaqt:</span><span>${escapeHtml(timeStr)}</span></div>`
+        : ``
+    }
     <div class="divider"></div>
 
-    <div class="title">Bemor:</div>
-    <div class="value">${escapeHtml(p.patientName)}</div>
+    ${
+      s.showPatientName !== false
+        ? `<div class="title">Bemor:</div>
+    <div class="value">${escapeHtml(p.patientName)}</div>`
+        : ``
+    }
     <div class="divider"></div>
 
-    <div class="queue">
+    ${
+      s.showQueue !== false
+        ? `<div class="queue">
       <div class="queue-label">Sizning navbat raqamingiz</div>
       <div class="queue-num">${escapeHtml(p.ticket)}</div>
-    </div>
+      ${doctorLine}
+    </div>`
+        : ``
+    }
     <div class="divider"></div>
 
-    <div class="title">Ko'rsatiladigan xizmatlar:</div>
+    ${
+      s.showServices !== false
+        ? `<div class="title">Ko'rsatiladigan xizmatlar:</div>
     <div class="table-header">
       <span class="col-service">Xizmat</span>
       <span class="col-qty">Soni</span>
@@ -474,7 +604,9 @@ ${commonHead}
       <span class="col-service">${escapeHtml(p.serviceName)}</span>
       <span class="col-qty">1</span>
       <span class="col-price">${showTotal ? escapeHtml(money) : ''}</span>
-    </div>
+    </div>`
+        : ``
+    }
 
     <div class="divider"></div>
     ${showTotal ? `<div class="total"><span>Jami to'lov:</span><span>${escapeHtml(money)} ${escapeHtml(p.currency)}</span></div>` : ``}

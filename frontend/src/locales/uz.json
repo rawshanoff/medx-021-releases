@@ -35,7 +35,8 @@
     "type": "Turi",
     "failed": "Xatolik",
     "create": "Yaratish",
-    "notifications": "Bildirishnomalar"
+    "notifications": "Bildirishnomalar",
+    "error_occurred": "Xatolik yuz berdi"
   },
   "nav": {
     "dashboard": "Qabulxona",
@@ -134,6 +135,18 @@
     "remaining": "Qoldi",
     "excess": "Ortiqcha",
     "payment_complete": "To'lov tugallandi!",
+    "total_paid": "To'langan",
+    "amount_remaining": "To'lash kerak",
+    "progress": "To'lov jarayoni",
+    "pay_all_cash": "Hammasini naqd",
+    "pay_remaining_card": "Qoldig'ini kartadan",
+    "split_half": "Teng ikkiga bo'lish",
+    "suggestion": "Taklif",
+    "suggest_cash": "naqd pul bilan to'lashni tavsiya qilamiz",
+    "suggest_card": "kartadan to'lashni tavsiya qilamiz",
+    "overpayment": "Ortiqcha to'lov",
+    "keyboard_hint": "Klaviatura yordami",
+    "to_navigate": "navigatsiya uchun",
     "no_results": "Bemorlar topilmadi",
     "create_new": "Yangi bemor yaratish",
     "sample_first_name": "Ulug'bek yoki Улугбек",
@@ -149,7 +162,9 @@
     "refund_confirm": "To'lovni qaytarishni xohlaysizmi?",
     "refund_success": "Qaytarish bajarildi",
     "refund_failed": "Qaytarishda xatolik",
-    "refund_only_waiting": "Qaytarish faqat boshlanmagan qabul uchun mavjud"
+    "refund_only_waiting": "Qaytarish faqat boshlanmagan qabul uchun mavjud",
+    "service": "Xizmat",
+    "select_doctor_service": "Shifokor va xizmatni tanlang"
   },
   "patients": {
     "title": "Bemorlar",
@@ -203,7 +218,10 @@
     "service_added": "Xizmat qo'shildi",
     "service_add_failed": "Xizmat qo'shishda xatolik",
     "service_deleted": "Xizmat o'chirildi",
-    "service_delete_failed": "Xizmatni o'chirishda xatolik"
+    "service_delete_failed": "Xizmatni o'chirishda xatolik",
+    "room": "Xona",
+    "room_number": "Xona raqami",
+    "room_number_placeholder": "masalan 3"
   },
   "finance": {
     "title": "Moliya",
@@ -222,7 +240,25 @@
     "cash": "Naqd",
     "card": "Karta",
     "x_report": "X-hisobot",
-    "z_report": "Z-hisobot"
+    "z_report": "Z-hisobot",
+    "cash_flow": "Kassa / Pul oqimi",
+    "shift_hint": "Smena boshqaruvi, xarajatlar, hisobotlar",
+    "new_transaction": "Yangi xarajat",
+    "reports_desc": "X/Z hisobotlar + PRO hisobotlar",
+    "day_cash": "Kunlik kassa",
+    "day_cash_desc": "PRO hisobotlarda mavjud",
+    "expense_modal_desc": "Joriy smena uchun yangi xarajat yarating",
+    "total_amount": "Summa",
+    "payment_method": "To'lov turi",
+    "expense_placeholder": "masalan: Kantselyariya mollari xaridi",
+    "processing": "Ishlanmoqda…",
+    "charge_btn": "Yozish",
+    "recent_transactions": "So'nggi operatsiyalar",
+    "no_transactions": "Operatsiyalar yo'q",
+    "close_shift_confirm": "Smenani yopish?",
+    "close_shift_desc": "Smena yopishdan oldin yakuniy hisobotni tekshiring",
+    "final_report": "Smena yakuniy hisoboti",
+    "close_shift_warning": "Smena yopilgandan keyin ma'lumotlar qulflanadi va boshqa operatsiyalar qo'shib bo'lmaydi."
   },
   "reports": {
     "basic": "Asosiy hisobotlar (bepul)",
@@ -253,6 +289,26 @@
     "latest_version": "Eng so'nggi versiya",
     "check_updates": "Yangilanishlarni tekshirish",
     "install_update": "Yangilanishni o'rnatish",
-    "update_url_not_configured": "Yangilanish tekshirish URL konfiguratsiya qilinmagan"
+    "update_url_not_configured": "Yangilanish tekshirish URL konfiguratsiya qilinmagan",
+    "failed_check_updates": "Yangilanishlarni tekshirib bo'lmadi",
+    "license_load_failed": "Litsenziyani yuklab bo'lmadi",
+    "user_created": "Foydalanuvchi yaratildi",
+    "user_create_failed": "Foydalanuvchini yaratib bo'lmadi. Foydalanuvchi nomi mavjud bo'lishi mumkin.",
+    "user_deleted": "Foydalanuvchi o'chirildi",
+    "user_delete_failed": "Foydalanuvchini o'chirib bo'lmadi",
+    "settings_loaded": "Sozlamalar saqlanganlardan yuklandi",
+    "qr_link_required": "Avval QR havolani ko'rsating",
+    "qr_saved": "QR saqlandi",
+    "saved": "Saqlandi",
+    "printers_electron_only": "Printerlar ro'yxati faqat Electron'da mavjud",
+    "test_electron_only": "Test faqat Electron'da mavjud",
+    "printer_required": "Avval printer deviceName-ni tanlang",
+    "sent_to_print": "Chop etishga yuborildi",
+    "printing_error": "Chop etish xatosi",
+    "electron_only": "Faqat Electron'da mavjud",
+    "debug_copied": "Debug nusxalandi",
+    "debug_copy_failed": "Debug-ni nusxalab bo'lmadi",
+    "printer_selected": "Printer tanlandi",
+    "update_installation_todo": "Yangilanish o'rnatish amalga oshiriladi"
   }
 }

@@ -15,6 +15,7 @@ import Patients from './pages/Patients';
 import Finance from './pages/Finance';
 import Doctors from './pages/Doctors';
 import System from './pages/System';
+import SystemAuditLogPage from './pages/SystemAuditLog';
 import Reports from './pages/Reports';
 import QueueTV from './pages/QueueTV';
 import Archive from './pages/Archive';
@@ -103,6 +104,14 @@ function App() {
                 }
               />
               <Route
+                path="/system/audit"
+                element={
+                  <ProtectedRoute roles={['admin', 'owner']}>
+                    <SystemAuditLogPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/doctors"
                 element={
                   <ProtectedRoute roles={['admin', 'owner', 'receptionist']}>
@@ -119,6 +128,9 @@ function App() {
                 }
               />
             </Route>
+
+            {/* Legacy/unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </ToastProvider>

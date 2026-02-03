@@ -148,12 +148,13 @@ export default function Reception() {
 
   const addToQueue = async (patientId: number, patientName: string, doctorId: number) => {
     try {
-      const res = await client.post('/reception/queue', {
+      const payload = {
         patient_name: patientName,
         patient_id: patientId,
         doctor_id: doctorId,
         status: 'WAITING',
-      });
+      };
+      const res = await client.post('/reception/queue', payload);
       await refreshQueue();
       return res.data.ticket_number;
     } catch (e) {
@@ -305,31 +306,9 @@ export default function Reception() {
                               onClick={async () => {
                                 if (!confirm(t('reception.refund_confirm'))) return;
                                 try {
-                                  // Create refund transaction (negative amount)
-                                  await client.post('/finance/transactions', {
-                                    patient_id: historyState.patient.id,
-                                    amount: -Math.abs(tx.amount),
-                                    payment_method: tx.payment_method,
-                                    description: `[REFUND] ${tx.description || ''}`,
-                                    doctor_id: tx.doctor_id,
-                                    cash_amount:
-                                      tx.payment_method === 'CASH'
-                                        ? -Math.abs(tx.amount)
-                                        : tx.payment_method === 'MIXED'
-                                          ? -Math.abs(tx.cash_amount || 0)
-                                          : 0,
-                                    card_amount:
-                                      tx.payment_method === 'CARD'
-                                        ? -Math.abs(tx.amount)
-                                        : tx.payment_method === 'MIXED'
-                                          ? -Math.abs(tx.card_amount || 0)
-                                          : 0,
-                                    transfer_amount:
-                                      tx.payment_method === 'TRANSFER'
-                                        ? -Math.abs(tx.amount)
-                                        : tx.payment_method === 'MIXED'
-                                          ? -Math.abs(tx.transfer_amount || 0)
-                                          : 0,
+                                  // Use proper refund endpoint instead of creating negative transaction directly
+                                  await client.post(`/finance/refund/${tx.id}`, {
+                                    reason: tx.description || 'No reason provided',
                                   });
                                   // Update queue status to CANCELLED
                                   if (relatedQueueItem) {
@@ -445,8 +424,8 @@ export default function Reception() {
         isOpen={mixedModalState.isOpen}
         onClose={() => setMixedModalState((prev) => ({ ...prev, isOpen: false }))}
         totalAmount={mixedModalState.total}
-        onConfirm={(c, cd, t) => {
-          mixedModalState.onConfirm(c, cd, t);
+        onConfirm={async (c, cd, t) => {
+          await mixedModalState.onConfirm(c, cd, t);
           setMixedModalState((prev) => ({ ...prev, isOpen: false }));
         }}
       />

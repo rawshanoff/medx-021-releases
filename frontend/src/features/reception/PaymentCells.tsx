@@ -18,6 +18,7 @@ type TransactionCreatePayload = {
   cash_amount?: number;
   card_amount?: number;
   transfer_amount?: number;
+  idempotency_key?: string;
 };
 
 export function PaymentCells({
@@ -106,6 +107,7 @@ export function PaymentCells({
         doctor_id: selectedDoctorId,
         payment_method: paymentMethod,
         description: svcName,
+        idempotency_key: crypto.randomUUID(),
       };
 
       if (paymentMethod === 'MIXED') {
@@ -126,13 +128,16 @@ export function PaymentCells({
 
       // Print receipt after payment (based on System settings)
       try {
-        const settings = { ...getPrintSettings(), autoPrint: true };
+        const loadedSettings = await getPrintSettings();
+        const settings = { ...loadedSettings, autoPrint: true };
         const nowIso = new Date().toISOString();
         const payload = {
           receiptNo: String(txRes?.data?.id ?? txRes?.data?.tx_id ?? 'AA-000000'),
           ticket,
           createdAtIso: nowIso,
           patientName: patient.full_name,
+          doctorName: selectedDoctor?.full_name,
+          doctorRoom: selectedDoctor?.room_number,
           serviceName: svcName,
           amount,
           currency: t('common.currency'),
