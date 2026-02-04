@@ -82,6 +82,7 @@ export default function Reception() {
     title?: string;
     confirmLabel?: string;
     description?: string;
+    infoText?: string;
   }>({
     isOpen: false,
     total: 0,
