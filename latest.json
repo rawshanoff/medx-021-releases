@@ -1,7 +1,7 @@
 {
-  "version": "1.0.12-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.12-mvp.zip",
-  "sha256": "939233615b7aa0d8d63dd0878f543dc1c0390746e7928329fea81381a2326f82",
-  "notes": "Fix name/phone normalization and mixed payment modal focus",
-  "published_at": "2026-02-04T11:40:37.350704+00:00"
+  "version": "1.0.13-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.13-mvp.zip",
+  "sha256": "18a935ae6a241331d34da05639bf278ffa564e3428833f9d2eff2b310a1ca1e0",
+  "notes": "Fix name/phone normalization, block duplicates, add /patients/deduplicate",
+  "published_at": "2026-02-04T11:56:15.936918+00:00"
 }
