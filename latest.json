@@ -1,7 +1,7 @@
 {
-  "version": "1.0.3-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.3-mvp.zip",
-  "sha256": "5f914334d79cc9914c28c98c77da65d1e6761a38225804f790e189938e23d062",
-  "notes": "Fix updater+alembic env for desktop",
-  "published_at": "2026-02-04T08:38:29.480425+00:00"
+  "version": "1.0.4-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.4-mvp.zip",
+  "sha256": "cf856ca2e6b427fcde5e6d2f689ac7b23d03deab073f2b378b24e573fecc7c90",
+  "notes": "Fix update-install marker race",
+  "published_at": "2026-02-04T09:13:55.320262+00:00"
 }
