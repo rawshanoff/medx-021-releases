@@ -1,7 +1,7 @@
 {
-  "version": "1.0.14-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.14-mvp.zip",
-  "sha256": "751a758b0fa04af95644dc81efc9a0499496bd963823c3048f1be991bda58e86",
-  "notes": "Fix Electron focus loss on create, portal+blur modals, improve mixed modal contrast",
-  "published_at": "2026-02-04T12:25:24.236528+00:00"
+  "version": "1.0.15-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.15-mvp.zip",
+  "sha256": "2fca77d16ecb0a846d943ace1eb42af75553c0800dc9336c855b9c1aa4668492",
+  "notes": "Hotfix: Modal portal fallback-safe (fix modals not opening)",
+  "published_at": "2026-02-04T12:37:28.120942+00:00"
 }
