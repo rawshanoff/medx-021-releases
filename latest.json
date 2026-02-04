@@ -1,7 +1,7 @@
 {
-  "version": "1.0.22-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.22-mvp.zip",
-  "sha256": "fcb6c0f23a498ebc0bed53d63027c3906890b9318ab779625eab4c9b04ca8a1b",
-  "notes": "Reception UI: shadcn-style tables, no solid blue rows, status badges (Waiting yellow, Tayyor green), dark uses slate-950, Inter font + increased row padding.",
-  "published_at": "2026-02-04T15:33:31.587555+00:00"
+  "version": "1.0.23-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.23-mvp.zip",
+  "sha256": "f4bc606a3563d44e7d90b4a86fb90acd355797c99e4f925c3083cc50d237899e",
+  "notes": "Reception: Linear/Stripe-like high-density UI (sharp h-9 inputs, uppercase muted labels, compact spacing, pay buttons outline, right sidebar text-xs + overflow-x-hidden).",
+  "published_at": "2026-02-04T15:40:43.404358+00:00"
 }
