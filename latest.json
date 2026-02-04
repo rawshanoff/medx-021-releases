@@ -1,7 +1,7 @@
 {
-  "version": "1.0.9-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.9-mvp.zip",
-  "sha256": "516eaa5df0a111d2c29c6bab820a7e83bf96177bf2dd27eff54651552ca8563c",
-  "notes": "Retry cleanup of update.zip and old backups",
-  "published_at": "2026-02-04T10:30:38.896223+00:00"
+  "version": "1.0.10-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.10-mvp.zip",
+  "sha256": "e0d4a5b6992a70dff9841e8e5cb31ca3699769e5419ccc57061b5c28a9caaeff",
+  "notes": "Show update success message and cleanup artifacts on Electron side",
+  "published_at": "2026-02-04T10:38:16.592817+00:00"
 }
