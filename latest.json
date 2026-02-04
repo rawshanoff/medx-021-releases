@@ -1,7 +1,7 @@
 {
-  "version": "1.0.24-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.24-mvp.zip",
-  "sha256": "4f524df96056028661969126cd7743453c5745249d384a118921335ce3e6403e",
-  "notes": "Reception: history opens as right-side sheet (clean vertical list + refund button), queue sidebar uses list layout with truncation + hidden scrollbar, inputs use soft blue glow focus.",
-  "published_at": "2026-02-04T15:52:59.776896+00:00"
+  "version": "1.0.25-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.25-mvp.zip",
+  "sha256": "a9adf6d5ee03477f3d289cb37b80fd028badb1afe9d2f38cc8551189a1ba18af",
+  "notes": "UI: premium SaaS styling for System (tiles/cards), new Card defaults, slate-50/900 page bg, polished sidebar hover/active.",
+  "published_at": "2026-02-04T17:08:14.839134+00:00"
 }
