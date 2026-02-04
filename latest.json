@@ -1,7 +1,7 @@
 {
-  "version": "1.0.25-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.25-mvp.zip",
-  "sha256": "a9adf6d5ee03477f3d289cb37b80fd028badb1afe9d2f38cc8551189a1ba18af",
-  "notes": "UI: premium SaaS styling for System (tiles/cards), new Card defaults, slate-50/900 page bg, polished sidebar hover/active.",
-  "published_at": "2026-02-04T17:08:14.839134+00:00"
+  "version": "1.0.26-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.26-mvp.zip",
+  "sha256": "647ee3711f70e7b167c3d2ab340d67e75c063c4facec80b0cc8c86a777372ffa",
+  "notes": "Reception focus + refund payment info; finance/report translations",
+  "published_at": "2026-02-04T23:26:09.041429+00:00"
 }
