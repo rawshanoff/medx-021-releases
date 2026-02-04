@@ -1,7 +1,7 @@
 {
-  "version": "1.0.20-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.20-mvp.zip",
-  "sha256": "7dbd62e6575a598c1995006c404f5cb94904b9d41ea961e6ba603ae475708dfa",
-  "notes": "Frontend: fix System labels (no i18n keys on screen) + modal width clamped via CSS min() + backdrop blur overlay.",
-  "published_at": "2026-02-04T15:07:23.508972+00:00"
+  "version": "1.0.21-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.21-mvp.zip",
+  "sha256": "5519aad3e747b23017d9660c3504cb97323440ccacb5a40baa61c22536dea878",
+  "notes": "System: fix untranslated modal titles/descriptions + add common.reset/common.saved + move audit history to /system/audit button + confirm on reset.",
+  "published_at": "2026-02-04T15:19:32.371195+00:00"
 }
