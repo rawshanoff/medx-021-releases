@@ -1,7 +1,7 @@
 {
-  "version": "1.0.4-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.4-mvp.zip",
-  "sha256": "cf856ca2e6b427fcde5e6d2f689ac7b23d03deab073f2b378b24e573fecc7c90",
-  "notes": "Fix update-install marker race",
-  "published_at": "2026-02-04T09:13:55.320262+00:00"
+  "version": "1.0.5-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.5-mvp.zip",
+  "sha256": "bce746f4dfd61c0bb5be09544f9ee5814a5bcc4143ad90a9f57267741a467fbb",
+  "notes": "Fix updater failures on Windows (alembic logging + PID wait)",
+  "published_at": "2026-02-04T09:31:53.818489+00:00"
 }
