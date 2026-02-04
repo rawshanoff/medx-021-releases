@@ -14,6 +14,7 @@ interface MixedPaymentModalProps {
   title?: string;
   confirmLabel?: string;
   description?: string;
+  infoText?: string;
 }
 
 export default function MixedPaymentModal({
@@ -26,6 +27,7 @@ export default function MixedPaymentModal({
   title,
   confirmLabel,
   description,
+  infoText,
 }: MixedPaymentModalProps) {
   const { t } = useTranslation();
   const [cash, setCash] = useState(0);
@@ -155,6 +157,11 @@ export default function MixedPaymentModal({
       }
       width={560}
     >
+      {infoText ? (
+        <div className="mb-3 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-foreground">
+          {infoText}
+        </div>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1">
           <label className="text-[13px] font-medium text-foreground">{t('reception.cash')}</label>

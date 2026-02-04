@@ -422,7 +422,8 @@ export default function Reception() {
                                       confirmLabel: t('reception.refund', {
                                         defaultValue: 'Возврат',
                                       }),
-                                      description: `${t('reception.total_amount')}: ${totalAbs.toLocaleString()} ${t('common.currency')} • ${t('reception.payment')}: ${paymentDetails}`,
+                                      description: `${t('reception.total_amount')}: ${totalAbs.toLocaleString()} ${t('common.currency')}`,
+                                      infoText: `${t('reception.payment')}: ${paymentDetails}`,
                                       onCancel: () => {},
                                       onConfirm: async () => {
                                         if (refundBusyTxId) return;

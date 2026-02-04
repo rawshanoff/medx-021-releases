@@ -35,8 +35,7 @@ export function ResultRow({
   return (
     <tr
       className={cn(
-        'bg-transparent transition-colors hover:bg-muted/40 focus-within:bg-blue-50/40',
-        'focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:ring-inset',
+        'bg-transparent transition-colors hover:bg-muted/40',
         requestFocus ? 'bg-muted/50' : '',
       )}
     >
