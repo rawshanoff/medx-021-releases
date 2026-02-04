@@ -1,7 +1,7 @@
 {
-  "version": "1.0.8-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.8-mvp.zip",
-  "sha256": "303d3cb112a140374c81795afc12e26bf045e23a617ebc77a5872bc4ed4e8a8b",
-  "notes": "Cleanup update.zip and prune old _update_backup folders",
-  "published_at": "2026-02-04T10:20:19.269194+00:00"
+  "version": "1.0.9-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.9-mvp.zip",
+  "sha256": "516eaa5df0a111d2c29c6bab820a7e83bf96177bf2dd27eff54651552ca8563c",
+  "notes": "Retry cleanup of update.zip and old backups",
+  "published_at": "2026-02-04T10:30:38.896223+00:00"
 }
