@@ -1,7 +1,7 @@
 {
-  "version": "1.0.6-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.6-mvp.zip",
-  "sha256": "61caa912386041fe9bd2e0fa75def4dddb88e63855db7fc0f36890d74c995683",
-  "notes": "Fix backend version detection in packaged builds",
-  "published_at": "2026-02-04T09:56:45.497052+00:00"
+  "version": "1.0.7-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.7-mvp.zip",
+  "sha256": "e09186588b101efe168bc155f0dfed47967c7789070f04d05dafa6b352f75dc3",
+  "notes": "Fix exe replacement during update (retry + PID wait)",
+  "published_at": "2026-02-04T10:08:51.996041+00:00"
 }
