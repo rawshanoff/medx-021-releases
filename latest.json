@@ -1,7 +1,7 @@
 {
-  "version": "1.0.11-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.11-mvp.zip",
-  "sha256": "e5c269c05daa5864ce45b9f34e5fcb9f8cfb42aa95cb0b32eeef1669e270f5d3",
-  "notes": "Fix version mismatch in ZIP and cleanup artifacts on backend startup",
-  "published_at": "2026-02-04T10:56:19.933765+00:00"
+  "version": "1.0.12-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.12-mvp.zip",
+  "sha256": "939233615b7aa0d8d63dd0878f543dc1c0390746e7928329fea81381a2326f82",
+  "notes": "Fix name/phone normalization and mixed payment modal focus",
+  "published_at": "2026-02-04T11:40:37.350704+00:00"
 }
