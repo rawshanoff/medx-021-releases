@@ -1,7 +1,7 @@
 {
-  "version": "1.0.23-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.23-mvp.zip",
-  "sha256": "f4bc606a3563d44e7d90b4a86fb90acd355797c99e4f925c3083cc50d237899e",
-  "notes": "Reception: Linear/Stripe-like high-density UI (sharp h-9 inputs, uppercase muted labels, compact spacing, pay buttons outline, right sidebar text-xs + overflow-x-hidden).",
-  "published_at": "2026-02-04T15:40:43.404358+00:00"
+  "version": "1.0.24-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.24-mvp.zip",
+  "sha256": "4f524df96056028661969126cd7743453c5745249d384a118921335ce3e6403e",
+  "notes": "Reception: history opens as right-side sheet (clean vertical list + refund button), queue sidebar uses list layout with truncation + hidden scrollbar, inputs use soft blue glow focus.",
+  "published_at": "2026-02-04T15:52:59.776896+00:00"
 }
