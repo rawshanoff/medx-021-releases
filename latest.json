@@ -1,7 +1,7 @@
 {
-  "version": "1.0.13-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.13-mvp.zip",
-  "sha256": "18a935ae6a241331d34da05639bf278ffa564e3428833f9d2eff2b310a1ca1e0",
-  "notes": "Fix name/phone normalization, block duplicates, add /patients/deduplicate",
-  "published_at": "2026-02-04T11:56:15.936918+00:00"
+  "version": "1.0.14-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.14-mvp.zip",
+  "sha256": "751a758b0fa04af95644dc81efc9a0499496bd963823c3048f1be991bda58e86",
+  "notes": "Fix Electron focus loss on create, portal+blur modals, improve mixed modal contrast",
+  "published_at": "2026-02-04T12:25:24.236528+00:00"
 }
