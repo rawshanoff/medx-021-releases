@@ -139,6 +139,17 @@ def normalize_full_name(value: str) -> str:
     if not value:
         return value
 
+    # Normalize various apostrophe characters to a single ASCII apostrophe.
+    # This prevents inconsistent casing and helps avoid duplicates in lookups.
+    value = (
+        value.replace("’", "'")
+        .replace("‘", "'")
+        .replace("`", "'")
+        .replace("ʼ", "'")  # U+02BC
+        .replace("ʻ", "'")  # U+02BB
+        .replace("‛", "'")
+    )
+
     def _cap(seg: str) -> str:
         if not seg:
             return seg
@@ -147,12 +158,17 @@ def normalize_full_name(value: str) -> str:
 
     out_words: list[str] = []
     for word in value.split(" "):
-        parts = re.split(r"([-’'])", word)
+        parts = re.split(r"([-'])", word)
         rebuilt = []
-        for p in parts:
-            if p in ("-", "'", "’"):
+        for i, p in enumerate(parts):
+            if p in ("-", "'"):
                 rebuilt.append(p)
             else:
-                rebuilt.append(_cap(p))
+                # After apostrophe: keep segment lower (Ulug'bek, Rahmon'ov)
+                prev = parts[i - 1] if i > 0 else ""
+                if prev == "'":
+                    rebuilt.append(p.lower())
+                else:
+                    rebuilt.append(_cap(p))
         out_words.append("".join(rebuilt))
     return " ".join(out_words)

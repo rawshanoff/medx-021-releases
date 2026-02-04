@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -18,10 +19,18 @@ if str(_repo_root) not in sys.path:
 # SQLAlchemy metadata with "Table 'users' is already defined".
 from datetime import datetime, timezone
 
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
 from backend.core.config import settings
 from backend.core.database import init_db
 from backend.core.exceptions import AppException
 from backend.core.rate_limit import limiter
+from backend.core.update_artifacts import cleanup_update_artifacts
 from backend.modules.appointments.router import router as appointments_router
 from backend.modules.auth import router as auth_router
 from backend.modules.doctors.router import router as doctors_router
@@ -32,12 +41,6 @@ from backend.modules.patients.router import router as patients_router
 from backend.modules.reception.router import router as reception_router
 from backend.modules.system.router import router as system_router
 from backend.modules.users.router import router as users_router
-from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
 
 
 def _configure_logging() -> None:
@@ -68,7 +71,20 @@ def _configure_logging() -> None:
 
 _configure_logging()
 
-app = FastAPI(title="MedX API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await init_db()
+    # Desktop: cleanup update leftovers after a restart.
+    # This is safe for server too (no-op unless files exist).
+    try:
+        cleanup_update_artifacts()
+    except Exception:
+        logger.exception("Failed to cleanup update artifacts")
+    yield
+
+
+app = FastAPI(title="MedX API", version="1.0.0", lifespan=lifespan)
 logger = logging.getLogger("medx")
 
 # Rate Limiting
@@ -98,11 +114,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def on_startup():
-    await init_db()
 
 
 @app.exception_handler(AppException)

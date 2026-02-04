@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .models import UserRole
 
@@ -26,11 +26,14 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
+
+
+# Backward-compatible/consistent naming alias (project often uses *Read).
+UserRead = UserResponse

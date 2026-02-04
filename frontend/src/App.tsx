@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
 import { ThemeProvider } from './ThemeProvider';
@@ -14,7 +14,7 @@ import Reception from './pages/Reception';
 import Patients from './pages/Patients';
 import Finance from './pages/Finance';
 import Doctors from './pages/Doctors';
-import System from './pages/System';
+import SystemSettingsPage from './pages/SystemSettingsPage';
 import SystemAuditLogPage from './pages/SystemAuditLog';
 import Reports from './pages/Reports';
 import QueueTV from './pages/QueueTV';
@@ -42,6 +42,10 @@ const RootLayout = () => (
 
 function App() {
   // No more local state for auth needed here
+
+  // In Electron we load UI via file://, BrowserRouter can break because pathname becomes
+  // a Windows file path and redirects may turn it into file:///C:/ (ERR_FILE_NOT_FOUND).
+  const Router = window.location.protocol === 'file:' ? HashRouter : BrowserRouter;
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -99,7 +103,7 @@ function App() {
                 path="/system"
                 element={
                   <ProtectedRoute roles={['admin', 'owner']}>
-                    <System />
+                    <SystemSettingsPage />
                   </ProtectedRoute>
                 }
               />

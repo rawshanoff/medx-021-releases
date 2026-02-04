@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-// i18n should already be loaded in App.tsx but wrapping here just in case or using hook
-import '../i18n';
 import { Button } from '../components/ui/button';
 import { cn } from '../lib/cn';
 import client from '../api/client';

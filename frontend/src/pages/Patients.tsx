@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import client from '../api/client';
 import { X, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { dobUiToIso, normalizeHumanName } from '../utils/text';
+import { dobIsoToUi, dobUiToIso, formatDobInput, normalizeHumanName } from '../utils/text';
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -100,6 +100,10 @@ export default function Patients() {
     filesBtnRefs.current = filesBtnRefs.current.slice(0, patients.length);
   }, [patients.length]);
 
+  useEffect(() => {
+    phoneRef.current?.focus();
+  }, []);
+
   // Derive effective focus without setState-in-effect.
   const effectiveFocusedRowIndex =
     focusedRowIndex == null
@@ -109,7 +113,7 @@ export default function Patients() {
         : Math.min(focusedRowIndex, patients.length - 1);
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
       <div className="min-h-0 flex flex-1 flex-col gap-3 overflow-hidden">
         {/* Search */}
         <PatientSearch
@@ -143,6 +147,7 @@ export default function Patients() {
                   <th>{t('reception.first_name')}</th>
                   <th>{t('reception.last_name')}</th>
                   <th>{t('reception.phone')}</th>
+                  <th className="w-[140px]">{t('reception.dob')}</th>
                   <th className="w-[200px] text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
@@ -151,7 +156,7 @@ export default function Patients() {
                   <>
                     {Array.from({ length: 6 }).map((_, i) => (
                       <tr key={`sk-${i}`} className="[&>td]:px-3 [&>td]:py-3">
-                        <td colSpan={5}>
+                        <td colSpan={6}>
                           <Skeleton className="h-6 w-full" />
                         </td>
                       </tr>
@@ -161,7 +166,7 @@ export default function Patients() {
 
                 {!loading && patients.length === 0 && hasSearch ? (
                   <tr>
-                    <td colSpan={5} className="p-5 text-center text-muted-foreground">
+                    <td colSpan={6} className="p-5 text-center text-muted-foreground">
                       {t('reception.no_results')}
                     </td>
                   </tr>
@@ -169,7 +174,7 @@ export default function Patients() {
 
                 {!loading && patients.length === 0 && !hasSearch ? (
                   <tr>
-                    <td colSpan={5} className="p-5 text-center text-muted-foreground">
+                    <td colSpan={6} className="p-5 text-center text-muted-foreground">
                       {t('reception.search_placeholder')}
                     </td>
                   </tr>
@@ -242,12 +247,22 @@ function PatientRow({
   const [editName, setEditName] = useState(namePart || '');
   const [editSurname, setEditSurname] = useState(surnamePart || '');
   const [editPhone, setEditPhone] = useState(patient.phone);
+  const [editDob, setEditDob] = useState(dobIsoToUi(patient.birth_date));
 
   const handleSave = async () => {
+    const isoDob = editDob ? dobUiToIso(editDob) : null;
+    if (editDob && !isoDob) {
+      showToast(
+        t('patients.invalid_birth_date', { defaultValue: 'Неверная дата рождения' }),
+        'warning',
+      );
+      return;
+    }
     try {
       await client.put(`/patients/${patient.id}`, {
         full_name: normalizeHumanName(`${editName} ${editSurname}`),
         phone: editPhone,
+        birth_date: isoDob,
       });
       setIsEditing(false);
       onUpdate();
@@ -294,6 +309,19 @@ function PatientRow({
           />
         ) : (
           formatPhone(patient.phone)
+        )}
+      </td>
+      <td className="p-3">
+        {isEditing ? (
+          <Input
+            className="h-12 text-[13px]"
+            placeholder={t('reception.date_format')}
+            inputMode="numeric"
+            value={editDob}
+            onChange={(e) => setEditDob(formatDobInput(e.target.value))}
+          />
+        ) : (
+          dobIsoToUi(patient.birth_date) || '—'
         )}
       </td>
 

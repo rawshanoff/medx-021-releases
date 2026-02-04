@@ -28,6 +28,16 @@ export function dobUiToIso(ui: string): string | null {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+export function dobIsoToUi(iso?: string | null): string {
+  if (!iso) return '';
+  const pure = String(iso).split('T')[0];
+  const parts = pure.split('-');
+  if (parts.length !== 3) return '';
+  const [yyyy, mm, dd] = parts;
+  if (!yyyy || !mm || !dd) return '';
+  return `${dd}.${mm}.${yyyy}`;
+}
+
 export function normalizeHumanName(input: string): string {
   const cleaned = input.replace(/\s+/g, ' ').trim();
   if (!cleaned) return '';
@@ -41,8 +51,13 @@ function normalizeNameToken(token: string): string {
   // Split by hyphen and apostrophes, normalize each segment, keep separators
   const segments = token.split(/([-’'])/g);
   return segments
-    .map((seg) => {
+    .map((seg, idx) => {
       if (seg === '-' || seg === "'" || seg === '’') return seg;
+      // After an apostrophe in Uzbek-like names, next segment should stay lowercase:
+      // e.g. Ulug'bek, O'g'il.
+      const prev = idx > 0 ? segments[idx - 1] : '';
+      if (prev === "'" || prev === '’') return seg.toLocaleLowerCase();
+      // After hyphen we keep Title Case (Jean-Luc)
       return capitalize(seg);
     })
     .join('');

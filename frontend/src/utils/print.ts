@@ -1,4 +1,5 @@
 import client from '../api/client';
+import { loggers } from './logger';
 
 export type PrintSettings = {
   clinicName: string;
@@ -40,9 +41,22 @@ const RECEIPT_STORAGE_PREFIX = 'medx-receipt:';
 
 export type ReceiptTemplateId = 'check-4-58' | 'check-1' | 'check-6';
 
+// Cache for synchronous access to print settings
+let _cachedSettings: PrintSettings | null = null;
+
+/**
+ * Get cached print settings synchronously.
+ * Returns cached settings or defaults if not yet loaded.
+ * Use getPrintSettings() for fresh data from server.
+ */
+export function getCachedPrintSettings(): PrintSettings {
+  return _cachedSettings ?? defaultSettings();
+}
+
 /**
  * Get print settings from server (via API).
  * Falls back to defaults if not found.
+ * Also updates the cached settings for synchronous access.
  *
  * Called on app startup or manually refreshed.
  */
@@ -51,12 +65,16 @@ export async function getPrintSettings(): Promise<PrintSettings> {
     const response = await client.get('/system/settings/print_config');
     const value = response.data?.value || response.data;
     if (value && typeof value === 'object') {
-      return { ...defaultSettings(), ...value } as PrintSettings;
+      const settings = { ...defaultSettings(), ...value } as PrintSettings;
+      _cachedSettings = settings;
+      return settings;
     }
   } catch (e) {
-    console.warn('Failed to load print settings from server, using defaults:', e);
+    loggers.print.warn('Failed to load print settings from server, using defaults', e);
   }
-  return defaultSettings();
+  const defaults = defaultSettings();
+  _cachedSettings = defaults;
+  return defaults;
 }
 
 /**
@@ -74,7 +92,7 @@ export async function setPrintSettings(next: PrintSettings): Promise<PrintSettin
       return value as PrintSettings;
     }
   } catch (e) {
-    console.error('Failed to save print settings to server:', e);
+    loggers.print.error('Failed to save print settings to server', e);
     throw e;
   }
   return next;
@@ -172,7 +190,7 @@ export function printQueueTicket(
   settings?: PrintSettings,
   win?: PrintWindow,
 ) {
-  const s = settings ?? getPrintSettings();
+  const s = settings ?? getCachedPrintSettings();
   const widthMm = s.paperSize === '58' ? 58 : 80;
   const contentMm = s.receiptWidthMode === 'safe' ? (s.paperSize === '58' ? 54 : 76) : widthMm;
 
@@ -280,7 +298,7 @@ export function loadReceiptForTicket(ticket: string): ReceiptPayload | null {
 }
 
 export function printReceipt(payload: ReceiptPayload, settings?: PrintSettings, win?: PrintWindow) {
-  const s = settings ?? getPrintSettings();
+  const s = settings ?? getCachedPrintSettings();
 
   const html = buildReceiptHtml(payload, s);
   // Electron: silent printing without dialogs/windows

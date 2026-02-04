@@ -1,22 +1,20 @@
 import asyncio
 
 import pytest
-from backend.core.config import settings
+from backend.core.database import Base
 from backend.modules.appointments import models as _appointments_models  # noqa: F401
 from backend.modules.finance.models import (
-    FinanceAuditLog,
     PaymentMethod,
     Shift,
-    Transaction,
 )
 from backend.modules.finance.router import close_shift, open_shift, process_payment
 from backend.modules.finance.schemas import ShiftCreate, TransactionCreate
 from backend.modules.patients import models as _patients_models  # noqa: F401
 from backend.modules.users.models import User, UserRole
 from fastapi import HTTPException
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 
 def _dummy_cashier() -> User:
@@ -31,16 +29,17 @@ def _dummy_cashier() -> User:
 
 
 async def _with_db(fn):
-    engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
-    Session = async_sessionmaker(engine, expire_on_commit=False)
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     async with Session() as db:
-        # Clean finance state
-        await db.execute(delete(Transaction))
-        await db.execute(delete(FinanceAuditLog))
-        await db.execute(delete(Shift))
-        await db.commit()
-
         await fn(db)
 
     await engine.dispose()

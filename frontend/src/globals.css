@@ -88,29 +88,29 @@
   .dark,
   [data-theme='dark'] {
     color-scheme: dark;
-    /* Deep navy background like the reference admin dashboard */
-    --background: 224 70% 6%;
+    /* Slate-950 like shadcn */
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
     /* Slightly lighter than background for better separation */
-    --card: 224 55% 10.5%;
+    --card: 222.2 84% 6.5%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 224 55% 10.5%;
+    --popover: 222.2 84% 6.5%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 210 40% 98%;
 
     /* Softer hover/active surfaces */
-    --secondary: 224 40% 20%;
+    --secondary: 222.2 47.4% 11.2%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 224 40% 20%;
+    --muted: 222.2 47.4% 11.2%;
     /* Bluish muted text like the reference */
     --muted-foreground: 215 25% 85%;
 
-    --accent: 224 40% 20%;
+    --accent: 222.2 47.4% 11.2%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;

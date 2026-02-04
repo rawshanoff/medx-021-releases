@@ -52,10 +52,7 @@ class SystemAuditLog(SoftDeleteMixin, Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Constraints & Indices
-    __table_args__ = (
-        Index("ix_system_audit_log_user_id", "user_id"),
-        Index("ix_system_audit_log_created_at", "created_at"),
-    )
+    __table_args__ = (Index("ix_system_audit_log_created_at", "created_at"),)
 
     # Relationships
     user = relationship("User")

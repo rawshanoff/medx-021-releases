@@ -1,5 +1,8 @@
 import logging
+import os
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 from backend.core.config import settings
 from sqlalchemy import Column, DateTime, text
@@ -74,6 +77,79 @@ async def _check_db_version():
         return True
 
 
+async def _auto_migrate_if_enabled() -> None:
+    """Desktop helper: auto-apply Alembic migrations if enabled.
+
+    On target machines the DB can be empty. For MVP desktop we want a smooth first-run:
+    if MEDX_AUTO_MIGRATE=1, run `alembic upgrade head` using Alembic API.
+
+    We rely on external migration files shipped with Electron extraResources:
+      <MEDX_APP_DIR>/backend/alembic.ini
+      <MEDX_APP_DIR>/backend/alembic/versions/...
+    """
+    env_flag = os.getenv("MEDX_AUTO_MIGRATE", "").strip() == "1"
+    # In packaged desktop backend we want migrations on first run even if env vars were lost.
+    frozen = bool(getattr(sys, "frozen", False))
+    if not (env_flag or frozen):
+        return
+
+    # Prefer explicit app dir from Electron, otherwise fallback to current working directory.
+    app_dir = os.getenv("MEDX_APP_DIR", "").strip() or os.getcwd()
+
+    root = Path(app_dir)
+    cfg_path = root / "backend" / "alembic.ini"
+    script_location = root / "backend" / "alembic"
+    if not cfg_path.exists() or not script_location.exists():
+        logger.warning(
+            "Auto-migrate skipped: alembic files not found. "
+            f"cfg={cfg_path} script_location={script_location}"
+        )
+        return
+
+    # Check if migrations needed: either alembic_version or users table missing.
+    async with engine.begin() as conn:
+        result = await conn.execute(text("""
+                SELECT
+                  EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'alembic_version'
+                  ) AS has_alembic,
+                  EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'users'
+                  ) AS has_users
+                """))
+        row = result.first()
+        has_alembic = bool(row[0]) if row is not None else False
+        has_users = bool(row[1]) if row is not None else False
+
+    if has_alembic and has_users:
+        return
+
+    logger.warning(
+        "⚠️  Похоже, БД не инициализирована: применяем миграции Alembic автоматически... "
+        f"(app_dir={root})"
+    )
+
+    def _run() -> None:
+        from alembic.config import Config
+
+        from alembic import command
+
+        cfg = Config(str(cfg_path))
+        cfg.set_main_option("script_location", str(script_location).replace("\\", "/"))
+        command.upgrade(cfg, "head")
+
+    try:
+        import asyncio
+
+        await asyncio.to_thread(_run)
+        logger.info("✅ Миграции применены (alembic upgrade head)")
+    except Exception:
+        logger.exception("❌ Не удалось применить миграции автоматически")
+        raise
+
+
 async def init_db():
     """Проверка доступности БД и версии схемы.
 
@@ -81,6 +157,9 @@ async def init_db():
     """
     async with engine.begin() as conn:
         await conn.execute(text("SELECT 1"))
+
+    # Desktop: create schema automatically on first run (when DB is empty).
+    await _auto_migrate_if_enabled()
 
     # Проверяем версию БД
     await _check_db_version()

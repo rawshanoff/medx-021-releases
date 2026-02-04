@@ -1,10 +1,8 @@
 import asyncio
 
 import pytest
-from backend.core.config import settings
-from backend.modules.appointments import models as _appointments_models  # noqa: F401
-from backend.modules.doctors.models import AuditLog, Doctor, DoctorService
-from backend.modules.files.models import FileDeliveryLog, PatientFile, TelegramLinkToken
+from backend.core.database import Base
+from backend.modules.doctors.models import Doctor
 from backend.modules.patients.models import Patient
 from backend.modules.reception.models import QueueItem
 from backend.modules.reception.router import (
@@ -15,9 +13,9 @@ from backend.modules.reception.router import (
 from backend.modules.reception.schemas import QueueItemCreate, QueueItemUpdate
 from backend.modules.users.models import User, UserRole
 from fastapi import HTTPException
-from sqlalchemy import delete, select
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import StaticPool
 
 
 def _dummy_receptionist() -> User:
@@ -30,23 +28,22 @@ def _dummy_receptionist() -> User:
     )
 
 
+def _dummy_patient(full_name: str, phone: str) -> Patient:
+    return Patient(full_name=full_name, phone=phone)
+
+
 async def _with_db(fn):
-    engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
-    Session = async_sessionmaker(engine, expire_on_commit=False)
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     async with Session() as db:
-        # Clean state (order matters due to FKs)
-        await db.execute(delete(QueueItem))
-        await db.execute(delete(FileDeliveryLog))
-        await db.execute(delete(PatientFile))
-        await db.execute(delete(TelegramLinkToken))
-        await db.execute(delete(_appointments_models.Appointment))
-        await db.execute(delete(DoctorService))
-        await db.execute(delete(Doctor))
-        await db.execute(delete(AuditLog))
-        await db.execute(delete(Patient))
-        await db.commit()
-
         await fn(db)
 
     await engine.dispose()
@@ -67,18 +64,27 @@ def test_add_to_queue_generates_sequential_ticket_per_doctor():
         await db.refresh(doc_a)
         await db.refresh(doc_b)
 
+        p1 = _dummy_patient("P1", "+1000000001")
+        p2 = _dummy_patient("P2", "+1000000002")
+        p3 = _dummy_patient("P3", "+1000000003")
+        db.add_all([p1, p2, p3])
+        await db.commit()
+        await db.refresh(p1)
+        await db.refresh(p2)
+        await db.refresh(p3)
+
         i1 = await add_to_queue(
-            QueueItemCreate(patient_name="P1", doctor_id=doc_a.id),
+            QueueItemCreate(patient_name="P1", patient_id=p1.id, doctor_id=doc_a.id),
             db=db,
             _user=user,
         )
         i2 = await add_to_queue(
-            QueueItemCreate(patient_name="P2", doctor_id=doc_a.id),
+            QueueItemCreate(patient_name="P2", patient_id=p2.id, doctor_id=doc_a.id),
             db=db,
             _user=user,
         )
         i3 = await add_to_queue(
-            QueueItemCreate(patient_name="P3", doctor_id=doc_b.id),
+            QueueItemCreate(patient_name="P3", patient_id=p3.id, doctor_id=doc_b.id),
             db=db,
             _user=user,
         )
@@ -104,13 +110,20 @@ def test_get_queue_enriches_doctor_name_and_fifo_order():
         await db.commit()
         await db.refresh(doc)
 
+        p1 = _dummy_patient("P1", "+1000000011")
+        p2 = _dummy_patient("P2", "+1000000012")
+        db.add_all([p1, p2])
+        await db.commit()
+        await db.refresh(p1)
+        await db.refresh(p2)
+
         await add_to_queue(
-            QueueItemCreate(patient_name="P1", doctor_id=doc.id),
+            QueueItemCreate(patient_name="P1", patient_id=p1.id, doctor_id=doc.id),
             db=db,
             _user=user,
         )
         await add_to_queue(
-            QueueItemCreate(patient_name="P2", doctor_id=doc.id),
+            QueueItemCreate(patient_name="P2", patient_id=p2.id, doctor_id=doc.id),
             db=db,
             _user=user,
         )
@@ -136,8 +149,13 @@ def test_update_queue_status_sets_value():
         await db.commit()
         await db.refresh(doc)
 
+        patient = _dummy_patient("P1", "+1000000021")
+        db.add(patient)
+        await db.commit()
+        await db.refresh(patient)
+
         item = await add_to_queue(
-            QueueItemCreate(patient_name="P1", doctor_id=doc.id),
+            QueueItemCreate(patient_name="P1", patient_id=patient.id, doctor_id=doc.id),
             db=db,
             _user=user,
         )
@@ -160,9 +178,16 @@ def test_add_to_queue_missing_doctor_404():
     async def _test(db):
         user = _dummy_receptionist()
 
+        patient = _dummy_patient("P1", "+1000000031")
+        db.add(patient)
+        await db.commit()
+        await db.refresh(patient)
+
         with pytest.raises(HTTPException) as e:
             await add_to_queue(
-                QueueItemCreate(patient_name="P1", doctor_id=999999),
+                QueueItemCreate(
+                    patient_name="P1", patient_id=patient.id, doctor_id=999999
+                ),
                 db=db,
                 _user=user,
             )

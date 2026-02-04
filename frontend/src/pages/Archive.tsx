@@ -13,6 +13,12 @@ type ArchivedItem = {
   data: PatientRead | DoctorAdmin | UserRead;
 };
 
+const getArchivedId = (item: ArchivedItem): number => {
+  if (item.type === 'patient') return (item.data as PatientRead).id;
+  if (item.type === 'doctor') return (item.data as DoctorAdmin).id;
+  return (item.data as UserRead).id;
+};
+
 export default function Archive() {
   const { t } = useTranslation();
   const { showToast } = useToast();
@@ -161,7 +167,7 @@ export default function Archive() {
           <div className="space-y-2">
             {items.map((item, index) => (
               <div
-                key={`${item.type}-${(item.data as any).id}-${index}`}
+                key={`${item.type}-${getArchivedId(item)}-${index}`}
                 className="flex items-center justify-between rounded-md border border-border bg-card p-4"
               >
                 <div className="min-w-0 flex-1">

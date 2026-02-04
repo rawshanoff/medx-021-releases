@@ -8,6 +8,7 @@ import { getPrintSettings, printReceipt, saveReceiptForTicket } from '../../util
 import { useToast } from '../../context/ToastContext';
 import type { Doctor } from '../../types/doctors';
 import type { Patient } from '../../types/patients';
+import { loggers } from '../../utils/logger';
 
 type TransactionCreatePayload = {
   patient_id: number;
@@ -35,7 +36,8 @@ export function PaymentCells({
   addToQueue: (patientId: number, patientName: string, doctorId: number) => Promise<string>;
   onRequestMixedPayment: (
     total: number,
-    onConfirm: (c: number, cd: number, t: number) => void,
+    onConfirm: (c: number, cd: number, t: number) => void | Promise<void>,
+    onCancel: () => void,
   ) => void;
   onShiftError: () => void;
   requestFocus?: boolean;
@@ -77,20 +79,44 @@ export function PaymentCells({
   };
 
   const handlePaymentMethodChange = (method: string) => {
-    setPaymentMethod(method);
-    if (method === 'MIXED') {
-      const svc = selectedDoctor?.services.find(
-        (s) => s.id != null && String(s.id) === selectedServiceId,
-      );
-      if (svc) {
-        onRequestMixedPayment(svc.price, (c, cd, tr) => {
-          setMixedSplit({ cash: c, card: cd, transfer: tr });
-        });
-      }
+    if (method !== 'MIXED') {
+      setPaymentMethod(method);
+      return;
     }
+
+    // Mixed payment: open modal; on cancel revert to CASH.
+    const svc = selectedDoctor?.services.find(
+      (s) => s.id != null && String(s.id) === selectedServiceId,
+    );
+    if (!svc) {
+      showToast(
+        t('reception.select_doctor_service', { defaultValue: 'Выберите врача и услугу' }),
+        'warning',
+      );
+      setPaymentMethod('CASH');
+      return;
+    }
+
+    // Keep UI selection as MIXED while modal is open.
+    setPaymentMethod('MIXED');
+    onRequestMixedPayment(
+      svc.price,
+      async (c, cd, tr) => {
+        // Save split and immediately perform payment+print.
+        setMixedSplit({ cash: c, card: cd, transfer: tr });
+        await processPay({ paymentMethod: 'MIXED', split: { cash: c, card: cd, transfer: tr } });
+      },
+      () => {
+        setMixedSplit({ cash: 0, card: 0, transfer: 0 });
+        setPaymentMethod('CASH');
+      },
+    );
   };
 
-  const processPay = async () => {
+  const processPay = async (opts?: {
+    paymentMethod?: string;
+    split?: { cash: number; card: number; transfer: number };
+  }) => {
     if (loading) return;
     setLoading(true);
 
@@ -100,20 +126,22 @@ export function PaymentCells({
       );
       const svcName = svc?.name || t('reception.service', { defaultValue: 'Услуга' });
       const amount = svc?.price || 0;
+      const effectivePaymentMethod = opts?.paymentMethod || paymentMethod;
+      const effectiveSplit = opts?.split || mixedSplit;
 
       const transactionData: TransactionCreatePayload = {
         patient_id: patient.id,
         amount,
         doctor_id: selectedDoctorId,
-        payment_method: paymentMethod,
+        payment_method: effectivePaymentMethod,
         description: svcName,
         idempotency_key: crypto.randomUUID(),
       };
 
-      if (paymentMethod === 'MIXED') {
-        transactionData.cash_amount = mixedSplit.cash;
-        transactionData.card_amount = mixedSplit.card;
-        transactionData.transfer_amount = mixedSplit.transfer;
+      if (effectivePaymentMethod === 'MIXED') {
+        transactionData.cash_amount = effectiveSplit.cash;
+        transactionData.card_amount = effectiveSplit.card;
+        transactionData.transfer_amount = effectiveSplit.transfer;
       }
 
       // Create Transaction
@@ -137,14 +165,18 @@ export function PaymentCells({
           createdAtIso: nowIso,
           patientName: patient.full_name,
           doctorName: selectedDoctor?.full_name,
-          doctorRoom: selectedDoctor?.room_number,
+          doctorRoom: selectedDoctor?.room_number ?? undefined,
           serviceName: svcName,
           amount,
           currency: t('common.currency'),
-          paymentMethod,
+          paymentMethod: effectivePaymentMethod,
           paymentBreakdown:
-            paymentMethod === 'MIXED'
-              ? { cash: mixedSplit.cash, card: mixedSplit.card, transfer: mixedSplit.transfer }
+            effectivePaymentMethod === 'MIXED'
+              ? {
+                  cash: effectiveSplit.cash,
+                  card: effectiveSplit.card,
+                  transfer: effectiveSplit.transfer,
+                }
               : undefined,
         };
         saveReceiptForTicket(ticket, payload);
@@ -158,7 +190,7 @@ export function PaymentCells({
         'success',
       );
     } catch (e: unknown) {
-      console.error(e);
+      loggers.reception.error('Payment processing error', e);
       const err = e as { response?: { status?: number; data?: { detail?: unknown } } };
       const detail = err.response?.data?.detail;
       if (
@@ -196,10 +228,20 @@ export function PaymentCells({
       );
       // If total is 0 or mismatch, ask again
       if (svc && (total === 0 || total !== svc.price)) {
-        onRequestMixedPayment(svc.price, (c, cd, tr) => {
-          setMixedSplit({ cash: c, card: cd, transfer: tr });
-          // Note: user must click Pay again after confirming modal
-        });
+        onRequestMixedPayment(
+          svc.price,
+          async (c, cd, tr) => {
+            setMixedSplit({ cash: c, card: cd, transfer: tr });
+            await processPay({
+              paymentMethod: 'MIXED',
+              split: { cash: c, card: cd, transfer: tr },
+            });
+          },
+          () => {
+            setMixedSplit({ cash: 0, card: 0, transfer: 0 });
+            setPaymentMethod('CASH');
+          },
+        );
         return;
       }
     }
@@ -209,13 +251,13 @@ export function PaymentCells({
 
   return (
     <>
-      <td className="px-3 py-3 align-top">
+      <td className="px-3 py-2.5 align-top">
         <div className="flex flex-col gap-2">
           <select
             ref={doctorSelectRef}
             value={selectedDoctorId}
             onChange={(e) => setSelectedDoctorId(e.target.value)}
-            className="h-[40px] w-full max-w-[240px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="h-9 w-full max-w-[240px] rounded-md border border-input bg-background px-3 text-sm shadow-none outline-none hover:border-blue-500/60 focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:border-blue-500 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           >
             <option value="">{t('reception.select_doctor')}</option>
             {doctors.map((d) => (
@@ -229,7 +271,7 @@ export function PaymentCells({
             <select
               value={selectedServiceId}
               onChange={(e) => setSelectedServiceId(e.target.value)}
-              className="h-[40px] w-full max-w-[240px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-9 w-full max-w-[240px] rounded-md border border-input bg-background px-3 text-sm shadow-none outline-none hover:border-blue-500/60 focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:border-blue-500 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
             >
               {selectedDoctor?.services.length === 0 ? (
                 <option value="">{t('doctors.no_services')}</option>
@@ -244,11 +286,11 @@ export function PaymentCells({
         </div>
       </td>
 
-      <td className="px-3 py-3 align-top">
+      <td className="px-3 py-2.5 align-top">
         <select
           value={paymentMethod}
           onChange={(e) => handlePaymentMethodChange(e.target.value)}
-          className="h-[40px] w-full max-w-[200px] rounded-md border border-border bg-background px-2.5 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="h-9 w-full max-w-[200px] rounded-md border border-input bg-background px-3 text-sm shadow-none outline-none hover:border-blue-500/60 focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:border-blue-500 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
         >
           <option value="CASH">{t('reception.cash')}</option>
           <option value="CARD">{t('reception.card')}</option>
@@ -257,11 +299,13 @@ export function PaymentCells({
         </select>
       </td>
 
-      <td className="px-3 py-3 align-top text-right">
+      <td className="px-3 py-2.5 align-top text-right">
         <Button
           onClick={handlePay}
           disabled={loading || !selectedServiceId}
+          variant="outline"
           size="sm"
+          className="h-9 rounded-md px-3 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           type="button"
         >
           <Receipt size={16} />

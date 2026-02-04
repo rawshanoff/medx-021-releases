@@ -1,7 +1,7 @@
 import { Clock, CheckCircle2, Printer } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';
-import { cn } from '../../lib/cn';
+import { Badge } from '../../components/ui/badge';
 import {
   getPrintSettings,
   loadReceiptForTicket,
@@ -9,6 +9,47 @@ import {
   printReceipt,
 } from '../../utils/print';
 import type { QueueItem, QueueStatus } from '../../types/reception';
+
+function statusBadge(status: QueueStatus, label: string) {
+  if (status === 'COMPLETED') {
+    return (
+      <Badge
+        variant="outline"
+        className="h-5 rounded-md border-emerald-500/30 bg-emerald-500/15 px-2 text-[11px] text-emerald-300 dark:text-emerald-200"
+      >
+        {label}
+      </Badge>
+    );
+  }
+  if (status === 'WAITING') {
+    return (
+      <Badge
+        variant="outline"
+        className="h-5 rounded-md border-yellow-500/30 bg-yellow-500/15 px-2 text-[11px] text-yellow-300 dark:text-yellow-200"
+      >
+        {label}
+      </Badge>
+    );
+  }
+  if (status === 'REFUNDED') {
+    return (
+      <Badge
+        variant="outline"
+        className="h-5 rounded-md border-amber-500/30 bg-amber-500/15 px-2 text-[11px] text-amber-300 dark:text-amber-200"
+      >
+        {label}
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant="outline"
+      className="h-5 rounded-md border-slate-500/30 bg-slate-500/10 px-2 text-[11px] text-slate-200"
+    >
+      {label}
+    </Badge>
+  );
+}
 
 export function QueueSidebar({
   queue,
@@ -20,17 +61,17 @@ export function QueueSidebar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card p-3">
-      <div className="mb-3 flex items-center justify-between gap-2">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-slate-200 bg-card p-3 dark:border-slate-800">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Clock size={18} className="text-muted-foreground" />
-          <div className="text-[14px] font-medium">{t('reception.queue')}</div>
+          <div className="text-sm font-medium">{t('reception.queue')}</div>
         </div>
 
         <Button
           variant="ghost"
           size="icon"
-          className="h-[40px] w-[40px]"
+          className="h-9 w-9"
           title={t('reception.print', { defaultValue: 'Печать' })}
           onClick={async () => {
             const loadedSettings = await getPrintSettings();
@@ -59,91 +100,87 @@ export function QueueSidebar({
         </Button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto space-y-2">
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-md border border-slate-200 bg-background/40 dark:border-slate-800 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {queue.length === 0 ? (
-          <div className="rounded-md border border-border bg-background p-3 text-[13px] text-muted-foreground">
+          <div className="p-2 text-xs text-muted-foreground">
             {t('reception.no_queue_today', { defaultValue: 'Очередь на сегодня пустая' })}
           </div>
-        ) : null}
+        ) : (
+          <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+            {queue.map((item) => {
+              const label =
+                item.status === 'WAITING'
+                  ? t('reception.waiting', { defaultValue: 'Waiting' })
+                  : item.status === 'COMPLETED'
+                    ? t('reception.completed', { defaultValue: 'Tayyor' })
+                    : item.status === 'REFUNDED'
+                      ? t('reception.refunded', { defaultValue: 'Refunded' })
+                      : t('common.cancelled', { defaultValue: 'Cancelled' });
 
-        {queue.map((item) => (
-          <div
-            key={item.id}
-            className={cn(
-              'rounded-md border border-border p-3',
-              item.status === 'WAITING' ? 'bg-secondary/60' : 'bg-background',
-            )}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="font-medium">{item.ticket_number}</div>
-                  <span
-                    className={cn(
-                      'inline-flex items-center rounded-sm px-1.5 py-0.5 text-[13px] font-medium',
-                      item.status === 'WAITING'
-                        ? 'bg-primary text-primary-foreground'
-                        : item.status === 'COMPLETED'
-                          ? 'bg-secondary text-secondary-foreground'
-                          : 'bg-destructive text-destructive-foreground',
-                    )}
-                  >
-                    {item.status === 'WAITING'
-                      ? t('reception.waiting')
-                      : item.status === 'COMPLETED'
-                        ? t('reception.completed')
-                        : t('common.cancelled') || 'Cancelled'}
-                  </span>
-                </div>
-                <div className="mt-0.5 truncate text-[14px]">{item.patient_name}</div>
-                <div className="truncate text-[13px] text-muted-foreground">{item.doctor_name}</div>
-              </div>
+              return (
+                <li key={item.id} className="p-2.5 transition-colors hover:bg-muted/40">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="text-[11px] text-muted-foreground">
+                          {item.ticket_number}
+                        </div>
+                        {statusBadge(item.status, label)}
+                      </div>
+                      <div className="mt-1 truncate text-sm font-medium">{item.patient_name}</div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {item.doctor_name}
+                      </div>
+                    </div>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-[40px] w-[40px]"
-                title={t('reception.print_ticket', { defaultValue: 'Печать талона' })}
-                onClick={async () => {
-                  const loadedSettings = await getPrintSettings();
-                  const settings = { ...loadedSettings, autoPrint: true };
-                  const cached = loadReceiptForTicket(item.ticket_number);
-                  if (cached) {
-                    printReceipt(cached, settings);
-                    return;
-                  }
-                  printQueueTicket(
-                    {
-                      ticket_number: item.ticket_number,
-                      patient_name: item.patient_name,
-                      doctor_name: item.doctor_name,
-                      created_at: item.created_at,
-                    },
-                    settings,
-                  );
-                }}
-                type="button"
-              >
-                <Printer size={16} />
-              </Button>
-            </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {item.status === 'WAITING' ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 rounded-md px-2.5 text-xs shadow-none"
+                          onClick={() => onUpdateStatus(item.id, 'COMPLETED')}
+                          type="button"
+                          title={t('common.done')}
+                        >
+                          <CheckCircle2 size={16} />
+                        </Button>
+                      ) : null}
 
-            {item.status === 'WAITING' ? (
-              <div className="mt-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="w-full justify-center"
-                  onClick={() => onUpdateStatus(item.id, 'COMPLETED')}
-                  type="button"
-                >
-                  <CheckCircle2 size={16} />
-                  {t('common.done')}
-                </Button>
-              </div>
-            ) : null}
-          </div>
-        ))}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title={t('reception.print_ticket', { defaultValue: 'Печать талона' })}
+                        onClick={async () => {
+                          const loadedSettings = await getPrintSettings();
+                          const settings = { ...loadedSettings, autoPrint: true };
+                          const cached = loadReceiptForTicket(item.ticket_number);
+                          if (cached) {
+                            printReceipt(cached, settings);
+                            return;
+                          }
+                          printQueueTicket(
+                            {
+                              ticket_number: item.ticket_number,
+                              patient_name: item.patient_name,
+                              doctor_name: item.doctor_name,
+                              created_at: item.created_at,
+                            },
+                            settings,
+                          );
+                        }}
+                        type="button"
+                      >
+                        <Printer size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

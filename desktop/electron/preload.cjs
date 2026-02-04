@@ -8,5 +8,11 @@ contextBridge.exposeInMainWorld('medx', {
    */
   printHtml: (payload) => ipcRenderer.invoke('print:html', payload),
   listPrinters: () => ipcRenderer.invoke('printers:list'),
+
+  // Setup/config helpers (desktop)
+  configGet: () => ipcRenderer.invoke('config:get'),
+  configSave: (payload) => ipcRenderer.invoke('config:save', payload),
+  configGenerateSecret: () => ipcRenderer.invoke('config:generateSecret'),
+  configOpenEnvFolder: () => ipcRenderer.invoke('config:openEnvFolder'),
 });
 

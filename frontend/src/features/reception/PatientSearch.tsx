@@ -42,18 +42,21 @@ export function PatientSearch({
   onFocusFirstResult: () => void;
 }) {
   const { t } = useTranslation();
+  const labelCls = 'mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground';
+  const inputCls =
+    'h-9 rounded-md border-input px-3 py-1 text-sm shadow-none ' +
+    'focus-visible:ring-1 focus-visible:ring-blue-500/50 focus-visible:border-blue-500 focus-visible:ring-offset-0';
 
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <div className="grid grid-cols-2 items-end gap-3 lg:grid-cols-5">
+    <div className="rounded-md border border-slate-200 bg-card p-3 dark:border-slate-800">
+      <div className="grid grid-cols-2 items-end gap-2 lg:grid-cols-5">
         <div>
-          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
-            {t('reception.phone')}
-          </label>
+          <label className={labelCls}>{t('reception.phone')}</label>
           <Input
             ref={phoneRef}
             placeholder="+998..."
             value={phone}
+            className={inputCls}
             onChange={(e) => setPhone(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'ArrowDown') {
@@ -70,13 +73,12 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
-            {t('reception.first_name')}
-          </label>
+          <label className={labelCls}>{t('reception.first_name')}</label>
           <Input
             ref={nameRef}
             placeholder={t('reception.sample_first_name')}
             value={name}
+            className={inputCls}
             onChange={(e) => setName(e.target.value)}
             onBlur={() => setName((v) => normalizeHumanName(v))}
             onKeyDown={(e) => {
@@ -94,13 +96,12 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
-            {t('reception.last_name')}
-          </label>
+          <label className={labelCls}>{t('reception.last_name')}</label>
           <Input
             ref={surnameRef}
             placeholder={t('reception.sample_last_name')}
             value={surname}
+            className={inputCls}
             onChange={(e) => setSurname(e.target.value)}
             onBlur={() => setSurname((v) => normalizeHumanName(v))}
             onKeyDown={(e) => {
@@ -118,14 +119,13 @@ export function PatientSearch({
         </div>
 
         <div>
-          <label className="mb-1.5 block pl-[16px] text-[13px] font-medium text-muted-foreground">
-            {t('reception.dob')}
-          </label>
+          <label className={labelCls}>{t('reception.dob')}</label>
           <Input
             ref={dobRef}
             inputMode="numeric"
             placeholder={t('reception.date_format')}
             value={dob}
+            className={inputCls}
             onChange={(e) => setDob(formatDobInput(e.target.value))}
             onKeyDown={(e) => {
               if (e.key === 'ArrowDown') {
@@ -144,15 +144,15 @@ export function PatientSearch({
         <Button
           ref={createBtnRef}
           onClick={onCreate}
-          variant="secondary"
+          variant="outline"
           size="sm"
           title={t('reception.create_new')}
           disabled={!canCreate}
-          className="h-[48px] w-full px-3 text-[13px]"
+          className="h-9 w-full rounded-md px-3 text-sm shadow-none"
           type="button"
         >
           <Plus size={16} />
-          <span className="ml-1">{t('common.add')}</span>
+          <span>{t('common.add')}</span>
         </Button>
       </div>
     </div>

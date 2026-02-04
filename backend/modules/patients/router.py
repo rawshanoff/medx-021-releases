@@ -1,3 +1,6 @@
+import logging
+import re
+from datetime import datetime, timezone
 from typing import List
 
 from backend.core.database import get_db
@@ -14,6 +17,7 @@ from backend.modules.patients.schemas import (
     PatientRead,
     PatientTransactionRead,
     PatientUpdate,
+    _normalize_phone,
 )
 from backend.modules.patients.text import (
     contains_cyrillic,
@@ -25,13 +29,43 @@ from backend.modules.patients.text import (
 from backend.modules.reception.models import QueueItem
 from backend.modules.users.models import UserRole
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
+logger = logging.getLogger("medx.patients")
+
+_NON_DIGITS = re.compile(r"\D+")
 
 
-@router.post("/", response_model=PatientRead)
+def _phone_variants_for_uniqueness(raw: str) -> list[str]:
+    """Generate phone variants to prevent duplicates from legacy formats.
+
+    We store canonical values like +998XXXXXXXXX, but old records may have:
+    - 9 digits (local)
+    - 998XXXXXXXXX (no plus)
+    - 0XXXXXXXXX
+    """
+    try:
+        canon = _normalize_phone(raw)
+    except Exception:
+        canon = str(raw or "").strip()
+    digits = _NON_DIGITS.sub("", canon)
+    out: list[str] = []
+    for v in [canon, digits, canon[1:] if canon.startswith("+") else ""]:
+        v = (v or "").strip()
+        if v and v not in out:
+            out.append(v)
+    # Uzbekistan: add local formats too
+    if digits.startswith("998") and len(digits) == 12:
+        local9 = digits[3:]
+        for v in [local9, "0" + local9]:
+            if v not in out:
+                out.append(v)
+    return out
+
+
+@router.post("/", response_model=PatientRead, status_code=201)
 async def create_patient(
     patient: PatientCreate,
     db: AsyncSession = Depends(get_db),
@@ -45,8 +79,9 @@ async def create_patient(
         )
     ),
 ):
-    # Check phone uniqueness
-    result = await db.execute(select(Patient).where(Patient.phone == patient.phone))
+    # Check phone uniqueness (including legacy formats)
+    variants = _phone_variants_for_uniqueness(patient.phone)
+    result = await db.execute(select(Patient).where(Patient.phone.in_(variants)))
     if result.scalars().first():
         raise HTTPException(
             status_code=400, detail="Patient with this phone already exists"
@@ -55,6 +90,9 @@ async def create_patient(
     payload = patient.model_dump()
     if payload.get("full_name"):
         payload["full_name"] = normalize_full_name(payload["full_name"])
+    if payload.get("phone"):
+        # Ensure canonical phone even if schema validators were bypassed.
+        payload["phone"] = _normalize_phone(payload["phone"])
 
     new_patient = Patient(**payload)
     db.add(new_patient)
@@ -110,8 +148,12 @@ async def search_patients(
             # handle potential format issues casually
             bd = date.fromisoformat(birth_date)
             query = query.where(Patient.birth_date == bd)
-        except ValueError:
-            pass
+        except ValueError as err:
+            logger.debug("Invalid birth_date filter: %r", birth_date)
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid birth_date format. Expected YYYY-MM-DD.",
+            ) from err
 
     # Fallback to global search if no specific filters provided but 'q' is there
     if not (phone or full_name or birth_date) and q:
@@ -205,12 +247,130 @@ async def update_patient(
     update_data = patient_update.model_dump(exclude_unset=True)
     if "full_name" in update_data and update_data["full_name"]:
         update_data["full_name"] = normalize_full_name(update_data["full_name"])
+    if "phone" in update_data and update_data["phone"]:
+        update_data["phone"] = _normalize_phone(update_data["phone"])
+        variants = _phone_variants_for_uniqueness(update_data["phone"])
+        # Exclude self
+        dup = await db.execute(
+            select(Patient).where(Patient.id != patient_id, Patient.phone.in_(variants))
+        )
+        if dup.scalars().first():
+            raise HTTPException(
+                status_code=400, detail="Patient with this phone already exists"
+            )
     for key, value in update_data.items():
         setattr(patient, key, value)
 
     await db.commit()
     await db.refresh(patient)
     return patient
+
+
+@router.post("/deduplicate", response_model=MessageResponse)
+async def deduplicate_patients(
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    """Normalize names/phones and merge duplicates by phone.
+
+    Keeps the smallest patient.id as canonical for each normalized phone.
+    Moves related records (transactions, queue, appointments, files) to canonical.
+    Soft-deletes duplicates and makes their phone unique to satisfy DB constraint.
+    """
+    res = await db.execute(select(Patient).order_by(Patient.id.asc()))
+    patients = list(res.scalars().all())
+
+    by_phone: dict[str, int] = {}
+    merged = 0
+    normalized = 0
+
+    for p in patients:
+        # Skip already deleted patients (keep as-is)
+        if getattr(p, "deleted_at", None) is not None:
+            continue
+
+        norm_phone = _normalize_phone(p.phone)
+        norm_name = normalize_full_name(p.full_name)
+
+        # If first time seeing this phone, set canonical id.
+        canonical_id = by_phone.get(norm_phone)
+        if canonical_id is None:
+            by_phone[norm_phone] = p.id
+            canonical_id = p.id
+
+        if canonical_id == p.id:
+            # Canonical: normalize fields in-place.
+            if p.phone != norm_phone:
+                p.phone = norm_phone
+                normalized += 1
+            if p.full_name != norm_name:
+                p.full_name = norm_name
+                normalized += 1
+            continue
+
+        # Duplicate: move references to canonical, then soft-delete.
+        await db.execute(
+            update(Transaction)
+            .where(Transaction.patient_id == p.id)
+            .values(patient_id=canonical_id)
+        )
+        await db.execute(
+            update(QueueItem)
+            .where(QueueItem.patient_id == p.id)
+            .values(patient_id=canonical_id)
+        )
+        await db.execute(
+            update(Appointment)
+            .where(Appointment.patient_id == p.id)
+            .values(patient_id=canonical_id)
+        )
+
+        try:
+            from backend.modules.files.models import (
+                FileDeliveryLog,
+                PatientFile,
+                TelegramLinkToken,
+            )
+
+            await db.execute(
+                update(PatientFile)
+                .where(PatientFile.patient_id == p.id)
+                .values(patient_id=canonical_id)
+            )
+            await db.execute(
+                update(FileDeliveryLog)
+                .where(FileDeliveryLog.patient_id == p.id)
+                .values(patient_id=canonical_id)
+            )
+            await db.execute(
+                update(TelegramLinkToken)
+                .where(TelegramLinkToken.patient_id == p.id)
+                .values(patient_id=canonical_id)
+            )
+        except Exception:
+            # files module may be absent in some deployments; ignore
+            logger.debug(
+                "Skipping files tables updates during deduplicate (files module unavailable)",
+                exc_info=True,
+            )
+
+        # Make phone unique to avoid constraint collision with canonical.
+        p.phone = f"{norm_phone}__DUP_{p.id}"
+        p.full_name = norm_name
+        try:
+            # Soft delete marker (if mixin exists)
+            if hasattr(p, "deleted_at"):
+                p.deleted_at = datetime.now(timezone.utc)
+        except Exception:
+            logger.warning(
+                "Failed to set deleted_at during deduplicate for patient_id=%s",
+                getattr(p, "id", None),
+                exc_info=True,
+            )
+        merged += 1
+
+    await db.commit()
+    return {"message": f"Deduplicate done. normalized={normalized}, merged={merged}"}
 
 
 @router.delete("/{patient_id}", response_model=MessageResponse)
@@ -233,6 +393,12 @@ async def delete_patient(
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
+    # Cancel active queue items to avoid orphaned active queue rows.
+    await db.execute(
+        update(QueueItem)
+        .where(QueueItem.patient_id == patient_id, QueueItem.status == "WAITING")
+        .values(status="CANCELLED")
+    )
     patient.soft_delete()
     await db.commit()
     return {"message": "Patient archived successfully"}

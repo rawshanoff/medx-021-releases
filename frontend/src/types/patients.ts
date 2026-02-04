@@ -16,6 +16,9 @@ export interface Patient extends PatientBase {
   history?: unknown;
 }
 
+// Alias for consistency with API naming
+export type PatientRead = Patient;
+
 export interface PatientWithBalance extends Patient {
   balance: number;
   category: string;
@@ -29,6 +32,7 @@ export interface PatientTransactionRead {
   card_amount: number;
   transfer_amount: number;
   description?: string | null;
+  related_transaction_id?: number | null;
   doctor_id?: string | null;
   created_at: string;
 }

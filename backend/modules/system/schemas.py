@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class VersionResponse(BaseModel):
@@ -42,8 +42,7 @@ class SystemSettingRead(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PrintSettingsValue(BaseModel):
@@ -83,10 +82,22 @@ class PrintSettingsValue(BaseModel):
     qrImageDataUrl: str = ""
 
 
+class SystemAuditUserRead(BaseModel):
+    """Minimal user info for audit timeline."""
+
+    id: int
+    username: str
+    full_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SystemAuditLogRead(BaseModel):
     """Schema for audit log entries."""
 
     id: int
+    user_id: int
+    user: Optional[SystemAuditUserRead] = None
     action: str  # "create", "update", "delete", "rollback"
     setting_key: str
     old_value: Optional[Any] = None
@@ -94,5 +105,4 @@ class SystemAuditLogRead(BaseModel):
     details: Optional[str] = None
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

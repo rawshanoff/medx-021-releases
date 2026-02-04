@@ -1,7 +1,7 @@
 {
   "name": "medx-desktop",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.15",
   "main": "main.cjs",
   "type": "commonjs",
   "scripts": {
@@ -9,52 +9,100 @@
     "dev:vite": "cd ../../frontend && npm run dev -- --port 3005 --strictPort",
     "dev:electron": "cross-env ELECTRON_START_URL=http://localhost:3005 electron .",
     "dev:app": "concurrently -k -n VITE,ELECTRON -c green,blue \"npm run dev:vite\" \"wait-on http://localhost:3005 && npm run dev:electron\"",
-    "build:frontend": "cd ../../frontend && npm run build",
+    "build:frontend": "npm --prefix ../../frontend run build && node scripts/copy-frontend.cjs",
     "package": "npm run build:frontend && electron-builder --dir",
     "dist": "npm run build:frontend && electron-builder"
   },
-  "dependencies": {
-    "electron": "^32.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "electron": "^32.2.0",
     "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",
-    "electron-builder": "^24.13.3"
-    ,
+    "electron-builder": "^24.13.3",
     "wait-on": "^8.0.5"
   },
   "build": {
     "appId": "com.medx.desktop",
     "productName": "MedX",
+    "artifactName": "021.exe",
+    "asar": false,
     "files": [
       "main.cjs",
       "preload.cjs",
-      "../../frontend/dist/**",
+      "frontend/**",
       "../../backend/**",
       "../../license_server/**",
       "../../.env.example",
       "../../start_all.bat",
       "../../run_migrations.bat",
-      "../../scripts/**"
+      "../../scripts/**",
+      "!../../**/.env",
+      "!../../**/.env.*",
+      "!../../**/*.pem",
+      "!../../**/*.key",
+      "!../../**/license.key"
     ],
     "extraResources": [
       {
-        "from": "../../frontend/dist",
+        "from": "frontend/dist",
         "to": "frontend_dist"
       },
       {
+        "from": "../../VERSION",
+        "to": "VERSION"
+      },
+      {
         "from": "../../backend",
-        "to": "backend"
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!**/.env",
+          "!**/.env.*",
+          "!**/*.pem",
+          "!**/*.key",
+          "!**/license.key"
+        ]
+      },
+      {
+        "from": "../../scripts",
+        "to": "scripts",
+        "filter": [
+          "**/*",
+          "!**/.env",
+          "!**/.env.*",
+          "!**/*.pem",
+          "!**/*.key",
+          "!**/license.key"
+        ]
       },
       {
         "from": "../../license_server",
-        "to": "license_server"
+        "to": "license_server",
+        "filter": [
+          "**/*",
+          "!**/.env",
+          "!**/.env.*",
+          "!**/*.pem",
+          "!**/*.key",
+          "!**/license.key"
+        ]
+      },
+      {
+        "from": "../../.env.example",
+        "to": ".env.example"
+      },
+      {
+        "from": "bin",
+        "to": "bin"
       }
     ],
     "win": {
       "target": [
         "nsis"
       ]
+    },
+    "nsis": {
+      "include": "build/installer.nsh"
     }
   }
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { History, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './button';
 import client from '../../api/client';
+import { loggers } from '../../utils/logger';
 
 export interface AuditLog {
   id: number;
@@ -67,7 +68,7 @@ export function SettingHistory({ settingKey, onRollback }: SettingHistoryProps) 
       setLogs(Array.isArray(response.data) ? response.data : []);
     } catch (err: any) {
       setError('Не удалось загрузить историю');
-      console.error('Error loading history:', err);
+      loggers.system.error('Error loading history', err);
     } finally {
       setLoading(false);
     }
@@ -85,20 +86,18 @@ export function SettingHistory({ settingKey, onRollback }: SettingHistoryProps) 
 
     try {
       const response = await client.post(`/system/settings/${settingKey}/rollback/${auditId}`);
-      setLogs((prev) =>
-        [
-          {
-            id: Math.max(...prev.map((l) => l.id), 0) + 1,
-            action: 'rollback',
-            setting_key: settingKey,
-            old_value: response.data.value,
-            new_value: oldValue,
-            details: `Rolled back from audit entry #${auditId}`,
-            created_at: new Date().toISOString(),
-          },
-          ...prev,
-        ]
-      );
+      setLogs((prev) => [
+        {
+          id: Math.max(...prev.map((l) => l.id), 0) + 1,
+          action: 'rollback',
+          setting_key: settingKey,
+          old_value: response.data.value,
+          new_value: oldValue,
+          details: `Rolled back from audit entry #${auditId}`,
+          created_at: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
       if (onRollback) onRollback(auditId);
     } catch (err: any) {
       alert('Ошибка при откате: ' + (err.response?.data?.detail || err.message));
@@ -149,12 +148,14 @@ export function SettingHistory({ settingKey, onRollback }: SettingHistoryProps) 
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <span
                   className={`inline-flex items-center justify-center h-6 px-2 rounded text-[11px] font-medium flex-shrink-0 ${getActionColor(
-                    log.action
+                    log.action,
                   )}`}
                 >
                   {getActionLabel(log.action)}
                 </span>
-                <div className="text-[12px] text-muted-foreground truncate">{formatDate(log.created_at)}</div>
+                <div className="text-[12px] text-muted-foreground truncate">
+                  {formatDate(log.created_at)}
+                </div>
               </div>
               {expandedId === log.id ? (
                 <ChevronUp className="h-4 w-4 flex-shrink-0" />

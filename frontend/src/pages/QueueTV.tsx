@@ -2,11 +2,20 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueue } from '../features/reception/hooks/useQueue';
 import type { QueueItem } from '../types/reception';
+import { loggers } from '../utils/logger';
 
 export default function QueueTV() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { queue, refresh } = useQueue();
   const previousTicketIdRef = useRef<number | null>(null);
+
+  const dateLocale = useMemo(() => {
+    const lang = String(i18n.language || '').toLowerCase();
+    if (lang.startsWith('ru')) return 'ru-RU';
+    if (lang.startsWith('uz')) return 'uz-UZ';
+    if (lang.startsWith('en')) return 'en-US';
+    return undefined;
+  }, [i18n.language]);
 
   const playNotificationSound = useCallback(() => {
     try {
@@ -32,7 +41,7 @@ export default function QueueTV() {
         oscillator.stop(startTime + 0.4);
       });
     } catch (e) {
-      console.warn('Could not play notification sound', e);
+      loggers.queue.warn('Could not play notification sound', e);
     }
   }, []);
 
@@ -66,7 +75,7 @@ export default function QueueTV() {
           {t('reception.queue')}
         </h1>
         <div className="text-2xl md:text-3xl text-muted-foreground">
-          {new Date().toLocaleDateString('ru-RU', {
+          {new Date().toLocaleDateString(dateLocale, {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

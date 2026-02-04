@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from backend.modules.finance.models import PaymentMethod
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class TransactionCreate(BaseModel):
@@ -53,9 +53,9 @@ class TransactionRead(TransactionCreate):
     shift_id: int
     created_at: datetime
     related_transaction_id: Optional[int] = None
+    patient_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShiftCreate(BaseModel):
@@ -71,8 +71,7 @@ class ShiftRead(ShiftCreate):
     total_card: int
     total_transfer: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReportXRead(BaseModel):

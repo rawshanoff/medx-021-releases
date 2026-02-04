@@ -2,7 +2,7 @@ import re
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class PatientBase(BaseModel):
@@ -42,8 +42,7 @@ class PatientRead(PatientBase):
     telegram_username: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientTransactionRead(BaseModel):
@@ -54,11 +53,11 @@ class PatientTransactionRead(BaseModel):
     card_amount: int = 0
     transfer_amount: int = 0
     description: Optional[str] = None
+    related_transaction_id: Optional[int] = None
     doctor_id: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientQueueHistoryRead(BaseModel):
@@ -68,8 +67,7 @@ class PatientQueueHistoryRead(BaseModel):
     status: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientAppointmentHistoryRead(BaseModel):
@@ -81,8 +79,7 @@ class PatientAppointmentHistoryRead(BaseModel):
     notes: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientHistoryRead(BaseModel):
@@ -100,9 +97,18 @@ def _normalize_phone(raw: str) -> str:
     if len(digits) > 16:
         raise ValueError("phone is too long")
 
-    # If starts with country code without '+', normalize to +<digits>
+    # Preserve explicit "+" if provided.
     if s.startswith("+"):
         return "+" + digits
+
+    # Uzbekistan defaults (avoid duplicates): 9-digit local numbers -> +998xxxxxxxxx
+    # Also handle: 998xxxxxxxxx (12 digits) and 0xxxxxxxxx (10 digits).
     if digits.startswith("998") and len(digits) == 12:
         return "+" + digits
+    if len(digits) == 10 and digits.startswith("0"):
+        return "+998" + digits[1:]
+    if len(digits) == 9:
+        return "+998" + digits
+
+    # Fallback: keep digits-only for other countries / legacy.
     return digits

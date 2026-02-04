@@ -87,6 +87,42 @@ LICENSE_DEV_MODE=true  # для MVP (разработки)
 
 **Все переменные** в `.env.example`
 
+## 🔄 Онлайн‑обновления (MVP, Electron)
+
+В MVP обновления делаются через **GitHub Releases**:
+
+- **Манифест**: `latest.json`
+- **Архив обновления**: `medx-<version>.zip`
+- Backend читает `UPDATE_CHECK_URL` и показывает статус в разделе «Система → Обновления».
+
+### Формат `latest.json`
+
+```json
+{
+  "version": "1.0.1",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.1-mvp.zip",
+  "sha256": "<hex>",
+  "notes": "Что нового...",
+  "published_at": "2026-02-03T12:00:00Z"
+}
+```
+
+### Как выпустить обновление
+
+1. Собрать `frontend/dist` и подготовить ZIP с папками:
+   - `backend/`
+   - `license_server/`
+   - `scripts/`
+   - `frontend/dist/`
+2. Посчитать SHA256 для ZIP и положить:
+   - `medx-<version>.zip` (asset)
+   - `latest.json` (asset)
+3. Настроить в `.env`:
+
+```bash
+UPDATE_CHECK_URL=https://github.com/rawshanoff/medx-021-releases/releases/latest/download/latest.json
+```
+
 ## Генерация RSA‑ключей
 
 Выполните в корне репозитория:

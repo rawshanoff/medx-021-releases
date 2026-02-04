@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { clearAuth, getToken, isTokenExpired } from '../utils/auth';
 
-export const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
+const isElectronFile = typeof window !== 'undefined' && window.location?.protocol === 'file:';
+
+// In Electron production we load UI via file://, so relative "/api" becomes file:///api (broken).
+// Default desktop backend is local.
+export const API_URL =
+  (import.meta.env.VITE_API_URL as string | undefined) ||
+  (isElectronFile ? 'http://127.0.0.1:8000/api' : '/api');
 
 const client = axios.create({
   baseURL: API_URL,

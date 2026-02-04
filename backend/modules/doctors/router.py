@@ -8,13 +8,15 @@ from backend.modules.doctors.schemas import (
     DoctorCreate,
     DoctorRead,
     DoctorServiceCreate,
+    DoctorServiceUpdate,
     DoctorUpdate,
 )
+from backend.modules.reception.models import QueueItem
 from backend.modules.users.models import UserRole
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import desc, select
+from sqlalchemy import desc, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, with_loader_criteria
 
 router = APIRouter()
 
@@ -27,7 +29,12 @@ async def list_archived_doctors(
 ):
     result = await db.execute(
         select(Doctor)
-        .options(selectinload(Doctor.services))
+        .options(
+            selectinload(Doctor.services),
+            with_loader_criteria(
+                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
+            ),
+        )
         .where(Doctor.deleted_at.is_not(None))
         .order_by(Doctor.full_name)
         .limit(500)
@@ -90,7 +97,12 @@ async def create_doctor(
     # Eager load relationships for response
     result = await db.execute(
         select(Doctor)
-        .options(selectinload(Doctor.services))
+        .options(
+            selectinload(Doctor.services),
+            with_loader_criteria(
+                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
+            ),
+        )
         .where(Doctor.id == new_doctor.id)
     )
     return result.scalars().first()
@@ -103,7 +115,12 @@ async def list_doctors(
 ):
     result = await db.execute(
         select(Doctor)
-        .options(selectinload(Doctor.services))
+        .options(
+            selectinload(Doctor.services),
+            with_loader_criteria(
+                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
+            ),
+        )
         .where(Doctor.deleted_at.is_(None))
         .order_by(Doctor.full_name)
     )
@@ -146,6 +163,8 @@ async def update_doctor(
         doctor.queue_prefix = doctor_update.queue_prefix
     if doctor_update.is_active is not None:
         doctor.is_active = doctor_update.is_active
+    if doctor_update.room_number is not None:
+        doctor.room_number = doctor_update.room_number
 
     # Log logic
     log = AuditLog(action="Update Doctor", details=f"Updated doctor ID {doctor_id}")
@@ -156,7 +175,12 @@ async def update_doctor(
     # Re-fetch with services
     result = await db.execute(
         select(Doctor)
-        .options(selectinload(Doctor.services))
+        .options(
+            selectinload(Doctor.services),
+            with_loader_criteria(
+                DoctorService, DoctorService.deleted_at.is_(None), include_aliases=True
+            ),
+        )
         .where(Doctor.id == doctor_id)
     )
     return result.scalars().first()
@@ -182,7 +206,15 @@ async def delete_doctor(
         )
         for svc in svc_res.scalars().all():
             svc.soft_delete()
-        # Keep historical queue items (do not delete)
+        # Cancel active queue items for this doctor to avoid orphaned active queue
+        await db.execute(
+            update(QueueItem)
+            .where(
+                QueueItem.doctor_id == doctor_id,
+                QueueItem.status == "WAITING",
+            )
+            .values(status="CANCELLED")
+        )
 
         log = AuditLog(action="Delete Doctor", details=f"Deleted doctor ID {doctor_id}")
         db.add(log)
@@ -215,6 +247,32 @@ async def delete_service(
 
     await db.commit()
     return {"message": "Service deleted"}
+
+
+@router.put("/services/{service_id}", response_model=MessageResponse)
+async def update_service(
+    service_id: int,
+    service: DoctorServiceUpdate,
+    db: AsyncSession = Depends(get_db),
+    _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
+):
+    svc = await db.get(DoctorService, service_id)
+    if not svc or svc.deleted_at is not None:
+        raise HTTPException(status_code=404, detail="Service not found")
+
+    if service.name is not None:
+        svc.name = service.name
+    if service.price is not None:
+        svc.price = service.price
+    if service.priority is not None:
+        svc.priority = service.priority
+
+    log = AuditLog(
+        action="Update Service", details=f"Updated service {svc.name} (ID {service_id})"
+    )
+    db.add(log)
+    await db.commit()
+    return {"message": "Service updated"}
 
 
 @router.get("/history", response_model=List[dict])

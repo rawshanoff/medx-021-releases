@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import client from '../api/client';
 import {
   Building2,
@@ -17,6 +17,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../context/ToastContext';
 import { hasAnyRole } from '../utils/auth';
+import { useNavigate } from 'react-router-dom';
 import {
   buildReceiptHtml,
   defaultSettings,
@@ -28,8 +29,8 @@ import {
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { SettingHistory } from '../components/ui/setting-history';
 import { cn } from '../lib/cn';
+import { loggers } from '../utils/logger';
 
 interface User {
   id: number;
@@ -77,16 +78,23 @@ function SettingsTile({
   return (
     <button
       type="button"
-      className="flex w-full items-start gap-3 rounded-md border border-border bg-card p-4 text-left transition hover:bg-accent/40"
+      className={cn(
+        'group flex w-full items-start gap-4 rounded-2xl border border-slate-200/80 bg-white p-6 text-left',
+        'shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] transition',
+        'hover:-translate-y-[1px] hover:shadow-[0_10px_20px_-10px_rgba(0,0,0,0.18)]',
+        'dark:border-slate-700/60 dark:bg-slate-800 dark:shadow-none dark:hover:shadow-none',
+      )}
       onClick={onClick}
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
         {icon}
       </div>
       <div className="min-w-0 pt-0.5">
-        <div className="text-[14px] font-medium">{title}</div>
+        <div className="text-[15px] font-semibold text-slate-900 dark:text-slate-50">{title}</div>
         {subtitle ? (
-          <div className="mt-0.5 text-[13px] text-muted-foreground">{subtitle}</div>
+          <div className="mt-1 text-sm leading-snug text-slate-500 dark:text-slate-400">
+            {subtitle}
+          </div>
         ) : null}
       </div>
     </button>
@@ -96,8 +104,14 @@ function SettingsTile({
 export default function System() {
   const { t } = useTranslation();
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const canManageUsers = useMemo(() => hasAnyRole(['admin', 'owner']), []);
   const [openSection, setOpenSection] = useState<SystemSection | null>(null);
+  const updatesPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const tr = (key: string, defaultValue: string) => t(key, { defaultValue });
+  const confirmReset = () =>
+    confirm(tr('system.confirm_reset', 'Сбросить изменения и загрузить сохранённые настройки?'));
 
   // System States
   const [version, setVersion] = useState(t('common.loading'));
@@ -148,12 +162,23 @@ export default function System() {
         const settings = await getPrintSettings();
         setLocalPrintSettings(settings);
       } catch (e) {
-        console.error('Failed to load print settings:', e);
+        loggers.system.error('Failed to load print settings', e);
         // Will use defaults if loading fails
       }
     };
     initializeSettings();
   }, [canManageUsers]);
+
+  useEffect(() => {
+    if (openSection !== 'updates') return;
+    // Best-effort scroll, so users see the panel (no modal).
+    try {
+      setTimeout(
+        () => updatesPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        0,
+      );
+    } catch {}
+  }, [openSection]);
 
   const checkForUpdates = async () => {
     setCheckingUpdates(true);
@@ -161,10 +186,62 @@ export default function System() {
       const res = await client.get('/system/update-check');
       setUpdateInfo(res.data);
     } catch (e) {
-      showToast('Failed to check for updates', 'error');
+      showToast(t('system.failed_check_updates'), 'error');
     } finally {
       setCheckingUpdates(false);
     }
+  };
+
+  const installUpdate = async () => {
+    setCheckingUpdates(true);
+    try {
+      // This endpoint will spawn updater and then the backend process will exit shortly after.
+      const res = await client.post('/system/update-install');
+      setUpdateInfo(res.data);
+      showToast(
+        t('system.updating_now', {
+          defaultValue: 'Устанавливаем обновление… приложение перезапустится.',
+        }),
+        'info',
+      );
+    } catch (e: any) {
+      // If backend is already shutting down, request may fail — treat as non-fatal.
+      const msg = e?.response?.data?.detail || t('common.error', { defaultValue: 'Ошибка' });
+      showToast(String(msg), 'error');
+    } finally {
+      setCheckingUpdates(false);
+    }
+
+    // UX: poll version after install attempt and notify on success.
+    const startedAt = Date.now();
+    const timeoutMs = 60_000;
+    const poll = async () => {
+      try {
+        const res = await client.get('/system/version');
+        const newVersion = res.data?.version;
+        if (newVersion && newVersion !== version) {
+          setVersion(newVersion);
+          showToast(
+            t('system.update_installed', {
+              defaultValue: `Обновление установлено: ${newVersion}`,
+            }),
+            'success',
+          );
+          // Refresh update status too.
+          try {
+            const u = await client.get('/system/update-check');
+            setUpdateInfo(u.data);
+          } catch {}
+          return;
+        }
+      } catch {
+        // backend may be restarting; ignore
+      }
+      if (Date.now() - startedAt < timeoutMs) {
+        setTimeout(poll, 2000);
+      }
+    };
+    setTimeout(poll, 2000);
   };
 
   const fetchSystemInfo = async () => {
@@ -189,7 +266,7 @@ export default function System() {
       const res = await client.get('/users/');
       setUsers(res.data);
     } catch (e) {
-      console.error('Failed to load users', e);
+      loggers.system.error('Failed to load users', e);
     }
   };
 
@@ -214,7 +291,7 @@ export default function System() {
           showToast(t('common.license') + ': OK', 'success');
         }
       } catch (err: any) {
-        showToast(err.response?.data?.detail || 'Не удалось загрузить лицензию', 'error');
+        showToast(err.response?.data?.detail || t('system.license_load_failed'), 'error');
       } finally {
         setLicenseFile(null);
       }
@@ -229,9 +306,9 @@ export default function System() {
       setShowUserModal(false);
       setFormData({ username: '', password: '', full_name: '', role: 'doctor' });
       fetchUsers();
-      showToast('User created', 'success');
+      showToast(t('system.user_created'), 'success');
     } catch (e) {
-      showToast('Failed to create user. Username might exist.', 'error');
+      showToast(t('system.user_create_failed'), 'error');
     }
   };
 
@@ -240,42 +317,44 @@ export default function System() {
     try {
       await client.delete(`/users/${id}`);
       fetchUsers();
-      showToast('User deleted', 'success');
+      showToast(t('system.user_deleted'), 'success');
     } catch (e) {
-      showToast('Failed to delete user', 'error');
+      showToast(t('system.user_delete_failed'), 'error');
     }
   };
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="grid grid-cols-3 gap-3">
+    <div className="flex h-full flex-col gap-6">
+      <div className="grid grid-cols-3 gap-6">
         <SettingsTile
-          title={t('system.clinic_details')}
-          subtitle={t('system.clinic_details_desc')}
+          title={tr('system.clinic_details', 'Реквизиты')}
+          subtitle={tr('system.clinic_details_desc', 'Клиника, логотип, QR, текст под QR')}
           icon={<Building2 size={18} />}
           onClick={() => setOpenSection('requisites')}
         />
         <SettingsTile
-          title={t('system.printer_settings')}
-          subtitle={t('system.printer_settings_desc')}
+          title={tr('system.printer_settings', 'Настройка принтера')}
+          subtitle={tr('system.printer_settings_desc', 'Выбор deviceName, бумага, silent‑печать')}
           icon={<Printer size={18} />}
           onClick={() => setOpenSection('printer')}
         />
         <SettingsTile
-          title={t('system.receipt_settings')}
-          subtitle={t('system.receipt_settings_desc')}
+          title={tr('system.receipt_settings', 'Настройка чека')}
+          subtitle={tr('system.receipt_settings_desc', 'Шаблон, поля, предпросмотр и тест')}
           icon={<FileText size={18} />}
           onClick={() => setOpenSection('receipt')}
         />
         <SettingsTile
-          title={t('system.activation')}
-          subtitle={t('system.activation_desc')}
+          title={tr('system.activation', 'Активация / лицензия')}
+          subtitle={tr('system.activation_desc', 'Статус, функции, загрузка ключа')}
           icon={<KeyRound size={18} />}
-          onClick={() => setOpenSection('license')}
+          onClick={() => {
+            setOpenSection('license');
+          }}
         />
         <SettingsTile
-          title={t('system.updates')}
-          subtitle={t('system.updates_desc')}
+          title={tr('system.updates', 'Обновления')}
+          subtitle={tr('system.updates_desc', 'Проверка и установка обновлений системы')}
           icon={<Download size={18} />}
           onClick={() => {
             setOpenSection('updates');
@@ -284,21 +363,23 @@ export default function System() {
         />
         {canManageUsers ? (
           <SettingsTile
-            title={t('system.users')}
-            subtitle={t('system.users_desc')}
+            title={tr('system.users', 'Пользователи')}
+            subtitle={tr('system.users_desc', 'Создание, роли, удаление')}
             icon={<Users size={18} />}
-            onClick={() => setOpenSection('users')}
+            onClick={() => {
+              setOpenSection('users');
+            }}
           />
         ) : null}
         <SettingsTile
-          title={t('system.reset_settings')}
-          subtitle={t('system.reset_settings_desc')}
+          title={tr('system.reset_settings', 'Сбросить настройки')}
+          subtitle={tr('system.reset_settings_desc', 'Вернуть значения по умолчанию')}
           icon={<Settings size={18} />}
           onClick={() => {
             getPrintSettings()
               .then((s) => {
                 setLocalPrintSettings(s);
-                showToast(t('system.settings_loaded'), 'success');
+                showToast(tr('system.settings_loaded', 'Настройки загружены'), 'success');
               })
               .catch(() => {
                 showToast(
@@ -314,14 +395,127 @@ export default function System() {
           title={t('system.audit_log', { defaultValue: 'История изменений' })}
           subtitle={t('system.audit_log_desc', { defaultValue: 'Кто и когда менял настройки' })}
           icon={<Settings size={18} />}
-          onClick={() => navigate('/system/audit')}
+          onClick={() => navigate('/system/audit?key=print_config')}
         />
       </div>
 
+      {/* Updates (NO MODAL) */}
+      {openSection === 'updates' ? (
+        <div
+          ref={updatesPanelRef}
+          className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:border-slate-700/60 dark:bg-slate-800 dark:shadow-none"
+          role="region"
+          aria-label={tr('system.updates', 'Обновления')}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[15px] font-semibold text-slate-900 dark:text-slate-50">
+                {tr('system.updates', 'Обновления')}
+              </div>
+              <div className="mt-1 text-sm leading-snug text-slate-500 dark:text-slate-400">
+                {tr('system.updates_desc', 'Проверка и установка обновлений системы')}
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              type="button"
+              onClick={() => setOpenSection(null)}
+            >
+              {t('common.close', { defaultValue: 'Закрыть' })}
+            </Button>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50 p-4 dark:border-slate-700/60 dark:bg-slate-900/40">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <div className="text-[13px] font-medium">{t('system.current_version')}</div>
+              <div className="text-[13px] font-medium text-foreground">{version}</div>
+            </div>
+
+            {checkingUpdates ? (
+              <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
+                <RefreshCw size={16} className="animate-spin" />
+                {t('system.checking_updates')}
+              </div>
+            ) : updateInfo ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[13px] font-medium">{t('system.latest_version')}</div>
+                  <div
+                    className={cn(
+                      'text-[13px] font-medium',
+                      updateInfo.update_available ? 'text-primary' : 'text-muted-foreground',
+                    )}
+                  >
+                    {updateInfo.latest_version}
+                  </div>
+                </div>
+
+                {updateInfo.release_notes ? (
+                  <div className="rounded-md border border-border bg-background p-2">
+                    <div className="text-[13px] text-muted-foreground">
+                      {updateInfo.release_notes}
+                    </div>
+                  </div>
+                ) : null}
+
+                {updateInfo.update_available ? (
+                  <div className="rounded-md border-2 border-primary bg-primary/10 p-3">
+                    <div className="mb-2 text-[13px] font-medium text-primary">
+                      {t('system.update_available')}: {updateInfo.latest_version}
+                    </div>
+                    {!updateInfo.download_url ? (
+                      <div className="text-[13px] text-muted-foreground">
+                        {t('system.update_url_not_configured')}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-border bg-background p-3">
+                    <div className="text-[13px] font-medium text-muted-foreground">
+                      {t('system.update_not_available')}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-[13px] text-muted-foreground">
+                {t('system.check_updates', { defaultValue: 'Проверьте обновления' })}
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                onClick={checkForUpdates}
+                disabled={checkingUpdates}
+              >
+                <RefreshCw size={14} className={checkingUpdates ? 'animate-spin' : ''} />{' '}
+                {t('system.check_updates')}
+              </Button>
+              {updateInfo?.update_available && updateInfo.download_url ? (
+                <Button
+                  variant="default"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    installUpdate();
+                  }}
+                >
+                  <Download size={14} /> {t('system.install_update')}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <SettingsModal
         open={openSection === 'license'}
-        title={t('system.activation_title')}
-        description={t('system.activation_description')}
+        title={tr('system.activation_title', 'Активация / лицензия')}
+        description={tr('system.activation_description', 'Статус лицензии и загрузка ключа.')}
         onClose={() => setOpenSection(null)}
         width={820}
       >
@@ -392,8 +586,8 @@ export default function System() {
 
       <SettingsModal
         open={openSection === 'requisites'}
-        title={t('system.clinic_title')}
-        description={t('system.clinic_description')}
+        title={tr('system.clinic_title', 'Реквизиты')}
+        description={tr('system.clinic_description', 'Данные клиники и QR/логотип для печати.')}
         onClose={() => setOpenSection(null)}
         width={900}
       >
@@ -553,36 +747,40 @@ export default function System() {
             onClick={async () => {
               try {
                 await setPrintSettings(printSettings);
-                showToast(t('common.saved') || 'Сохранено', 'success');
+                showToast(tr('common.saved', 'Сохранено'), 'success');
               } catch (e) {
-                showToast(t('common.error') || 'Ошибка сохранения', 'error');
+                showToast(tr('common.error', 'Ошибка сохранения'), 'error');
               }
             }}
           >
-            {t('common.save') || 'Сохранить'}
+            {tr('common.save', 'Сохранить')}
           </Button>
           <Button
             variant="secondary"
             className="h-10 px-3 text-[13px]"
             type="button"
             onClick={async () => {
+              if (!confirmReset()) return;
               try {
                 const settings = await getPrintSettings();
                 setLocalPrintSettings(settings);
               } catch (e) {
-                console.error('Failed to load print settings:', e);
+                loggers.system.error('Failed to load print settings', e);
               }
             }}
           >
-            {t('common.reset') || 'Сбросить'}
+            {tr('common.reset', 'Сбросить')}
           </Button>
         </div>
       </SettingsModal>
 
       <SettingsModal
         open={openSection === 'printer'}
-        title={t('system.printer_title')}
-        description={t('system.printer_description')}
+        title={tr('system.printer_title', 'Настройка принтера')}
+        description={tr(
+          'system.printer_description',
+          'Выбор принтера (deviceName) и параметры silent‑печати.',
+        )}
         onClose={() => setOpenSection(null)}
         width={900}
       >
@@ -708,45 +906,51 @@ export default function System() {
             onClick={async () => {
               try {
                 await setPrintSettings(printSettings);
-                showToast(t('common.saved') || 'Сохранено', 'success');
+                showToast(tr('common.saved', 'Сохранено'), 'success');
               } catch (e) {
-                showToast(t('common.error') || 'Ошибка сохранения', 'error');
+                showToast(tr('common.error', 'Ошибка сохранения'), 'error');
               }
             }}
           >
-            {t('common.save') || 'Сохранить'}
+            {tr('common.save', 'Сохранить')}
           </Button>
           <Button
             variant="secondary"
             className="h-10 px-3 text-[13px]"
             type="button"
             onClick={async () => {
+              if (!confirmReset()) return;
               try {
                 const settings = await getPrintSettings();
                 setLocalPrintSettings(settings);
               } catch (e) {
-                console.error('Failed to load print settings:', e);
+                loggers.system.error('Failed to load print settings', e);
               }
             }}
           >
-            {t('common.reset') || 'Сбросить'}
+            {tr('common.reset', 'Сбросить')}
           </Button>
-        </div>
-
-        <div className="mt-4 border-t border-border pt-4">
-          <SettingHistory
-            settingKey="print_config"
-            onRollback={() => {
-              showToast('Откат выполнен', 'success');
+          <Button
+            variant="outline"
+            className="h-10 px-3 text-[13px]"
+            type="button"
+            onClick={() => {
+              setOpenSection(null);
+              navigate('/system/audit?key=print_config');
             }}
-          />
+          >
+            {tr('system.audit_log', 'История изменений')}
+          </Button>
         </div>
       </SettingsModal>
 
       <SettingsModal
         open={openSection === 'receipt'}
-        title={t('system.receipt_title')}
-        description={t('system.receipt_description')}
+        title={tr('system.receipt_title', 'Настройка чека')}
+        description={tr(
+          'system.receipt_description',
+          'Шаблон, что показывать в чеке, предпросмотр и тесты.',
+        )}
         onClose={() => setOpenSection(null)}
         width={980}
       >
@@ -1145,44 +1349,46 @@ export default function System() {
             onClick={async () => {
               try {
                 await setPrintSettings(printSettings);
-                showToast(t('common.saved') || 'Сохранено', 'success');
+                showToast(tr('common.saved', 'Сохранено'), 'success');
               } catch (e) {
-                showToast(t('common.error') || 'Ошибка сохранения', 'error');
+                showToast(tr('common.error', 'Ошибка сохранения'), 'error');
               }
             }}
           >
-            {t('common.save') || 'Сохранить'}
+            {tr('common.save', 'Сохранить')}
           </Button>
           <Button
             variant="secondary"
             type="button"
             onClick={async () => {
+              if (!confirmReset()) return;
               try {
                 const settings = await getPrintSettings();
                 setLocalPrintSettings(settings);
               } catch (e) {
-                console.error('Failed to load print settings:', e);
+                loggers.system.error('Failed to load print settings', e);
               }
             }}
           >
-            {t('common.reset') || 'Сбросить'}
+            {tr('common.reset', 'Сбросить')}
           </Button>
-        </div>
-
-        <div className="mt-4 border-t border-border pt-4">
-          <SettingHistory
-            settingKey="print_config"
-            onRollback={() => {
-              showToast('Откат выполнен', 'success');
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => {
+              setOpenSection(null);
+              navigate('/system/audit?key=print_config');
             }}
-          />
+          >
+            {tr('system.audit_log', 'История изменений')}
+          </Button>
         </div>
       </SettingsModal>
 
       <SettingsModal
         open={openSection === 'users'}
-        title={t('system.users_title')}
-        description={t('system.users_description')}
+        title={tr('system.users_title', 'Пользователи')}
+        description={tr('system.users_description', 'Создание пользователей и управление ролями.')}
         onClose={() => {
           setOpenSection(null);
           setUsersPage(0);
@@ -1427,97 +1633,6 @@ export default function System() {
             </div>
           </form>
         </Modal>
-      )}
-
-      {/* Updates Modal */}
-      {openSection === 'updates' && (
-        <SettingsModal
-          open={true}
-          title={t('system.updates')}
-          description={t('system.updates_desc')}
-          onClose={() => setOpenSection(null)}
-          width={820}
-        >
-          <div className="rounded-md border border-border bg-secondary/30 p-3">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <div className="text-[13px] font-medium">{t('system.current_version')}</div>
-              <div className="text-[13px] font-medium text-foreground">{version}</div>
-            </div>
-
-            {checkingUpdates ? (
-              <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-                <RefreshCw size={16} className="animate-spin" />
-                {t('system.checking_updates')}
-              </div>
-            ) : updateInfo ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-[13px] font-medium">{t('system.latest_version')}</div>
-                  <div
-                    className={cn(
-                      'text-[13px] font-medium',
-                      updateInfo.update_available ? 'text-primary' : 'text-muted-foreground',
-                    )}
-                  >
-                    {updateInfo.latest_version}
-                  </div>
-                </div>
-
-                {updateInfo.release_notes && (
-                  <div className="rounded-md border border-border bg-background p-2">
-                    <div className="text-[13px] text-muted-foreground">
-                      {updateInfo.release_notes}
-                    </div>
-                  </div>
-                )}
-
-                {updateInfo.update_available ? (
-                  <div className="rounded-md border-2 border-primary bg-primary/10 p-3">
-                    <div className="mb-2 text-[13px] font-medium text-primary">
-                      {t('system.update_available')}: {updateInfo.latest_version}
-                    </div>
-                    {!updateInfo.download_url && (
-                      <div className="text-[13px] text-muted-foreground">
-                        {t('system.update_url_not_configured')}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="rounded-md border border-border bg-background p-3">
-                    <div className="text-[13px] font-medium text-muted-foreground">
-                      {t('system.update_not_available')}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : null}
-
-            <div className="mt-4 flex justify-end gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                type="button"
-                onClick={checkForUpdates}
-                disabled={checkingUpdates}
-              >
-                <RefreshCw size={14} className={checkingUpdates ? 'animate-spin' : ''} />{' '}
-                {t('system.check_updates')}
-              </Button>
-              {updateInfo?.update_available && updateInfo.download_url ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  type="button"
-                  onClick={() => {
-                    showToast('Update installation will be implemented', 'info');
-                  }}
-                >
-                  <Download size={14} /> {t('system.install_update')}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-        </SettingsModal>
       )}
     </div>
   );

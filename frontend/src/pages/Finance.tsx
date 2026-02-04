@@ -3,14 +3,12 @@ import client from '../api/client';
 import {
   Banknote,
   CreditCard,
+  ArrowLeftRight,
   FileText,
   Lock,
   TrendingDown,
-  Unlock,
   RefreshCw,
-  CheckCircle,
-  Clock,
-  User,
+  Receipt,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../context/ToastContext';
@@ -20,6 +18,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { cn } from '../lib/cn';
+import { loggers } from '../utils/logger';
+import { FinanceDashboardLayout, SummaryCard } from '../features/finance/FinanceDashboardLayout';
 
 export default function Finance() {
   const { t } = useTranslation();
@@ -28,12 +28,13 @@ export default function Finance() {
   const [shift, setShift] = useState<any>(null);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('CASH'); // CASH, CARD, MIXED
+  const [paymentMethod, setPaymentMethod] = useState('CASH'); // CASH, CARD, TRANSFER, MIXED
   const [loading, setLoading] = useState(false);
   const [txLoading, setTxLoading] = useState(false);
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [closeShiftOpen, setCloseShiftOpen] = useState(false);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [cashCounted, setCashCounted] = useState('');
 
   // For Mixed Payment (Expense doesn't usually use mixed but keep logic just in case or simplify)
   // Expense is usually pure Cash or pure Card from company account.
@@ -41,17 +42,6 @@ export default function Finance() {
   useEffect(() => {
     checkActiveShift();
   }, []);
-
-  // Auto-refresh every 15 seconds
-  useEffect(() => {
-    if (!shift) return;
-
-    const interval = setInterval(() => {
-      checkActiveShift();
-    }, 15000); // 15 seconds
-
-    return () => clearInterval(interval);
-  }, [shift]);
 
   // Auto-refresh every 15 seconds
   useEffect(() => {
@@ -73,18 +63,21 @@ export default function Finance() {
         await fetchRecentTransactions();
       }
     } catch (e) {
-      console.error('Failed to check active shift', e);
+      loggers.finance.error('Failed to check active shift', e);
       setShift(null);
     }
   };
 
   const fetchRecentTransactions = async () => {
     try {
-      const res = await client.get('/finance/recent-transactions?limit=5');
+      const res = await client.get('/finance/recent-transactions?limit=20');
       setRecentTransactions(res.data || []);
     } catch (e) {
-      showToast('Не удалось загрузить транзакции', 'error');
-      console.error('Failed to fetch recent transactions', e);
+      showToast(
+        t('finance.failed_load_transactions', { defaultValue: 'Не удалось загрузить транзакции' }),
+        'error',
+      );
+      loggers.finance.error('Failed to fetch recent transactions', e);
     }
   };
 
@@ -102,6 +95,7 @@ export default function Finance() {
   };
 
   const handleCloseShift = () => {
+    setCashCounted('');
     setCloseShiftOpen(true);
   };
 
@@ -169,195 +163,194 @@ export default function Finance() {
     return { cash, card, transfer, total: cash + card + transfer };
   }, [shift]);
 
+  const formatMoney = (n: number) => Number(n || 0).toLocaleString();
+
   return (
     <div className="flex h-full flex-col gap-4">
-      {/* Status Bar */}
-      <div
-        className={cn(
-          'flex items-center justify-between p-3 rounded-lg border',
+      <FinanceDashboardLayout
+        shiftOpen={Boolean(shift)}
+        shiftTitle={
           shift
-            ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
-            : 'bg-gray-50 dark:bg-gray-950/30 border-gray-200 dark:border-gray-800',
-        )}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              'w-2 h-2 rounded-full',
-              shift ? 'bg-green-500 animate-pulse' : 'bg-gray-400',
-            )}
-          />
-          <div>
-            <div className="text-sm font-medium">
-              {shift ? t('finance.shift_open', { id: shift.id }) : t('finance.shift_closed')}
-            </div>
-            {shift && (
-              <div className="text-xs text-muted-foreground">
-                {new Date(shift.opened_at).toLocaleString()}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {!shift ? (
-            <Button
-              size="sm"
-              onClick={handleOpenShift}
-              disabled={loading}
-              className="h-8 px-3 text-xs"
-            >
-              <Unlock size={14} />
-              {t('finance.open_shift')}
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCloseShift}
-              disabled={loading}
-              className="h-8 px-3 text-xs"
-            >
-              <Lock size={14} />
-              {t('finance.close_shift')}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="min-h-0 flex-1 space-y-4 overflow-auto">
-        {/* Summary Cards */}
-        <div className="rounded-lg border border-border bg-card p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">
-              {t('finance.cash_flow', { defaultValue: 'Касса / Cash Flow' })}
-            </h3>
+            ? t('finance.shift_open_title', {
+                id: shift.id,
+                defaultValue: `Смена #${shift.id} (Открыта)`,
+              })
+            : t('finance.shift_closed', { defaultValue: 'Смена закрыта' })
+        }
+        shiftSubtitle={shift?.start_time ? new Date(shift.start_time).toLocaleString() : undefined}
+        onOpenShift={handleOpenShift}
+        onCloseShift={handleCloseShift}
+        openShiftDisabled={loading}
+        closeShiftDisabled={loading}
+        topRight={
+          <>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
+              type="button"
               onClick={checkActiveShift}
               disabled={loading}
-              className="h-8 w-8 p-0"
+              className="h-10 w-10 rounded-md"
+              title={t('common.refresh', { defaultValue: 'Обновить' })}
             >
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </Button>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: t('finance.cash'), value: shiftTotals.cash, color: 'text-green-600' },
-              { label: t('finance.card'), value: shiftTotals.card, color: 'text-blue-600' },
-              {
-                label: t('reception.transfer'),
-                value: shiftTotals.transfer,
-                color: 'text-orange-600',
-              },
-              {
-                label: t('reports.total', { defaultValue: 'Итого' }),
-                value: shiftTotals.total,
-                color: 'text-gray-900 dark:text-white',
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="bg-background rounded-lg border p-4 hover:shadow-sm transition-shadow"
-              >
-                <div className="text-sm font-medium text-muted-foreground mb-1">{item.label}</div>
-                <div className={cn('text-2xl font-bold', item.color)}>
-                  {Number(item.value || 0).toLocaleString()}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">{t('common.currency')}</div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setExpenseOpen(true)}
+              disabled={!shift}
+              className="h-10 px-4 text-[13px]"
+            >
+              <TrendingDown size={16} />
+              <span>{t('finance.new_transaction', { defaultValue: 'Новый расход' })}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/reports')}
+              className="h-10 px-4 text-[13px]"
+            >
+              <FileText size={16} />
+              <span>{t('nav.reports', { defaultValue: 'Отчёты' })}</span>
+            </Button>
+          </>
+        }
+        kpis={
+          <>
+            <SummaryCard
+              icon={<Banknote size={18} />}
+              label={t('finance.cash', { defaultValue: 'Наличные' })}
+              value={formatMoney(shiftTotals.cash)}
+              currencyLabel={t('common.currency', { defaultValue: "so'm" })}
+            />
+            <SummaryCard
+              icon={<CreditCard size={18} />}
+              label={t('finance.card', { defaultValue: 'Карта' })}
+              value={formatMoney(shiftTotals.card)}
+              currencyLabel={t('common.currency', { defaultValue: "so'm" })}
+            />
+            <SummaryCard
+              icon={<FileText size={18} />}
+              label={t('finance.transfer', { defaultValue: 'Перевод' })}
+              value={formatMoney(shiftTotals.transfer)}
+              currencyLabel={t('common.currency', { defaultValue: "so'm" })}
+            />
+            <SummaryCard
+              icon={<Lock size={18} />}
+              label={t('reports.total', { defaultValue: 'Итого' })}
+              value={formatMoney(shiftTotals.total)}
+              currencyLabel={t('common.currency', { defaultValue: "so'm" })}
+              className="ring-1 ring-blue-500/10"
+            />
+          </>
+        }
+        transactionsTitle={t('finance.recent_transactions', { defaultValue: 'Транзакции' })}
+        transactionsTable={
+          recentTransactions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200/80 bg-slate-50 p-10 text-center dark:border-slate-700/60 dark:bg-slate-900/30">
+              <Receipt size={42} className="mb-3 opacity-60" />
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                {t('finance.no_transactions', { defaultValue: 'No transactions yet' })}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Transaction Feed */}
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="text-lg font-semibold mb-4">
-            {t('finance.recent_transactions', { defaultValue: 'Последние операции' })}
-          </h3>
-
-          {recentTransactions.length > 0 ? (
-            <div className="space-y-2">
-              {recentTransactions.map((tx: any) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between p-3 bg-background rounded-lg border"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      {tx.amount > 0 ? (
-                        <CheckCircle size={16} className="text-green-500" />
-                      ) : (
-                        <TrendingDown size={16} className="text-red-500" />
-                      )}
-                      <div className="text-sm">
-                        <div className="font-medium">{tx.amount > 0 ? 'Приход' : 'Расход'}</div>
-                        <div className="text-muted-foreground text-xs">
-                          {new Date(tx.created_at).toLocaleTimeString()}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div
-                      className={cn(
-                        'font-semibold',
-                        tx.amount > 0 ? 'text-green-600' : 'text-red-600',
-                      )}
-                    >
-                      {tx.amount > 0 ? '+' : ''}
-                      {Math.abs(tx.amount).toLocaleString()} {t('common.currency')}
-                    </div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <User size={12} />
-                      {tx.created_by || 'System'}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {t('finance.no_transactions_hint', {
+                  defaultValue: 'Операции появятся после оплат.',
+                })}
+              </div>
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Clock size={48} className="mx-auto mb-2 opacity-50" />
-              <div>{t('finance.no_transactions', { defaultValue: 'Нет операций' })}</div>
+            <div className="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-700/60">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:bg-slate-900/30">
+                  <tr className="[&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left">
+                    <th className="w-[120px]">{t('finance.time', { defaultValue: 'Время' })}</th>
+                    <th>{t('finance.patient', { defaultValue: 'Пациент' })}</th>
+                    <th>{t('finance.service', { defaultValue: 'Услуга' })}</th>
+                    <th className="w-[160px] text-right">
+                      {t('finance.amount', { defaultValue: 'Сумма' })}
+                    </th>
+                    <th className="w-[120px] text-right">
+                      {t('finance.method', { defaultValue: 'Метод' })}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="[&>tr]:border-t [&>tr]:border-slate-200/80 dark:[&>tr]:border-slate-800">
+                  {recentTransactions.map((tx: any) => {
+                    const method = String(tx.payment_method || '').toUpperCase();
+                    const methodLabel =
+                      method === 'CARD'
+                        ? t('finance.method_card', { defaultValue: 'Карта' })
+                        : method === 'TRANSFER'
+                          ? t('finance.method_transfer', { defaultValue: 'Перевод' })
+                          : method === 'MIXED'
+                            ? t('finance.method_mixed', { defaultValue: 'Смешанная' })
+                            : t('finance.method_cash', { defaultValue: 'Наличные' });
+                    const badgeTone =
+                      method === 'CARD'
+                        ? 'bg-blue-600/10 text-blue-700 dark:text-blue-200 border-blue-600/20'
+                        : method === 'TRANSFER'
+                          ? 'bg-amber-500/10 text-amber-800 dark:text-amber-200 border-amber-500/20'
+                          : method === 'MIXED'
+                            ? 'bg-violet-500/10 text-violet-800 dark:text-violet-200 border-violet-500/20'
+                            : 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 border-emerald-500/20';
+
+                    const patient = tx.patient_name || (tx.patient_id ? `#${tx.patient_id}` : '—');
+                    const service =
+                      String(tx.description || '').replace(/^\[EXPENSE\]\s*/i, '') ||
+                      t('common.not_available', { defaultValue: '—' });
+                    const amountAbs = Math.abs(Number(tx.amount || 0));
+
+                    return (
+                      <tr key={tx.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/20">
+                        <td className="px-3 py-3 text-sm text-slate-500 dark:text-slate-400">
+                          {tx.created_at
+                            ? new Date(tx.created_at).toLocaleTimeString()
+                            : t('common.not_available', { defaultValue: '—' })}
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="truncate font-semibold text-slate-900 dark:text-slate-50">
+                            {patient}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <div className="truncate text-slate-700 dark:text-slate-200">
+                            {service}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-right">
+                          <div
+                            className={cn(
+                              'font-mono font-semibold tabular-nums',
+                              Number(tx.amount || 0) < 0
+                                ? 'text-destructive'
+                                : 'text-slate-900 dark:text-slate-50',
+                            )}
+                          >
+                            {Number(tx.amount || 0) < 0 ? '-' : ''}
+                            {amountAbs.toLocaleString()}{' '}
+                            {t('common.currency', { defaultValue: "so'm" })}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 text-right">
+                          <span
+                            className={cn(
+                              'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold',
+                              badgeTone,
+                            )}
+                          >
+                            {methodLabel}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
-
-        {/* Actions - адаптивные кнопки */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:justify-end">
-          <Button
-            variant="outline"
-            onClick={() => setExpenseOpen(true)}
-            disabled={!shift}
-            className="flex items-center gap-2 h-12 px-6 w-full sm:w-auto"
-          >
-            <TrendingDown size={18} />
-            <span>{t('finance.new_transaction', { defaultValue: 'Новый расход' })}</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => navigate('/reports')}
-            className="flex items-center gap-2 h-12 px-6 w-full sm:w-auto"
-          >
-            <FileText size={18} />
-            <span>{t('nav.reports')}</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            disabled
-            className="flex items-center gap-2 h-12 px-6 w-full sm:w-auto opacity-60"
-          >
-            <Lock size={18} />
-            <span>PRO</span>
-          </Button>
-        </div>
-      </div>
+          )
+        }
+      />
 
       <Modal
         open={expenseOpen}
@@ -389,20 +382,26 @@ export default function Finance() {
             <label className="block text-sm font-medium mb-3">
               {t('finance.payment_method', { defaultValue: 'Тип оплаты' })}
             </label>
-            <div className="grid grid-cols-2 gap-3">
-              {(['CASH', 'CARD'] as const).map((method) => (
+            <div className="grid grid-cols-3 gap-3">
+              {(['CASH', 'CARD', 'TRANSFER'] as const).map((method) => (
                 <button
                   key={method}
                   type="button"
                   onClick={() => setPaymentMethod(method)}
                   className={cn(
-                    'p-4 border-2 rounded-lg transition-all hover:border-gray-400 flex flex-col items-center gap-2',
+                    'p-4 border-2 rounded-lg transition-all hover:border-blue-500/60 focus-visible:outline-none flex flex-col items-center gap-2',
                     paymentMethod === method
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
                       : 'border-gray-300',
                   )}
                 >
-                  {method === 'CASH' ? <Banknote size={20} /> : <CreditCard size={20} />}
+                  {method === 'CASH' ? (
+                    <Banknote size={20} />
+                  ) : method === 'CARD' ? (
+                    <CreditCard size={20} />
+                  ) : (
+                    <ArrowLeftRight size={20} />
+                  )}
                   <span className="text-sm font-medium">
                     {t(`finance.${method.toLowerCase()}`, { defaultValue: method })}
                   </span>
@@ -429,12 +428,20 @@ export default function Finance() {
           {/* Предпросмотр */}
           {amount && (
             <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border">
-              <div className="text-sm text-muted-foreground mb-1">Предпросмотр:</div>
+              <div className="text-sm text-muted-foreground mb-1">
+                {t('finance.preview', { defaultValue: 'Предпросмотр:' })}
+              </div>
               <div className="font-medium text-red-600">
                 -{Number(amount).toFixed(2)} {t('common.currency')} •{' '}
-                {paymentMethod === 'CASH' ? 'наличными' : 'картой'}
+                {paymentMethod === 'CASH'
+                  ? t('finance.method_cash_case', { defaultValue: 'наличными' })
+                  : paymentMethod === 'CARD'
+                    ? t('finance.method_card_case', { defaultValue: 'картой' })
+                    : t('finance.method_transfer_case', { defaultValue: 'переводом' })}
               </div>
-              <div className="text-sm text-muted-foreground">{description || 'Без описания'}</div>
+              <div className="text-sm text-muted-foreground">
+                {description || t('finance.no_description', { defaultValue: 'Без описания' })}
+              </div>
             </div>
           )}
 
@@ -479,28 +486,69 @@ export default function Finance() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span>{t('finance.cash')}:</span>
-                <span className="font-medium">
+                <span className="font-mono font-semibold tabular-nums">
                   {shiftTotals.cash.toLocaleString()} {t('common.currency')}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>{t('finance.card')}:</span>
-                <span className="font-medium">
+                <span className="font-mono font-semibold tabular-nums">
                   {shiftTotals.card.toLocaleString()} {t('common.currency')}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>{t('reception.transfer')}:</span>
-                <span className="font-medium">
+                <span>{t('finance.transfer', { defaultValue: 'Перевод' })}:</span>
+                <span className="font-mono font-semibold tabular-nums">
                   {shiftTotals.transfer.toLocaleString()} {t('common.currency')}
                 </span>
               </div>
               <div className="border-t pt-2 flex justify-between font-semibold">
                 <span>{t('reports.total')}:</span>
-                <span>
+                <span className="font-mono tabular-nums">
                   {shiftTotals.total.toLocaleString()} {t('common.currency')}
                 </span>
               </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-200/80 bg-slate-50 p-4 dark:border-slate-700/60 dark:bg-slate-900/30">
+            <div className="text-sm font-semibold">
+              {t('finance.cash_reconcile', { defaultValue: 'Сверка наличных' })}
+            </div>
+            <div className="mt-1 text-sm text-muted-foreground">
+              {t('finance.cash_reconcile_hint', {
+                defaultValue:
+                  'Пересчитайте наличные в кассе и сравните с суммой на экране перед закрытием смены.',
+              })}
+            </div>
+            <div className="mt-3">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t('finance.cash_counted', { defaultValue: 'Фактически в кассе (наличные)' })}
+              </label>
+              <Input
+                type="number"
+                value={cashCounted}
+                onChange={(e) => setCashCounted(e.target.value)}
+                placeholder={String(shiftTotals.cash || 0)}
+              />
+              {cashCounted.trim() ? (
+                <div className="mt-2 flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {t('finance.diff', { defaultValue: 'Разница' })}
+                  </span>
+                  <span
+                    className={cn(
+                      'font-mono font-semibold tabular-nums',
+                      Number(cashCounted) - shiftTotals.cash === 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-amber-700 dark:text-amber-200',
+                    )}
+                  >
+                    {(Number(cashCounted) - shiftTotals.cash).toLocaleString()}{' '}
+                    {t('common.currency')}
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
 

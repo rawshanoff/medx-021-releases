@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional
 
+from backend.core.config import settings
 from backend.core.database import get_db
 from backend.core.features import FEATURE_CORE, FEATURE_FINANCE_BASIC
 from backend.core.licenses import license_manager
@@ -31,6 +32,7 @@ from sqlalchemy.orm import selectinload
 
 router = APIRouter()
 logger = logging.getLogger("medx")
+_advisory_lock_warned = False
 
 
 async def _acquire_shift_lock(db: AsyncSession) -> None:
@@ -38,10 +40,22 @@ async def _acquire_shift_lock(db: AsyncSession) -> None:
 
     We use Postgres advisory transaction lock. If DB doesn't support it, we skip.
     """
+    global _advisory_lock_warned
+    bind = db.get_bind()
+    dialect_name = bind.dialect.name if bind is not None else ""
+    if dialect_name and dialect_name != "postgresql":
+        if not _advisory_lock_warned:
+            logger.warning(
+                "Advisory locks are not supported for %s",
+                dialect_name,
+            )
+            _advisory_lock_warned = True
+        return
     try:
         await db.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": 21_001})
     except Exception:
         # best-effort (e.g., sqlite in some environments)
+        logger.debug("Advisory shift lock unavailable", exc_info=True)
         return
 
 
@@ -69,6 +83,141 @@ async def _audit(
     )
 
 
+async def _calculate_shift_totals(
+    db: AsyncSession, shift_id: int
+) -> tuple[int, int, int]:
+    cash_result = await db.execute(
+        select(func.sum(Transaction.cash_amount)).where(
+            Transaction.shift_id == shift_id,
+            Transaction.payment_method == PaymentMethod.MIXED,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    mixed_cash = cash_result.scalar() or 0
+
+    card_result = await db.execute(
+        select(func.sum(Transaction.card_amount)).where(
+            Transaction.shift_id == shift_id,
+            Transaction.payment_method == PaymentMethod.MIXED,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    mixed_card = card_result.scalar() or 0
+
+    transfer_result = await db.execute(
+        select(func.sum(Transaction.transfer_amount)).where(
+            Transaction.shift_id == shift_id,
+            Transaction.payment_method == PaymentMethod.MIXED,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    mixed_transfer = transfer_result.scalar() or 0
+
+    cash_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.shift_id == shift_id,
+            Transaction.payment_method == PaymentMethod.CASH,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    cash_total = (cash_tx_result.scalar() or 0) + mixed_cash
+
+    card_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.shift_id == shift_id,
+            Transaction.payment_method == PaymentMethod.CARD,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    card_total = (card_tx_result.scalar() or 0) + mixed_card
+
+    transfer_tx_result = await db.execute(
+        select(func.sum(Transaction.amount)).where(
+            Transaction.shift_id == shift_id,
+            Transaction.payment_method == PaymentMethod.TRANSFER,
+            Transaction.deleted_at.is_(None),
+        )
+    )
+    transfer_total = (transfer_tx_result.scalar() or 0) + mixed_transfer
+
+    return int(cash_total), int(card_total), int(transfer_total)
+
+
+def _validate_payment_splits(tx: TransactionCreate) -> None:
+    if tx.amount == 0:
+        raise HTTPException(
+            status_code=400, detail="Transaction amount must be non-zero"
+        )
+    if tx.payment_method == PaymentMethod.MIXED:
+        if tx.amount <= 0:
+            raise HTTPException(
+                status_code=400, detail="Mixed payment amount must be positive"
+            )
+        component_total = (
+            int(tx.cash_amount) + int(tx.card_amount) + int(tx.transfer_amount)
+        )
+        if component_total != int(tx.amount):
+            raise HTTPException(
+                status_code=400,
+                detail="Mixed payment components must equal total amount",
+            )
+        return
+
+    cash = int(tx.cash_amount or 0)
+    card = int(tx.card_amount or 0)
+    transfer = int(tx.transfer_amount or 0)
+    if tx.payment_method == PaymentMethod.CASH:
+        if card != 0 or transfer != 0 or (cash not in (0, int(tx.amount))):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid split for CASH payment",
+            )
+        return
+    if tx.payment_method == PaymentMethod.CARD:
+        if cash != 0 or transfer != 0 or (card not in (0, int(tx.amount))):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid split for CARD payment",
+            )
+        return
+    if tx.payment_method == PaymentMethod.TRANSFER:
+        if cash != 0 or card != 0 or (transfer not in (0, int(tx.amount))):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid split for TRANSFER payment",
+            )
+        return
+
+
+async def _assert_shift_totals_consistent(db: AsyncSession, shift: Shift) -> None:
+    cash_total, card_total, transfer_total = await _calculate_shift_totals(db, shift.id)
+    stored_cash = int(shift.total_cash or 0)
+    stored_card = int(shift.total_card or 0)
+    stored_transfer = int(shift.total_transfer or 0)
+
+    if (
+        stored_cash != cash_total
+        or stored_card != card_total
+        or stored_transfer != transfer_total
+    ):
+        logger.error(
+            "Shift #%s totals mismatch before payment. "
+            "Stored: cash=%s, card=%s, transfer=%s. "
+            "Calculated: cash=%s, card=%s, transfer=%s",
+            shift.id,
+            stored_cash,
+            stored_card,
+            stored_transfer,
+            cash_total,
+            card_total,
+            transfer_total,
+        )
+        raise HTTPException(
+            status_code=409,
+            detail="Shift totals are inconsistent. Contact support.",
+        )
+
+
 @router.get("/shifts/active", response_model=Optional[ShiftRead])
 async def get_active_shift(
     db: AsyncSession = Depends(get_db),
@@ -84,7 +233,7 @@ async def get_active_shift(
     return shift
 
 
-@router.post("/shifts/open", response_model=ShiftRead)
+@router.post("/shifts/open", response_model=ShiftRead, status_code=201)
 async def open_shift(
     shift_data: ShiftCreate,
     db: AsyncSession = Depends(get_db),
@@ -133,61 +282,7 @@ async def close_shift(
     if not shift:
         raise HTTPException(status_code=400, detail="No open shift found")
 
-    # Calculate running totals from transactions for verification
-    cash_result = await db.execute(
-        select(func.sum(Transaction.cash_amount)).where(
-            Transaction.shift_id == shift.id,
-            Transaction.payment_method == PaymentMethod.MIXED,
-            Transaction.deleted_at.is_(None),
-        )
-    )
-    mixed_cash = cash_result.scalar() or 0
-
-    card_result = await db.execute(
-        select(func.sum(Transaction.card_amount)).where(
-            Transaction.shift_id == shift.id,
-            Transaction.payment_method == PaymentMethod.MIXED,
-            Transaction.deleted_at.is_(None),
-        )
-    )
-    mixed_card = card_result.scalar() or 0
-
-    transfer_result = await db.execute(
-        select(func.sum(Transaction.transfer_amount)).where(
-            Transaction.shift_id == shift.id,
-            Transaction.payment_method == PaymentMethod.MIXED,
-            Transaction.deleted_at.is_(None),
-        )
-    )
-    mixed_transfer = transfer_result.scalar() or 0
-
-    # Calculate totals for non-mixed payments
-    cash_tx_result = await db.execute(
-        select(func.sum(Transaction.amount)).where(
-            Transaction.shift_id == shift.id,
-            Transaction.payment_method == PaymentMethod.CASH,
-            Transaction.deleted_at.is_(None),
-        )
-    )
-    cash_total = (cash_tx_result.scalar() or 0) + mixed_cash
-
-    card_tx_result = await db.execute(
-        select(func.sum(Transaction.amount)).where(
-            Transaction.shift_id == shift.id,
-            Transaction.payment_method == PaymentMethod.CARD,
-            Transaction.deleted_at.is_(None),
-        )
-    )
-    card_total = (card_tx_result.scalar() or 0) + mixed_card
-
-    transfer_tx_result = await db.execute(
-        select(func.sum(Transaction.amount)).where(
-            Transaction.shift_id == shift.id,
-            Transaction.payment_method == PaymentMethod.TRANSFER,
-            Transaction.deleted_at.is_(None),
-        )
-    )
-    transfer_total = (transfer_tx_result.scalar() or 0) + mixed_transfer
+    cash_total, card_total, transfer_total = await _calculate_shift_totals(db, shift.id)
 
     # Verify stored totals match calculated
     if (
@@ -205,21 +300,35 @@ async def close_shift(
             detail="Shift totals do not match transactions. Contact support.",
         )
 
-    shift.is_closed = True
-    shift.end_time = datetime.now(timezone.utc)
-
     await _audit(
         db,
         user,
         "shift_close",
         f"shift_id={shift.id}, total_cash={shift.total_cash}, total_card={shift.total_card}, total_transfer={shift.total_transfer}",
     )
+    close_time = datetime.now(timezone.utc)
+    update_result = await db.execute(
+        update(Shift)
+        .where(
+            Shift.id == shift.id,
+            Shift.version == shift.version,
+            Shift.is_closed == False,
+            Shift.deleted_at.is_(None),
+        )
+        .values(is_closed=True, end_time=close_time, version=Shift.version + 1)
+    )
+    if update_result.rowcount != 1:
+        await db.rollback()
+        raise HTTPException(
+            status_code=409, detail="Shift was modified concurrently. Try again."
+        )
+
     await db.commit()
     await db.refresh(shift)
     return shift
 
 
-@router.post("/transactions", response_model=TransactionRead)
+@router.post("/transactions", response_model=TransactionRead, status_code=201)
 async def process_payment(
     tx: TransactionCreate,
     db: AsyncSession = Depends(get_db),
@@ -231,23 +340,11 @@ async def process_payment(
     await check_finance_license()
     await _acquire_shift_lock(db)
 
-    # Idempotency check
-    if tx.idempotency_key:
-        existing = await db.execute(
-            select(Transaction).where(
-                Transaction.idempotency_key == tx.idempotency_key,
-                Transaction.deleted_at.is_(None),
-            )
-        )
-        if found := existing.scalars().first():
-            logger.info(f"Idempotent hit: {tx.idempotency_key}")
-            return found
-
     # Validate amount is within limits
-    if abs(tx.amount) > 10_000_000:
+    if abs(tx.amount) > settings.MAX_TRANSACTION_AMOUNT:
         raise HTTPException(
             status_code=400,
-            detail="Transaction amount exceeds maximum limit of 10,000,000",
+            detail=f"Transaction amount exceeds maximum limit of {settings.MAX_TRANSACTION_AMOUNT:,}",
         )
 
     # Требуем описание для отрицательных сумм (расход/возврат)
@@ -255,6 +352,8 @@ async def process_payment(
         raise HTTPException(
             status_code=400, detail="Description is required for negative transactions"
         )
+
+    _validate_payment_splits(tx)
 
     # Find current shift
     # Lock active shift row to prevent race conditions on running totals.
@@ -272,6 +371,21 @@ async def process_payment(
         raise HTTPException(
             status_code=400, detail="No open shift. Open a shift first."
         )
+
+    await _assert_shift_totals_consistent(db, shift)
+
+    # Idempotency check scoped to shift
+    if tx.idempotency_key:
+        existing = await db.execute(
+            select(Transaction).where(
+                Transaction.shift_id == shift.id,
+                Transaction.idempotency_key == tx.idempotency_key,
+                Transaction.deleted_at.is_(None),
+            )
+        )
+        if found := existing.scalars().first():
+            logger.info(f"Idempotent hit: {tx.idempotency_key}")
+            return found
 
     logger.info(f"Creating transaction with shift_id: {shift.id}")
     new_tx = Transaction(shift_id=shift.id, **tx.model_dump())
@@ -297,21 +411,46 @@ async def process_payment(
         f"Deltas: cash={delta_cash}, card={delta_card}, transfer={delta_transfer}"
     )
 
+    stored_cash = int(shift.total_cash or 0)
+    stored_card = int(shift.total_card or 0)
+    stored_transfer = int(shift.total_transfer or 0)
+    if (
+        stored_cash + delta_cash < 0
+        or stored_card + delta_card < 0
+        or stored_transfer + delta_transfer < 0
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Transaction would result in negative shift totals",
+        )
+
     db.add(new_tx)
     await db.flush()
     logger.info("Transaction flushed")
 
-    await db.execute(
+    update_result = await db.execute(
         update(Shift)
         .where(
-            Shift.id == shift.id, Shift.is_closed == False, Shift.deleted_at.is_(None)
+            Shift.id == shift.id,
+            Shift.version == shift.version,
+            Shift.is_closed == False,
+            Shift.deleted_at.is_(None),
+            func.coalesce(Shift.total_cash, 0) + delta_cash >= 0,
+            func.coalesce(Shift.total_card, 0) + delta_card >= 0,
+            func.coalesce(Shift.total_transfer, 0) + delta_transfer >= 0,
         )
         .values(
-            total_cash=Shift.total_cash + delta_cash,
-            total_card=Shift.total_card + delta_card,
-            total_transfer=Shift.total_transfer + delta_transfer,
+            total_cash=func.coalesce(Shift.total_cash, 0) + delta_cash,
+            total_card=func.coalesce(Shift.total_card, 0) + delta_card,
+            total_transfer=func.coalesce(Shift.total_transfer, 0) + delta_transfer,
+            version=Shift.version + 1,
         )
     )
+    if update_result.rowcount != 1:
+        await db.rollback()
+        raise HTTPException(
+            status_code=409, detail="Shift was modified concurrently. Try again."
+        )
     logger.info("Shift updated")
 
     await _audit(
@@ -328,12 +467,13 @@ async def process_payment(
         if tx.idempotency_key:
             existing = await db.execute(
                 select(Transaction).where(
+                    Transaction.shift_id == shift.id,
                     Transaction.idempotency_key == tx.idempotency_key,
                     Transaction.deleted_at.is_(None),
                 )
             )
             if found := existing.scalars().first():
-                logger.info(f"Idempotent race hit: {tx.idempotency_key}")
+                logger.debug("Idempotent race hit: %s", tx.idempotency_key)
                 return found
         raise
 
@@ -396,6 +536,8 @@ async def refund_payment(
             status_code=400, detail="No open shift. Open a shift first."
         )
 
+    await _assert_shift_totals_consistent(db, shift)
+
     # Create refund transaction (negative amount)
     refund_tx = Transaction(
         shift_id=shift.id,
@@ -439,16 +581,43 @@ async def refund_payment(
         )
     )
 
+    stored_cash = int(shift.total_cash or 0)
+    stored_card = int(shift.total_card or 0)
+    stored_transfer = int(shift.total_transfer or 0)
+    if (
+        stored_cash + delta_cash < 0
+        or stored_card + delta_card < 0
+        or stored_transfer + delta_transfer < 0
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Refund would result in negative shift totals",
+        )
+
     # Update shift totals atomically
-    await db.execute(
+    update_result = await db.execute(
         update(Shift)
-        .where(Shift.id == shift.id)
+        .where(
+            Shift.id == shift.id,
+            Shift.version == shift.version,
+            Shift.is_closed == False,
+            Shift.deleted_at.is_(None),
+            func.coalesce(Shift.total_cash, 0) + delta_cash >= 0,
+            func.coalesce(Shift.total_card, 0) + delta_card >= 0,
+            func.coalesce(Shift.total_transfer, 0) + delta_transfer >= 0,
+        )
         .values(
-            total_cash=Shift.total_cash + delta_cash,
-            total_card=Shift.total_card + delta_card,
-            total_transfer=Shift.total_transfer + delta_transfer,
+            total_cash=func.coalesce(Shift.total_cash, 0) + delta_cash,
+            total_card=func.coalesce(Shift.total_card, 0) + delta_card,
+            total_transfer=func.coalesce(Shift.total_transfer, 0) + delta_transfer,
+            version=Shift.version + 1,
         )
     )
+    if update_result.rowcount != 1:
+        await db.rollback()
+        raise HTTPException(
+            status_code=409, detail="Shift was modified concurrently. Try again."
+        )
 
     db.add(refund_tx)
     await _audit(
@@ -609,14 +778,22 @@ async def get_recent_transactions(
         # Get transactions for active shift
         res = await db.execute(
             select(Transaction)
-            .where(Transaction.shift_id == active_shift.id)
+            .where(
+                Transaction.shift_id == active_shift.id,
+                Transaction.deleted_at.is_(None),
+            )
+            .options(selectinload(Transaction.patient))
             .order_by(Transaction.created_at.desc())
             .limit(limit)
         )
     else:
         # Get last transactions regardless of shift
         res = await db.execute(
-            select(Transaction).order_by(Transaction.created_at.desc()).limit(limit)
+            select(Transaction)
+            .where(Transaction.deleted_at.is_(None))
+            .options(selectinload(Transaction.patient))
+            .order_by(Transaction.created_at.desc())
+            .limit(limit)
         )
 
     transactions = res.scalars().all()

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "medx-frontend": "file:../.."
+  }
+}

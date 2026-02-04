@@ -23,7 +23,8 @@ export function ResultRow({
   onViewHistory: () => void;
   onRequestMixedPayment: (
     total: number,
-    onConfirm: (c: number, cd: number, t: number) => void,
+    onConfirm: (c: number, cd: number, t: number) => void | Promise<void>,
+    onCancel: () => void,
   ) => void;
   onShiftError: () => void;
   requestFocus?: boolean;
@@ -32,23 +33,29 @@ export function ResultRow({
   const { t } = useTranslation();
 
   return (
-    <tr className={cn('h-12 border-t border-border', requestFocus ? 'bg-primary/5' : '')}>
-      <td className="px-3 py-3 align-top">
-        <div className="text-[15px] font-medium leading-[20px]">{patient.full_name}</div>
+    <tr
+      className={cn(
+        'bg-transparent transition-colors hover:bg-muted/40 focus-within:bg-blue-50/40',
+        'focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:ring-inset',
+        requestFocus ? 'bg-muted/50' : '',
+      )}
+    >
+      <td className="px-3 py-2.5 align-top">
+        <div className="font-medium leading-[18px]">{patient.full_name}</div>
         <Button
           variant="ghost"
           size="sm"
           type="button"
           onClick={onViewHistory}
-          className="mt-1 h-[28px] justify-start gap-1 px-2 text-[13px] text-primary/90 hover:bg-primary/10 hover:text-primary"
+          className="mt-1 h-7 justify-start gap-1 px-2 text-xs text-primary/90 hover:bg-primary/10 hover:text-primary focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
         >
           <HistoryIcon size={14} />
           {t('reception.history')}
         </Button>
       </td>
 
-      <td className="px-3 py-3 align-top text-muted-foreground">{patient.birth_date || '—'}</td>
-      <td className="px-3 py-3 align-top">{patient.phone}</td>
+      <td className="px-3 py-2.5 align-top text-muted-foreground">{patient.birth_date || '—'}</td>
+      <td className="px-3 py-2.5 align-top">{patient.phone}</td>
 
       <PaymentCells
         patient={patient}

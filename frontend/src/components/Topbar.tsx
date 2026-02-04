@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Download, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../lib/cn';
 import { clearAuth, getUser, getUserRole } from '../utils/auth';
+import { loggers } from '../utils/logger';
+import { API_URL } from '../api/client';
 import { Button } from './ui/button';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeToggle } from './ThemeToggle';
@@ -22,6 +24,7 @@ function getInitials(name: string) {
 export function Topbar() {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -52,7 +55,7 @@ export function Topbar() {
       // Only check for admin/owner users to avoid unnecessary API calls
       if (!['admin', 'owner'].includes(role || '')) return;
 
-      const response = await fetch('/api/system/update-check', {
+      const response = await fetch(`${API_URL}/system/update-check`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -64,14 +67,14 @@ export function Topbar() {
       }
     } catch (error) {
       // Silently ignore update check errors
-      console.debug('Update check failed:', error);
+      loggers.system.debug('Update check failed', error);
     }
   };
 
   const handleLogout = () => {
     if (confirm(t('nav.logout_confirm'))) {
       clearAuth();
-      window.location.reload();
+      navigate('/login', { replace: true });
     }
   };
 
@@ -140,7 +143,7 @@ export function Topbar() {
             type="button"
             onClick={() => {
               // Navigate to system updates page
-              window.location.href = '/system';
+              navigate('/system?tab=updates');
             }}
           >
             <Download size={18} className="text-primary" />

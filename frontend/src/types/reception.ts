@@ -1,4 +1,4 @@
-export type QueueStatus = 'WAITING' | 'COMPLETED' | 'CANCELLED';
+export type QueueStatus = 'WAITING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED';
 
 export type { Doctor, Service } from './doctors';
 export type { Patient } from './patients';

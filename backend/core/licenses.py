@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timezone
 from typing import Dict, List
@@ -13,6 +14,7 @@ from backend.core.features import (
 from jose import JWTError, jwt
 
 ALGORITHM = "RS256"
+logger = logging.getLogger("medx.licenses")
 
 
 class LicenseManager:
@@ -72,7 +74,9 @@ class LicenseManager:
         payload = self.load_license()
         if "error" in payload:
             if not self.dev_mode:
-                print(f"License Error: {payload['error']}")
+                logger.warning(
+                    "License error (%s): %s", self.license_path, payload.get("error")
+                )
             # Fail-closed for paid features, but keep free lifetime features enabled.
             # Dev-mode explicitly bypasses this in load_license().
             return [FEATURE_CORE, FEATURE_FINANCE_BASIC, FEATURE_REPORTS_BASIC]

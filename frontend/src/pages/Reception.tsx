@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import client from '../api/client';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +17,7 @@ import { useQueue } from '../features/reception/hooks/useQueue';
 import { usePatientsSearch } from '../features/reception/hooks/usePatients';
 import type { Patient, PatientHistoryRead } from '../types/patients';
 import type { QueueItem } from '../types/reception';
+import { loggers } from '../utils/logger';
 
 export default function Reception() {
   const { t } = useTranslation();
@@ -55,6 +57,13 @@ export default function Reception() {
     data: PatientHistoryRead | null;
     error: string | null;
   } | null>(null);
+  const [refundBusyTxId, setRefundBusyTxId] = useState<number | null>(null);
+
+  // UI confirm modals (avoid native `confirm()` in Electron: it can break window focus)
+  const [createConfirm, setCreateConfirm] = useState<{
+    open: boolean;
+    payload: { full_name: string; phone: string; birth_date: string | null };
+  } | null>(null);
 
   const getErrorDetail = (err: unknown): string | null => {
     if (!axios.isAxiosError(err)) return null;
@@ -66,12 +75,26 @@ export default function Reception() {
   const [mixedModalState, setMixedModalState] = useState<{
     isOpen: boolean;
     total: number;
-    onConfirm: (cash: number, card: number, transfer: number) => void;
+    onConfirm: (cash: number, card: number, transfer: number) => void | Promise<void>;
+    onCancel: () => void;
+    initialSplit?: { cash?: number; card?: number; transfer?: number };
+    readOnly?: boolean;
+    title?: string;
+    confirmLabel?: string;
+    description?: string;
   }>({
     isOpen: false,
     total: 0,
     onConfirm: () => {},
+    onCancel: () => {},
   });
+
+  const [showShiftModal, setShowShiftModal] = useState(false);
+
+  const anyModalOpenRef = useRef(false);
+  useEffect(() => {
+    anyModalOpenRef.current = Boolean(historyState) || mixedModalState.isOpen || showShiftModal;
+  }, [historyState, mixedModalState.isOpen, showShiftModal]);
 
   // UX: when Reception is open, typing anywhere should go to phone search.
   useEffect(() => {
@@ -79,6 +102,8 @@ export default function Reception() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        // If any modal is open, let the modal handle Esc.
+        if (anyModalOpenRef.current) return;
         e.preventDefault();
         setPhone('');
         setName('');
@@ -117,33 +142,39 @@ export default function Reception() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  // Queue: refresh on mount and when returning to the tab.
+  useEffect(() => {
+    refreshQueue().catch(() => {});
+  }, [refreshQueue]);
+
+  useEffect(() => {
+    const onFocus = () => refreshQueue().catch(() => {});
+    const onVis = () => {
+      if (!document.hidden) onFocus();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, [refreshQueue]);
+
   const handleInlineCreate = async () => {
     if (!name && !surname && !phone) {
       showToast(t('reception.fill_required'), 'warning');
       return;
     }
 
-    if (confirm(t('reception.create_new') + '?')) {
-      try {
-        const fullName = normalizeHumanName((name + ' ' + surname).trim());
-        const created = await client.post('/patients/', {
-          full_name: fullName,
-          phone: phone,
-          birth_date: dobUiToIso(dob) || null,
-        });
-        const newId = Number(created?.data?.id);
-        if (Number.isFinite(newId) && newId > 0) {
-          setFocusPatientId(newId);
-        }
-        showToast(t('reception.patient_created', { defaultValue: 'Пациент создан' }), 'success');
-        await refreshPatients();
-      } catch (e) {
-        showToast(
-          t('reception.patient_create_failed', { defaultValue: 'Ошибка создания пациента' }),
-          'error',
-        );
-      }
-    }
+    const fullName = normalizeHumanName((name + ' ' + surname).trim());
+    setCreateConfirm({
+      open: true,
+      payload: {
+        full_name: fullName,
+        phone: phone,
+        birth_date: dobUiToIso(dob) || null,
+      },
+    });
   };
 
   const addToQueue = async (patientId: number, patientName: string, doctorId: number) => {
@@ -163,16 +194,28 @@ export default function Reception() {
         getErrorDetail(e) ||
         t('reception.queue_add_failed', { defaultValue: 'Не удалось добавить в очередь' });
       showToast(errorMsg, 'error');
-      console.error('Failed to add to queue', e);
+      loggers.reception.error('Failed to add to queue', e);
       return '';
     }
   };
 
-  const openMixedModal = (total: number, onConfirm: (c: number, cd: number, t: number) => void) => {
-    setMixedModalState({ isOpen: true, total, onConfirm });
+  const openMixedModal = (
+    total: number,
+    onConfirm: (c: number, cd: number, t: number) => void | Promise<void>,
+    onCancel: () => void,
+  ) => {
+    setMixedModalState({
+      isOpen: true,
+      total,
+      onConfirm,
+      onCancel,
+      initialSplit: undefined,
+      readOnly: false,
+      title: undefined,
+      confirmLabel: undefined,
+      description: undefined,
+    });
   };
-
-  const [showShiftModal, setShowShiftModal] = useState(false);
 
   const handleOpenShift = async () => {
     try {
@@ -189,11 +232,11 @@ export default function Reception() {
   };
 
   return (
-    <div className="flex h-full flex-col gap-[24px]">
+    <div className="flex h-full flex-col gap-3 overflow-hidden">
       <div className="min-h-0 flex-1">
-        <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_360px] gap-[24px]">
+        <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_340px] gap-3">
           {/* LEFT */}
-          <div className="flex min-h-0 flex-col gap-[24px]">
+          <div className="flex min-h-0 flex-col gap-3">
             {/* Search */}
             <PatientSearch
               phone={phone}
@@ -253,149 +296,186 @@ export default function Reception() {
         </div>
       </div>
 
-      {/* History Modal */}
-      {historyState && (
-        <Modal
-          open={true}
-          title={`${t('reception.history')}: ${historyState.patient.full_name}`}
-          description={`${historyState.patient.phone}${historyState.patient.birth_date ? ` • ${historyState.patient.birth_date}` : ''}`}
-          onClose={() => setHistoryState(null)}
-          width={980}
-        >
-          {historyState.loading ? (
-            <div className="text-[13px] text-muted-foreground">{t('common.loading')}</div>
-          ) : null}
-          {historyState.error ? (
-            <div className="text-[13px] text-destructive">{historyState.error}</div>
-          ) : null}
-
-          {!historyState.loading && !historyState.error ? (
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-              <div className="rounded-md border border-border bg-background p-3">
-                <div className="mb-2 text-[13px] font-medium">
-                  {t('finance.title', { defaultValue: 'Финансы' })}
+      {/* History Right Sheet */}
+      {historyState
+        ? createPortal(
+            <div
+              className="fixed z-[9999] flex p-0 bg-black/40 backdrop-blur-sm"
+              style={{ top: 0, right: 0, bottom: 0, left: 0 }}
+              role="dialog"
+              aria-modal="true"
+              onMouseDown={(e) => {
+                if (e.target === e.currentTarget) setHistoryState(null);
+              }}
+            >
+              <div
+                className="ml-auto flex h-full w-[min(420px,100vw)] flex-col border-l border-slate-200 bg-card shadow-2xl dark:border-slate-800"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium">
+                      {t('reception.history', { defaultValue: 'История' })}:{' '}
+                      {historyState.patient.full_name}
+                    </div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      {historyState.patient.phone}
+                      {historyState.patient.birth_date
+                        ? ` • ${historyState.patient.birth_date}`
+                        : ''}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-md"
+                    type="button"
+                    aria-label={t('common.close', { defaultValue: 'Закрыть' })}
+                    onClick={() => setHistoryState(null)}
+                  >
+                    ×
+                  </Button>
                 </div>
-                <div className="grid gap-2">
-                  {(historyState.data?.transactions ?? []).slice(0, 3).map((tx) => {
-                    // Check if there's a WAITING queue item created around the same time (within 5 minutes)
-                    const txTime = new Date(tx.created_at).getTime();
-                    const relatedQueueItem = historyState.data?.queue?.find((qi) => {
-                      const qiTime = new Date(qi.created_at).getTime();
-                      const timeDiff = Math.abs(txTime - qiTime);
-                      return qi.status === 'WAITING' && timeDiff < 5 * 60 * 1000; // 5 minutes
-                    });
-                    const canRefund = tx.amount > 0 && relatedQueueItem != null;
 
-                    return (
-                      <div
-                        key={`tx-${tx.id}`}
-                        className="rounded-md border border-border bg-card p-2"
-                      >
-                        <div className="flex justify-between gap-2">
-                          <div className="font-medium">
-                            {Number(tx.amount || 0).toLocaleString()} {t('common.currency')}
-                          </div>
-                          <div className="text-[13px] text-muted-foreground">
-                            {new Date(tx.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div className="text-[13px] text-muted-foreground">
-                          {tx.description || ''}
-                        </div>
-                        {canRefund && (
-                          <div className="mt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-[13px]"
-                              onClick={async () => {
-                                if (!confirm(t('reception.refund_confirm'))) return;
-                                try {
-                                  // Use proper refund endpoint instead of creating negative transaction directly
-                                  await client.post(`/finance/refund/${tx.id}`, {
-                                    reason: tx.description || 'No reason provided',
-                                  });
-                                  // Update queue status to CANCELLED
-                                  if (relatedQueueItem) {
-                                    await client.put(`/reception/queue/${relatedQueueItem.id}`, {
-                                      status: 'CANCELLED',
+                <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                  {historyState.loading ? (
+                    <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+                  ) : null}
+                  {historyState.error ? (
+                    <div className="text-sm text-destructive">{historyState.error}</div>
+                  ) : null}
+
+                  {!historyState.loading && !historyState.error ? (
+                    <div className="space-y-3">
+                      {(historyState.data?.transactions ?? []).length === 0 ? (
+                        <div className="text-sm text-muted-foreground">—</div>
+                      ) : null}
+
+                      {(historyState.data?.transactions ?? []).map((tx) => {
+                        const txTime = new Date(tx.created_at).getTime();
+                        const relatedQueueItem = historyState.data?.queue?.find((qi) => {
+                          const qiTime = new Date(qi.created_at).getTime();
+                          const timeDiff = Math.abs(txTime - qiTime);
+                          return qi.status === 'WAITING' && timeDiff < 5 * 60 * 1000;
+                        });
+                        const refundTx = historyState.data?.transactions?.find(
+                          (t) => t.related_transaction_id === tx.id,
+                        );
+                        const isRefunded = Boolean(refundTx);
+                        const canShowRefundButton = tx.amount > 0 && relatedQueueItem != null;
+                        const totalAbs = Math.abs(Number(tx.amount || 0));
+                        const split =
+                          tx.payment_method === 'MIXED'
+                            ? {
+                                cash: Math.abs(Number(tx.cash_amount || 0)),
+                                card: Math.abs(Number(tx.card_amount || 0)),
+                                transfer: Math.abs(Number(tx.transfer_amount || 0)),
+                              }
+                            : tx.payment_method === 'CARD'
+                              ? { card: totalAbs }
+                              : tx.payment_method === 'TRANSFER'
+                                ? { transfer: totalAbs }
+                                : { cash: totalAbs };
+                        const paymentMethodLabel =
+                          tx.payment_method === 'MIXED'
+                            ? t('reception.mixed', { defaultValue: 'Смешанная' })
+                            : tx.payment_method === 'CARD'
+                              ? t('reception.card', { defaultValue: 'Карта' })
+                              : tx.payment_method === 'TRANSFER'
+                                ? t('reception.transfer', { defaultValue: 'Перевод' })
+                                : t('reception.cash', { defaultValue: 'Наличные' });
+                        const paymentDetails =
+                          tx.payment_method === 'MIXED'
+                            ? `${paymentMethodLabel} (${t('reception.cash')}: ${split.cash?.toLocaleString()} ${t('common.currency')}, ${t('reception.card')}: ${split.card?.toLocaleString()} ${t('common.currency')}, ${t('reception.transfer')}: ${split.transfer?.toLocaleString()} ${t('common.currency')})`
+                            : paymentMethodLabel;
+
+                        return (
+                          <div
+                            key={`tx-${tx.id}`}
+                            className="rounded-md border border-slate-200 bg-background/40 p-4 dark:border-slate-800"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-xs text-muted-foreground">
+                                {new Date(tx.created_at).toLocaleDateString()}
+                              </div>
+                              <div className="text-sm font-semibold">
+                                {Number(tx.amount || 0).toLocaleString()} {t('common.currency')}
+                              </div>
+                            </div>
+                            <div className="mt-1 text-sm">{tx.description || ''}</div>
+
+                            {canShowRefundButton ? (
+                              <div className="mt-3">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-full rounded-md px-3 text-xs shadow-none hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
+                                  disabled={refundBusyTxId === tx.id || isRefunded}
+                                  onClick={() => {
+                                    if (refundBusyTxId || isRefunded) return;
+                                    setMixedModalState({
+                                      isOpen: true,
+                                      total: totalAbs,
+                                      initialSplit: split,
+                                      readOnly: true,
+                                      title: t('reception.refund', { defaultValue: 'Возврат' }),
+                                      confirmLabel: t('reception.refund', {
+                                        defaultValue: 'Возврат',
+                                      }),
+                                      description: `${t('reception.total_amount')}: ${totalAbs.toLocaleString()} ${t('common.currency')} • ${t('reception.payment')}: ${paymentDetails}`,
+                                      onCancel: () => {},
+                                      onConfirm: async () => {
+                                        if (refundBusyTxId) return;
+                                        setRefundBusyTxId(tx.id);
+                                        try {
+                                          await client.post(`/finance/refund/${tx.id}`, {
+                                            reason: tx.description || 'No reason provided',
+                                          });
+                                          if (relatedQueueItem) {
+                                            await client.patch(
+                                              `/reception/queue/${relatedQueueItem.id}`,
+                                              {
+                                                status: 'REFUNDED',
+                                              },
+                                            );
+                                          }
+                                          await refreshQueue();
+                                          const res = await client.get(
+                                            `/patients/${historyState.patient.id}/history`,
+                                          );
+                                          setHistoryState((prev) =>
+                                            prev ? { ...prev, data: res.data } : prev,
+                                          );
+                                          showToast(t('reception.refund_success'), 'success');
+                                        } catch {
+                                          showToast(t('reception.refund_failed'), 'error');
+                                        } finally {
+                                          setRefundBusyTxId(null);
+                                        }
+                                      },
                                     });
-                                    await refreshQueue();
-                                  }
-                                  // Refresh history
-                                  const res = await client.get(
-                                    `/patients/${historyState.patient.id}/history`,
-                                  );
-                                  setHistoryState({
-                                    ...historyState,
-                                    data: res.data,
-                                  });
-                                  showToast(t('reception.refund_success'), 'success');
-                                } catch (e) {
-                                  showToast(t('reception.refund_failed'), 'error');
-                                }
-                              }}
-                            >
-                              {t('reception.refund')}
-                            </Button>
+                                  }}
+                                  type="button"
+                                >
+                                  {refundBusyTxId === tx.id
+                                    ? '…'
+                                    : isRefunded
+                                      ? t('reception.refunded', { defaultValue: 'Refunded' })
+                                      : t('reception.refund')}
+                                </Button>
+                              </div>
+                            ) : null}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  {(historyState.data?.transactions ?? []).length === 0 ? (
-                    <div className="text-[13px] text-muted-foreground">—</div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="rounded-md border border-border bg-background p-3">
-                <div className="mb-2 text-[13px] font-medium">{t('reception.queue')}</div>
-                <div className="grid gap-2">
-                  {(historyState.data?.queue ?? []).slice(0, 3).map((qi) => (
-                    <div key={`q-${qi.id}`} className="rounded-md border border-border bg-card p-2">
-                      <div className="flex justify-between gap-2">
-                        <div className="font-medium">{qi.ticket_number}</div>
-                        <div className="text-[13px] text-muted-foreground">
-                          {new Date(qi.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                      <div className="text-[13px] text-muted-foreground">{String(qi.status)}</div>
+                        );
+                      })}
                     </div>
-                  ))}
-                  {(historyState.data?.queue ?? []).length === 0 ? (
-                    <div className="text-[13px] text-muted-foreground">—</div>
                   ) : null}
                 </div>
               </div>
-
-              <div className="rounded-md border border-border bg-background p-3">
-                <div className="mb-2 text-[13px] font-medium">
-                  {t('nav.appointments', { defaultValue: 'Записи' })}
-                </div>
-                <div className="grid gap-2">
-                  {(historyState.data?.appointments ?? []).slice(0, 3).map((a) => (
-                    <div key={`a-${a.id}`} className="rounded-md border border-border bg-card p-2">
-                      <div className="flex justify-between gap-2">
-                        <div className="font-medium">
-                          {new Date(a.start_time).toLocaleDateString()}
-                        </div>
-                        <div className="text-[13px] text-muted-foreground">{String(a.status)}</div>
-                      </div>
-                      <div className="text-[13px] text-muted-foreground">
-                        {String(a.doctor_id || '')}
-                      </div>
-                    </div>
-                  ))}
-                  {(historyState.data?.appointments ?? []).length === 0 ? (
-                    <div className="text-[13px] text-muted-foreground">—</div>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </Modal>
-      )}
+            </div>,
+            document.body,
+          )
+        : null}
 
       {/* Shift Closed Modal */}
       {showShiftModal && (
@@ -427,13 +507,72 @@ export default function Reception() {
       {/* Mixed Payment Modal */}
       <MixedPaymentModal
         isOpen={mixedModalState.isOpen}
-        onClose={() => setMixedModalState((prev) => ({ ...prev, isOpen: false }))}
+        onClose={() => {
+          try {
+            mixedModalState.onCancel();
+          } catch {}
+          setMixedModalState((prev) => ({ ...prev, isOpen: false }));
+        }}
         totalAmount={mixedModalState.total}
         onConfirm={async (c, cd, t) => {
           await mixedModalState.onConfirm(c, cd, t);
           setMixedModalState((prev) => ({ ...prev, isOpen: false }));
         }}
       />
+
+      {/* Create patient confirm (replaces native confirm) */}
+      {createConfirm?.open ? (
+        <Modal
+          open={true}
+          title={t('reception.create_new', { defaultValue: 'Создать пациента' })}
+          description={t('reception.create_new') + '?'}
+          onClose={() => setCreateConfirm(null)}
+          width={520}
+        >
+          <div className="text-[13px] text-muted-foreground">
+            {createConfirm.payload.full_name || '—'} • {createConfirm.payload.phone || '—'}
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              type="button"
+              onClick={() => setCreateConfirm(null)}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              onClick={async () => {
+                try {
+                  const created = await client.post('/patients/', createConfirm.payload);
+                  const newId = Number(created?.data?.id);
+                  if (Number.isFinite(newId) && newId > 0) setFocusPatientId(newId);
+                  showToast(
+                    t('reception.patient_created', { defaultValue: 'Пациент создан' }),
+                    'success',
+                  );
+                  await refreshPatients();
+                  setCreateConfirm(null);
+                  // Ensure typing continues smoothly
+                  phoneRef.current?.focus();
+                } catch (e) {
+                  showToast(
+                    t('reception.patient_create_failed', {
+                      defaultValue: 'Ошибка создания пациента',
+                    }),
+                    'error',
+                  );
+                }
+              }}
+            >
+              {t('common.confirm', { defaultValue: 'Да' })}
+            </Button>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }

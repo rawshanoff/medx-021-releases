@@ -19,7 +19,7 @@ export default function Sidebar() {
 
   const navItems = [
     { icon: <LayoutDashboard size={18} />, label: t('nav.dashboard'), path: '/', allow: true },
-    // Запись/appointments пока отключаем (по просьбе)
+    // Appointments page is currently disabled on request.
     {
       icon: <Users size={18} />,
       label: t('nav.patients'),
@@ -52,7 +52,7 @@ export default function Sidebar() {
     },
     {
       icon: <Archive size={18} />,
-      label: t('nav.archive', { defaultValue: 'Архив' }),
+      label: t('nav.archive'),
       path: '/archive',
       allow: isAdminOrOwner,
     },
@@ -70,7 +70,7 @@ export default function Sidebar() {
         <div className="h-9 w-9" />
       </div>
 
-      <nav className="flex-1 overflow-auto px-0 py-3">
+      <nav className="flex-1 overflow-auto px-2 py-3">
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
           {navItems
             .filter((i) => i.allow)
@@ -82,9 +82,9 @@ export default function Sidebar() {
                     cn(
                       // Fixed icon-only sidebar (50px row height)
                       'flex h-[50px] items-center justify-center rounded-xl px-2 text-[14px] font-medium',
-                      'text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-foreground',
+                      'text-muted-foreground/90 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
                       isActive
-                        ? 'bg-sidebar-accent text-sidebar-foreground shadow-[0_0_0_1px_hsl(var(--sidebar-border))]'
+                        ? 'bg-sidebar-accent/70 text-sidebar-foreground shadow-[0_0_0_1px_hsl(var(--sidebar-border))]'
                         : '',
                     )
                   }

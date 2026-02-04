@@ -1,0 +1,62 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Build release package
+        run: |
+          python scripts/build_release.py \
+            --version ${{ steps.version.outputs.VERSION }} \
+            --skip-frontend-build \
+            --base-url "https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.VERSION }}" \
+            --notes "Release ${{ steps.version.outputs.VERSION }}"
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            releases/medx-${{ steps.version.outputs.VERSION }}.zip
+            releases/latest.json
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update latest release
+        run: |
+          # Copy latest.json to be available at /releases/latest/download/latest.json
+          echo "Release built successfully: medx-${{ steps.version.outputs.VERSION }}.zip"

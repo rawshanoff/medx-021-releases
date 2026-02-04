@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 # Service Schemas
@@ -36,12 +36,45 @@ class DoctorServiceCreate(DoctorServiceBase):
     pass
 
 
+class DoctorServiceUpdate(BaseModel):
+    name: Optional[str] = None
+    price: Optional[int] = None
+    priority: Optional[int] = None
+
+    @field_validator("name")
+    @classmethod
+    def _validate_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        s = str(v or "").strip()
+        if not s:
+            raise ValueError("service name is required")
+        return s
+
+    @field_validator("price")
+    @classmethod
+    def _validate_price(cls, v: Optional[int]) -> Optional[int]:
+        if v is None:
+            return v
+        if int(v) < 0:
+            raise ValueError("price must be >= 0")
+        return int(v)
+
+    @field_validator("priority")
+    @classmethod
+    def _validate_priority(cls, v: Optional[int]) -> Optional[int]:
+        if v is None:
+            return v
+        if int(v) < 0:
+            raise ValueError("priority must be >= 0")
+        return int(v)
+
+
 class DoctorServiceRead(DoctorServiceBase):
     id: int
     doctor_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Doctor Schemas
@@ -51,6 +84,14 @@ class DoctorBase(BaseModel):
     room_number: Optional[str] = None
     queue_prefix: Optional[str] = "A"
     is_active: bool = True
+
+    @field_validator("full_name")
+    @classmethod
+    def _normalize_full_name(cls, v: str) -> str:
+        s = str(v or "").strip()
+        if not s:
+            raise ValueError("full_name must not be empty")
+        return s
 
     @field_validator("queue_prefix")
     @classmethod
@@ -90,5 +131,4 @@ class DoctorRead(DoctorBase):
     id: int
     services: List[DoctorServiceRead] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

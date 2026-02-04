@@ -10,6 +10,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { cn } from '../lib/cn';
 import { PageContainer } from '../components/PageContainer';
+import { loggers } from '../utils/logger';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -79,7 +80,7 @@ export default function Login() {
 
       navigate(redirectPath);
     } catch (err: any) {
-      console.error('Login error:', err);
+      loggers.auth.error('Login error', err);
       const msg = getLoginErrorMessage(err);
       setErrorText(msg);
       showToast(msg, 'error');
@@ -124,6 +125,7 @@ export default function Login() {
                   }}
                   placeholder={t('auth.username_placeholder')}
                   className="pl-[44px]"
+                  autoComplete="username"
                   autoFocus
                   required
                 />
@@ -148,6 +150,7 @@ export default function Login() {
                   }}
                   placeholder={t('auth.password_placeholder')}
                   className="pl-[44px] pr-[48px]"
+                  autoComplete="current-password"
                   required
                 />
                 <button
@@ -156,8 +159,8 @@ export default function Login() {
                   className="absolute right-[8px] top-1/2 -translate-y-1/2 rounded-md bg-secondary/40 p-2 text-muted-foreground shadow-sm hover:bg-secondary/70 hover:text-foreground"
                   aria-label={
                     showPassword
-                      ? t('common.hide', { defaultValue: 'Скрыть' })
-                      : t('common.show', { defaultValue: 'Показать' })
+                      ? t('common.hide', { defaultValue: 'Hide' })
+                      : t('common.show', { defaultValue: 'Show' })
                   }
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

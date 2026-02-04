@@ -19,7 +19,7 @@ from sqlalchemy.orm import selectinload
 router = APIRouter()
 
 
-@router.post("/queue", response_model=QueueItemRead)
+@router.post("/queue", response_model=QueueItemRead, status_code=201)
 async def add_to_queue(
     item: QueueItemCreate,
     db: AsyncSession = Depends(get_db),
@@ -28,12 +28,18 @@ async def add_to_queue(
     """Add patient to queue with doctor-specific prefix (A-001, B-001, etc.)"""
     today = date.today()
 
-    # Get doctor to fetch queue_prefix
-    doctor_result = await db.execute(select(Doctor).where(Doctor.id == item.doctor_id))
+    # Get doctor to fetch queue_prefix (must be active and not deleted)
+    doctor_result = await db.execute(
+        select(Doctor).where(
+            Doctor.id == item.doctor_id,
+            Doctor.deleted_at.is_(None),
+            Doctor.is_active == True,
+        )
+    )
     doctor = doctor_result.scalar_one_or_none()
 
     if not doctor:
-        raise HTTPException(status_code=404, detail="Doctor not found")
+        raise HTTPException(status_code=404, detail="Doctor not found or inactive")
 
     # Generate sequential number atomically with retry on unique constraint.
     # This prevents collisions when two patients are registered at the same time.
@@ -73,13 +79,16 @@ async def get_queue(
     db: AsyncSession = Depends(get_db),
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
-    # Return all waiting items, or all items for today
-    # Ordering by created_at desc (or asc for queue?) Usually ASC for queue (FIFO)
+    # Return today's queue items (not cancelled) ordered by creation time (FIFO)
+    today = date.today()
     result = await db.execute(
         select(QueueItem)
         .options(selectinload(QueueItem.doctor))
+        .where(
+            QueueItem.queue_date == today,
+            QueueItem.status != "CANCELLED",
+        )
         .order_by(QueueItem.created_at.asc())
-        # .where(QueueItem.status == QueueStatus.WAITING) # Optionally filter
     )
     items = result.scalars().all()
 

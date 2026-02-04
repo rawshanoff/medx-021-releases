@@ -1,4 +1,7 @@
 import logging
+import os
+import time
+from pathlib import Path
 from typing import Any
 
 from backend.core.config import settings
@@ -15,10 +18,11 @@ from backend.modules.system.schemas import (
     VersionResponse,
 )
 from backend.modules.users.models import User, UserRole
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger("medx")
 router = APIRouter()
@@ -200,7 +204,7 @@ async def check_update(
             "update_available": True,
             "latest_version": update_info["latest"],
             "current_version": settings.CURRENT_VERSION,
-            "release_notes": "Update available",
+            "release_notes": update_info.get("notes") or "Update available",
             "download_url": update_info["url"],
         }
 
@@ -209,6 +213,91 @@ async def check_update(
         "latest_version": settings.CURRENT_VERSION,
         "current_version": settings.CURRENT_VERSION,
         "release_notes": "Up to date",
+    }
+
+
+def _hard_exit_after_delay(delay_sec: float = 0.8) -> None:
+    # Never hard-exit during tests.
+    if os.getenv("MEDX_DISABLE_HARD_EXIT") in ("1", "true", "yes") or os.getenv(
+        "PYTEST_CURRENT_TEST"
+    ):
+        return
+    # Give the HTTP response a moment to flush, then hard-exit the process.
+    # Electron will restart services after updater finishes.
+    try:
+        time.sleep(max(0.0, float(delay_sec)))
+    finally:
+        os._exit(0)  # noqa: S404
+
+
+def _spawn_update(download_url: str, sha256: str | None) -> None:
+    updater.spawn_update_process(download_url=download_url, sha256=sha256)
+
+
+@router.post("/update-install", response_model=UpdateCheckResponse)
+async def install_update(
+    background: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OWNER)),
+):
+    """Start online update installation (desktop/Electron MVP).
+
+    Spawns `scripts/updater.py` to download/apply the update ZIP, then exits the
+    backend process shortly after responding. Electron is responsible for
+    restarting services and reloading the UI.
+    """
+    update_info = await updater.check_for_updates()
+
+    if not update_info:
+        return {
+            "update_available": False,
+            "latest_version": settings.CURRENT_VERSION,
+            "current_version": settings.CURRENT_VERSION,
+            "release_notes": "Up to date",
+            "download_url": None,
+        }
+
+    # Audit (best-effort): store the update start event in system audit log.
+    try:
+        await _audit(
+            db=db,
+            user=user,
+            action="update_install_start",
+            setting_key="app_update",
+            old_value={"version": settings.CURRENT_VERSION},
+            new_value={
+                "version": update_info.get("latest"),
+                "url": update_info.get("url"),
+                "sha256": update_info.get("sha256"),
+                "published_at": update_info.get("published_at"),
+            },
+            details="Started online update installation",
+        )
+        await db.commit()
+    except Exception:
+        await db.rollback()
+
+    # Spawn updater and then exit after we return response.
+    # IMPORTANT: create marker BEFORE exiting to avoid race with Electron watcher.
+    try:
+        p = Path(os.getcwd()) / "._update_in_progress"
+        p.write_text(
+            f"started_at={time.time()}\nurl={update_info.get('url')}\n",
+            encoding="utf-8",
+        )
+    except Exception:
+        logger.exception("Failed to write update marker")
+
+    _spawn_update(download_url=update_info["url"], sha256=update_info.get("sha256"))
+    # Give Electron/updater a bit more time on Windows before we hard-exit.
+    background.add_task(_hard_exit_after_delay, 2.0)
+
+    return {
+        "update_available": True,
+        "latest_version": update_info["latest"],
+        "current_version": settings.CURRENT_VERSION,
+        "release_notes": update_info.get("notes") or "Update available",
+        "download_url": update_info.get("url"),
     }
 
 
@@ -285,6 +374,31 @@ async def update_print_settings(
         return PrintSettingsValue(**(updated.value or {}))
     except ValidationError:
         return PrintSettingsValue()
+
+
+@router.get("/settings/keys", response_model=list[str])
+async def list_setting_keys(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """List available setting keys for current user.
+
+    Used by the Settings UI to populate history filters and navigation.
+    """
+    result = await db.execute(
+        select(SystemSetting.key)
+        .where(
+            SystemSetting.user_id == user.id,
+            SystemSetting.deleted_at.is_(None),
+        )
+        .distinct()
+        .order_by(SystemSetting.key.asc())
+    )
+    keys = [r[0] for r in result.all() if r and r[0]]
+    # Ensure known keys are present even if not yet saved.
+    if "print_config" not in keys:
+        keys.insert(0, "print_config")
+    return keys
 
 
 @router.get("/settings/{key}", response_model=SystemSettingRead)
@@ -415,6 +529,7 @@ async def get_setting_audit_history(
     """
     result = await db.execute(
         select(SystemAuditLog)
+        .options(selectinload(SystemAuditLog.user))
         .where(
             SystemAuditLog.user_id == user.id,
             SystemAuditLog.setting_key == setting_key,

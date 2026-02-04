@@ -4,9 +4,12 @@ import client from '../api/client';
 import { Button } from '../components/ui/button';
 import { useToast } from '../context/ToastContext';
 import { useTranslation } from 'react-i18next';
+import { DiffViewer } from '../components/settings/DiffViewer';
 
 type AuditRow = {
   id: number;
+  user_id: number;
+  user?: { id: number; username: string; full_name?: string | null } | null;
   action: string;
   setting_key: string;
   old_value?: unknown;
@@ -15,12 +18,29 @@ type AuditRow = {
   created_at?: string | null;
 };
 
-function formatJson(v: unknown): string {
-  if (v == null) return '';
+function formatDateTime(v?: string | null) {
+  if (!v) return '—';
   try {
-    return JSON.stringify(v, null, 2);
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) return v;
+    return d.toLocaleString();
   } catch {
     return String(v);
+  }
+}
+
+function actionLabel(action: string) {
+  switch (action) {
+    case 'create':
+      return 'Создание';
+    case 'update':
+      return 'Изменение';
+    case 'delete':
+      return 'Удаление';
+    case 'rollback':
+      return 'Откат';
+    default:
+      return action;
   }
 }
 
@@ -37,16 +57,29 @@ export default function SystemAuditLogPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [availableKeys, setAvailableKeys] = useState<string[]>(['print_config']);
 
   const keys = useMemo(
-    () => [
-      {
-        key: 'print_config',
-        label: t('system.receipt_settings', { defaultValue: 'Настройки чека' }),
-      },
-    ],
-    [t],
+    () =>
+      availableKeys.map((k) => ({
+        key: k,
+        label:
+          k === 'print_config'
+            ? t('system.receipt_settings', { defaultValue: 'Настройки чека' })
+            : k,
+      })),
+    [availableKeys, t],
   );
+
+  const loadKeys = async () => {
+    try {
+      const res = await client.get('/system/settings/keys');
+      const k = Array.isArray(res.data) ? (res.data as string[]) : [];
+      setAvailableKeys(k.length ? k : ['print_config']);
+    } catch {
+      setAvailableKeys(['print_config']);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
@@ -79,6 +112,7 @@ export default function SystemAuditLogPage() {
   };
 
   useEffect(() => {
+    loadKeys();
     refresh();
   }, [settingKey, limit]);
 
@@ -126,47 +160,53 @@ export default function SystemAuditLogPage() {
                 : t('common.empty', { defaultValue: 'Пусто' })}
             </div>
           ) : (
-            rows.map((r) => (
-              <div key={r.id} className="p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-[13px] font-medium">
-                    #{r.id} • {r.action} • {r.created_at || ''}
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    type="button"
-                    disabled={busyId === r.id}
-                    onClick={() => rollback(r.id)}
-                  >
-                    {t('system.rollback', { defaultValue: 'Откатить' })}
-                  </Button>
-                </div>
-
-                {r.details ? (
-                  <div className="mt-2 text-[13px] text-muted-foreground">{r.details}</div>
-                ) : null}
-
-                <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <div>
-                    <div className="text-[12px] font-medium text-muted-foreground">
-                      {t('system.old_value', { defaultValue: 'Было' })}
-                    </div>
-                    <pre className="mt-1 max-h-64 overflow-auto rounded-md border border-border bg-background p-2 text-[12px]">
-                      {formatJson(r.old_value)}
-                    </pre>
-                  </div>
-                  <div>
-                    <div className="text-[12px] font-medium text-muted-foreground">
-                      {t('system.new_value', { defaultValue: 'Стало' })}
-                    </div>
-                    <pre className="mt-1 max-h-64 overflow-auto rounded-md border border-border bg-background p-2 text-[12px]">
-                      {formatJson(r.new_value)}
-                    </pre>
-                  </div>
+            <div>
+              <div className="grid grid-cols-[180px_1fr_160px_120px] gap-3 border-b border-border px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <div>{t('system.date', { defaultValue: 'Дата' })}</div>
+                <div>{t('system.user', { defaultValue: 'Пользователь' })}</div>
+                <div>{t('system.action', { defaultValue: 'Действие' })}</div>
+                <div className="text-right">
+                  {t('common.actions', { defaultValue: 'Действия' })}
                 </div>
               </div>
-            ))
+              {rows.map((r) => (
+                <div key={r.id} className="p-4">
+                  <div className="grid grid-cols-[180px_1fr_160px_120px] items-start gap-3">
+                    <div className="text-sm text-muted-foreground">
+                      {formatDateTime(r.created_at)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-foreground">
+                        {r.user?.full_name || r.user?.username || '—'}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span className="rounded-md border border-border bg-background px-2 py-0.5">
+                          {r.setting_key}
+                        </span>
+                        <span>#{r.id}</span>
+                        {r.details ? <span className="truncate">{r.details}</span> : null}
+                      </div>
+                    </div>
+                    <div className="text-sm font-semibold">{actionLabel(r.action)}</div>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        type="button"
+                        disabled={busyId === r.id}
+                        onClick={() => rollback(r.id)}
+                      >
+                        {t('system.rollback', { defaultValue: 'Откатить' })}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <DiffViewer oldValue={r.old_value} newValue={r.new_value} />
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

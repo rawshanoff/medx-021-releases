@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
   const proxyTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:8000';
 
   return {
+    // Electron loads the built app from file://, so assets must use relative paths.
+    base: mode === 'production' ? './' : '/',
     plugins: [react()],
     server: {
       // Port can still be overridden by CLI/env.

@@ -18,6 +18,7 @@ class QueueStatus(str, enum.Enum):
     WAITING = "WAITING"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
+    REFUNDED = "REFUNDED"
 
 
 class QueueItem(Base):
