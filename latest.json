@@ -1,7 +1,7 @@
 {
-  "version": "1.0.17-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.17-mvp.zip",
-  "sha256": "3a1e8d2b008cf197de0af8817f7ea8b8bd81fd395c4e5d18d002eed3973fc10b",
-  "notes": "Fix: System в†’ Updates no longer uses modal (inline panel). Includes updater env autodetect.",
-  "published_at": "2026-02-04T13:30:38.095243+00:00"
+  "version": "1.0.18-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.18-mvp.zip",
+  "sha256": "68caa44a9f1cb556fe4d1ac0cdad39915d135f4b2954264ed7e3075fded6c79a",
+  "notes": "Fix: modern centered Modal via portal (restores modals opening everywhere).",
+  "published_at": "2026-02-04T13:53:48.100548+00:00"
 }
