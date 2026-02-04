@@ -1,7 +1,7 @@
 {
-  "version": "1.0.18-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.18-mvp.zip",
-  "sha256": "68caa44a9f1cb556fe4d1ac0cdad39915d135f4b2954264ed7e3075fded6c79a",
-  "notes": "Fix: modern centered Modal via portal (restores modals opening everywhere).",
-  "published_at": "2026-02-04T13:53:48.100548+00:00"
+  "version": "1.0.19-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.19-mvp.zip",
+  "sha256": "81e010ab962ca23eebfda72eb1ee0605cd0b4d83d4cd2204d255a6340ba409b2",
+  "notes": "UI: modern modal sizing (no full-width) + backdrop blur overlay.",
+  "published_at": "2026-02-04T14:54:30.037731+00:00"
 }
