@@ -70,8 +70,8 @@ export function DoctorListItem({
 
   // Service form
   const [svcName, setSvcName] = useState('');
-  const [svcPrice, setSvcPrice] = useState<number>(1000);
-  const [svcPriority, setSvcPriority] = useState<number>(0);
+  const [svcPrice, setSvcPrice] = useState<string>('1000');
+  const [svcPriority, setSvcPriority] = useState<string>('0');
 
   const currency = t('common.currency', { defaultValue: "so'm" });
 
@@ -115,16 +115,16 @@ export function DoctorListItem({
   const openAddService = () => {
     setEditingService(null);
     setSvcName('');
-    setSvcPrice(1000);
-    setSvcPriority(0);
+    setSvcPrice('1000');
+    setSvcPriority('0');
     setServiceModalOpen(true);
   };
 
   const openEditService = (svc: Service) => {
     setEditingService(svc);
     setSvcName(String(svc.name || ''));
-    setSvcPrice(Number(svc.price) || 0);
-    setSvcPriority(Number(svc.priority) || 0);
+    setSvcPrice(String(Number(svc.price) || 0));
+    setSvcPriority(String(Number(svc.priority) || 0));
     setServiceModalOpen(true);
   };
 
@@ -176,15 +176,15 @@ export function DoctorListItem({
       if (editingService?.id) {
         await client.put(`/doctors/services/${editingService.id}`, {
           name: svcName,
-          price: Number(svcPrice),
-          priority: Number(svcPriority),
+          price: Number(svcPrice || 0),
+          priority: Number(svcPriority || 0),
         });
         showToast(t('doctors.service_updated', { defaultValue: 'Услуга обновлена' }), 'success');
       } else {
         await client.post(`/doctors/${doctor.id}/services`, {
           name: svcName,
-          price: Number(svcPrice),
-          priority: Number(svcPriority),
+          price: Number(svcPrice || 0),
+          priority: Number(svcPriority || 0),
         });
         showToast(t('doctors.service_added', { defaultValue: 'Услуга добавлена' }), 'success');
       }
@@ -485,7 +485,7 @@ export function DoctorListItem({
               type="number"
               placeholder="1000"
               value={svcPrice}
-              onChange={(e) => setSvcPrice(Math.max(0, Number(e.target.value)))}
+              onChange={(e) => setSvcPrice(e.target.value)}
             />
           </div>
           <div>
@@ -497,7 +497,7 @@ export function DoctorListItem({
               type="number"
               placeholder="0"
               value={svcPriority}
-              onChange={(e) => setSvcPriority(Math.max(0, Number(e.target.value)))}
+              onChange={(e) => setSvcPriority(e.target.value)}
             />
           </div>
         </div>

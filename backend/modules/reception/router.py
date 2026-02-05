@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from backend.core.database import get_db
 from backend.modules.auth import require_roles
@@ -76,16 +76,25 @@ async def add_to_queue(
 
 @router.get("/queue", response_model=list[QueueItemRead])
 async def get_queue(
+    range: str = "today",
     db: AsyncSession = Depends(get_db),
     _user=Depends(require_roles(UserRole.ADMIN, UserRole.RECEPTIONIST)),
 ):
-    # Return today's queue items (not cancelled) ordered by creation time (FIFO)
-    today = date.today()
+    # Return queue items for selected range (not cancelled) ordered by creation time (FIFO)
+    now = datetime.now()
+    start_of_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    if range == "2days":
+        start = start_of_today - timedelta(days=1)
+    elif range == "shift":
+        start = now - timedelta(hours=12)
+    else:
+        start = start_of_today
+
     result = await db.execute(
         select(QueueItem)
         .options(selectinload(QueueItem.doctor))
         .where(
-            QueueItem.queue_date == today,
+            QueueItem.created_at >= start,
             QueueItem.status != "CANCELLED",
         )
         .order_by(QueueItem.created_at.asc())

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Clock, CheckCircle2, Printer } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/button';
@@ -54,11 +55,39 @@ function statusBadge(status: QueueStatus, label: string) {
 export function QueueSidebar({
   queue,
   onUpdateStatus,
+  receiptRange,
+  onReceiptRangeChange,
 }: {
   queue: QueueItem[];
   onUpdateStatus: (id: number, status: QueueStatus) => void | Promise<void>;
+  receiptRange: 'shift' | 'today' | '2days';
+  onReceiptRangeChange: (next: 'shift' | 'today' | '2days') => void;
 }) {
   const { t } = useTranslation();
+
+  const filteredQueue = useMemo(() => {
+    if (queue.length === 0) return queue;
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfYesterday = new Date(startOfToday);
+    startOfYesterday.setDate(startOfToday.getDate() - 1);
+    const shiftStart = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+
+    const start =
+      receiptRange === '2days'
+        ? startOfYesterday
+        : receiptRange === 'shift'
+          ? shiftStart
+          : startOfToday;
+
+    return queue.filter((item) => {
+      if (!item.created_at) return true;
+      const created = new Date(item.created_at);
+      if (Number.isNaN(created.getTime())) return true;
+      return created >= start;
+    });
+  }, [queue, receiptRange]);
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-slate-200 bg-card p-3 dark:border-slate-800">
@@ -68,46 +97,63 @@ export function QueueSidebar({
           <div className="text-sm font-medium">{t('reception.queue')}</div>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9"
-          title={t('reception.print', { defaultValue: 'Печать' })}
-          onClick={async () => {
-            const loadedSettings = await getPrintSettings();
-            const settings = { ...loadedSettings, autoPrint: true };
-            const first = queue.find((q) => q.status === 'WAITING') || queue[0];
-            if (!first) return;
-            const cached = loadReceiptForTicket(first.ticket_number);
-            if (cached) {
-              printReceipt(cached, settings);
-            } else {
-              printQueueTicket(
-                {
-                  ticket_number: first.ticket_number,
-                  patient_name: first.patient_name,
-                  doctor_name: first.doctor_name,
-                  created_at: first.created_at,
-                },
-                settings,
-              );
-            }
-          }}
-          disabled={queue.length === 0}
-          type="button"
-        >
-          <Printer size={16} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <select
+            className="h-8 rounded-md border border-border bg-background px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500"
+            value={receiptRange}
+            onChange={(e) => onReceiptRangeChange(e.target.value as any)}
+          >
+            <option value="shift">
+              {t('reception.receipts_shift', { defaultValue: 'За смену' })}
+            </option>
+            <option value="today">
+              {t('reception.receipts_today', { defaultValue: 'За сегодня' })}
+            </option>
+            <option value="2days">
+              {t('reception.receipts_last_2_days', { defaultValue: 'Последние 2 дня' })}
+            </option>
+          </select>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            title={t('reception.print', { defaultValue: 'Печать' })}
+            onClick={async () => {
+              const loadedSettings = await getPrintSettings();
+              const settings = { ...loadedSettings, autoPrint: true };
+              const first = queue.find((q) => q.status === 'WAITING') || queue[0];
+              if (!first) return;
+              const cached = loadReceiptForTicket(first.ticket_number);
+              if (cached) {
+                printReceipt(cached, settings);
+              } else {
+                printQueueTicket(
+                  {
+                    ticket_number: first.ticket_number,
+                    patient_name: first.patient_name,
+                    doctor_name: first.doctor_name,
+                    created_at: first.created_at,
+                  },
+                  settings,
+                );
+              }
+            }}
+            disabled={queue.length === 0}
+            type="button"
+          >
+            <Printer size={16} />
+          </Button>
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-md border border-slate-200 bg-background/40 dark:border-slate-800 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {queue.length === 0 ? (
+        {filteredQueue.length === 0 ? (
           <div className="p-2 text-xs text-muted-foreground">
             {t('reception.no_queue_today', { defaultValue: 'Очередь на сегодня пустая' })}
           </div>
         ) : (
           <ul className="divide-y divide-slate-200 dark:divide-slate-800">
-            {queue.map((item) => {
+            {filteredQueue.map((item) => {
               const label =
                 item.status === 'WAITING'
                   ? t('reception.waiting', { defaultValue: 'Waiting' })

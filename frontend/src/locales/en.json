@@ -251,6 +251,9 @@
     "refund_failed": "Refund failed",
     "refund_only_waiting": "Refund is only available for non-started appointments",
     "service": "Service",
+    "receipts_shift": "Per shift",
+    "receipts_today": "Today",
+    "receipts_last_2_days": "Last 2 days",
     "select_doctor_service": "Select doctor and service"
   },
   "patients": {
@@ -443,6 +446,12 @@
     "clinic_description": "Clinic data and QR/logo for printing.",
     "section_basic": "Basic",
     "requisites_hint": "These details are shown on the receipt and in the QR block.",
+    "required_fields_title": "Required fields",
+    "required_fields_desc": "Select fields that must be filled during registration.",
+    "required_phone": "Phone",
+    "required_name": "First name",
+    "required_surname": "Last name",
+    "required_birth_date": "Date of birth",
     "logo_for_receipt": "Logo (for receipt)",
     "clinic_name": "Clinic name",
     "clinic_phone": "Phone",

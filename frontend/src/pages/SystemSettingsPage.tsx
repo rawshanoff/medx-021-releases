@@ -24,6 +24,12 @@ import {
   printReceipt,
   setPrintSettings,
 } from '../utils/print';
+import {
+  defaultPatientRequiredFields,
+  getPatientRequiredFields,
+  setPatientRequiredFields,
+  type PatientRequiredFields,
+} from '../utils/patientRequiredFields';
 import { cn } from '../lib/cn';
 import { loggers } from '../utils/logger';
 import { Button } from '../components/ui/button';
@@ -122,6 +128,10 @@ export default function SystemSettingsPage() {
   // Print settings
   const [printSettings, setLocalPrintSettings] = useState(defaultSettings());
   const hasEditedSettingsRef = useRef(false);
+  const [requiredFields, setRequiredFields] = useState<PatientRequiredFields>(
+    defaultPatientRequiredFields,
+  );
+  const [requiredFieldsBusy, setRequiredFieldsBusy] = useState(false);
   const [printers, setPrinters] = useState<
     Array<{ name: string; displayName: string; isDefault: boolean }>
   >([]);
@@ -157,6 +167,12 @@ export default function SystemSettingsPage() {
         }
       } catch (e) {
         loggers.system.error('Failed to load print settings', e);
+      }
+      try {
+        const fields = await getPatientRequiredFields();
+        setRequiredFields(fields);
+      } catch (e) {
+        loggers.system.error('Failed to load required fields settings', e);
       }
     };
     void initializeSettings();
@@ -499,6 +515,9 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.clinicName}
+              onFocus={() => {
+                hasEditedSettingsRef.current = true;
+              }}
               onChange={(e) => {
                 hasEditedSettingsRef.current = true;
                 setLocalPrintSettings((p) => ({ ...p, clinicName: e.target.value }));
@@ -511,6 +530,9 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.clinicPhone}
+              onFocus={() => {
+                hasEditedSettingsRef.current = true;
+              }}
               onChange={(e) => {
                 hasEditedSettingsRef.current = true;
                 setLocalPrintSettings((p) => ({ ...p, clinicPhone: e.target.value }));
@@ -523,6 +545,9 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.clinicAddress}
+              onFocus={() => {
+                hasEditedSettingsRef.current = true;
+              }}
               onChange={(e) => {
                 hasEditedSettingsRef.current = true;
                 setLocalPrintSettings((p) => ({ ...p, clinicAddress: e.target.value }));
@@ -535,6 +560,9 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.footerNote}
+              onFocus={() => {
+                hasEditedSettingsRef.current = true;
+              }}
               onChange={(e) => {
                 hasEditedSettingsRef.current = true;
                 setLocalPrintSettings((p) => ({ ...p, footerNote: e.target.value }));
@@ -548,6 +576,9 @@ export default function SystemSettingsPage() {
             <Input
               placeholder={tr('system.telegram_placeholder', 'Например: t.me/ваш_канал')}
               value={printSettings.underQrText}
+              onFocus={() => {
+                hasEditedSettingsRef.current = true;
+              }}
               onChange={(e) => {
                 hasEditedSettingsRef.current = true;
                 setLocalPrintSettings((p) => ({ ...p, underQrText: e.target.value }));
@@ -563,6 +594,9 @@ export default function SystemSettingsPage() {
                 className="flex-1"
                 placeholder={tr('system.qr_url_placeholder', 'https://...')}
                 value={printSettings.qrUrl}
+                onFocus={() => {
+                  hasEditedSettingsRef.current = true;
+                }}
                 onChange={(e) => {
                   hasEditedSettingsRef.current = true;
                   setLocalPrintSettings((p) => ({ ...p, qrUrl: e.target.value }));
@@ -608,6 +642,87 @@ export default function SystemSettingsPage() {
                 </Button>
               </div>
             ) : null}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{tr('system.required_fields_title', 'Обязательные поля')}</CardTitle>
+          <CardDescription>
+            {tr(
+              'system.required_fields_desc',
+              'Отметьте поля, которые обязательно должны быть заполнены при регистрации.',
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                className="h-4 w-4 accent-primary"
+                type="checkbox"
+                checked={requiredFields.phone}
+                onChange={(e) => setRequiredFields((p) => ({ ...p, phone: e.target.checked }))}
+              />
+              <span className="font-medium">{tr('system.required_phone', 'Телефон')}</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                className="h-4 w-4 accent-primary"
+                type="checkbox"
+                checked={requiredFields.firstName}
+                onChange={(e) => setRequiredFields((p) => ({ ...p, firstName: e.target.checked }))}
+              />
+              <span className="font-medium">{tr('system.required_name', 'Имя')}</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                className="h-4 w-4 accent-primary"
+                type="checkbox"
+                checked={requiredFields.lastName}
+                onChange={(e) => setRequiredFields((p) => ({ ...p, lastName: e.target.checked }))}
+              />
+              <span className="font-medium">{tr('system.required_surname', 'Фамилия')}</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                className="h-4 w-4 accent-primary"
+                type="checkbox"
+                checked={requiredFields.birthDate}
+                onChange={(e) => setRequiredFields((p) => ({ ...p, birthDate: e.target.checked }))}
+              />
+              <span className="font-medium">
+                {tr('system.required_birth_date', 'Дата рождения')}
+              </span>
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={async () => {
+                setRequiredFieldsBusy(true);
+                try {
+                  await setPatientRequiredFields(requiredFields);
+                  showToast(tr('common.saved', 'Сохранено'), 'success');
+                } catch {
+                  showToast(tr('common.error', 'Ошибка сохранения'), 'error');
+                } finally {
+                  setRequiredFieldsBusy(false);
+                }
+              }}
+              disabled={requiredFieldsBusy}
+            >
+              {tr('common.save', 'Сохранить')}
+            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setRequiredFields(defaultPatientRequiredFields)}
+              disabled={requiredFieldsBusy}
+            >
+              {tr('common.reset', 'Сбросить')}
+            </Button>
           </div>
         </CardContent>
       </Card>

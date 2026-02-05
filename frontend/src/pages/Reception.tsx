@@ -18,6 +18,11 @@ import { usePatientsSearch } from '../features/reception/hooks/usePatients';
 import type { Patient, PatientHistoryRead } from '../types/patients';
 import type { QueueItem } from '../types/reception';
 import { loggers } from '../utils/logger';
+import {
+  defaultPatientRequiredFields,
+  getPatientRequiredFields,
+  type PatientRequiredFields,
+} from '../utils/patientRequiredFields';
 
 export default function Reception() {
   const { t } = useTranslation();
@@ -26,6 +31,10 @@ export default function Reception() {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [dob, setDob] = useState('');
+  const [requiredFields, setRequiredFields] = useState<PatientRequiredFields>(
+    defaultPatientRequiredFields,
+  );
+  const [receiptRange, setReceiptRange] = useState<'shift' | 'today' | '2days'>('today');
 
   const phoneRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -40,7 +49,11 @@ export default function Reception() {
     clear: clearPatients,
   } = usePatientsSearch({ phone, name, surname, dob });
   const { doctors } = useDoctors();
-  const { queue, refresh: refreshQueue, updateStatus: updateQueueStatusRaw } = useQueue();
+  const {
+    queue,
+    refresh: refreshQueue,
+    updateStatus: updateQueueStatusRaw,
+  } = useQueue(receiptRange);
   const updateQueueStatus = async (id: number, status: QueueItem['status']) => {
     try {
       await updateQueueStatusRaw(id, status);
@@ -149,6 +162,12 @@ export default function Reception() {
   }, [refreshQueue]);
 
   useEffect(() => {
+    getPatientRequiredFields()
+      .then(setRequiredFields)
+      .catch(() => setRequiredFields(defaultPatientRequiredFields));
+  }, []);
+
+  useEffect(() => {
     const onFocus = () => refreshQueue().catch(() => {});
     const onVis = () => {
       if (!document.hidden) onFocus();
@@ -162,7 +181,11 @@ export default function Reception() {
   }, [refreshQueue]);
 
   const handleInlineCreate = async () => {
-    if (!name && !surname && !phone) {
+    const isPhoneOk = !requiredFields.phone || Boolean(String(phone || '').trim());
+    const isNameOk = !requiredFields.firstName || Boolean(String(name || '').trim());
+    const isSurnameOk = !requiredFields.lastName || Boolean(String(surname || '').trim());
+    const isDobOk = !requiredFields.birthDate || Boolean(String(dob || '').trim());
+    if (!isPhoneOk || !isNameOk || !isSurnameOk || !isDobOk) {
       showToast(t('reception.fill_required'), 'warning');
       return;
     }
@@ -253,7 +276,12 @@ export default function Reception() {
               surnameRef={surnameRef}
               dobRef={dobRef}
               createBtnRef={createBtnRef}
-              canCreate={Boolean(phone || name || surname)}
+              canCreate={
+                (!requiredFields.phone || Boolean(String(phone || '').trim())) &&
+                (!requiredFields.firstName || Boolean(String(name || '').trim())) &&
+                (!requiredFields.lastName || Boolean(String(surname || '').trim())) &&
+                (!requiredFields.birthDate || Boolean(String(dob || '').trim()))
+              }
               onCreate={handleInlineCreate}
               onFocusFirstResult={() => {
                 if (patients.length > 0) setFocusPatientId(patients[0].id);
@@ -293,7 +321,12 @@ export default function Reception() {
           </div>
 
           {/* RIGHT (Queue) */}
-          <QueueSidebar queue={queue} onUpdateStatus={updateQueueStatus} />
+          <QueueSidebar
+            queue={queue}
+            onUpdateStatus={updateQueueStatus}
+            receiptRange={receiptRange}
+            onReceiptRangeChange={setReceiptRange}
+          />
         </div>
       </div>
 

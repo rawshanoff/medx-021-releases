@@ -251,6 +251,9 @@
     "refund_failed": "Qaytarishda xatolik",
     "refund_only_waiting": "Qaytarish faqat boshlanmagan qabul uchun mavjud",
     "service": "Xizmat",
+    "receipts_shift": "Smena bo'yicha",
+    "receipts_today": "Bugun",
+    "receipts_last_2_days": "So'nggi 2 kun",
     "select_doctor_service": "Shifokor va xizmatni tanlang"
   },
   "patients": {
@@ -443,6 +446,12 @@
     "clinic_description": "Klinika ma'lumotlari va chop etish uchun QR/logotip.",
     "section_basic": "Asosiy",
     "requisites_hint": "Bu ma'lumotlar chekda va QR blokda ko'rsatiladi.",
+    "required_fields_title": "Majburiy maydonlar",
+    "required_fields_desc": "Ro'yxatdan o'tishda to'ldirilishi shart bo'lgan maydonlarni belgilang.",
+    "required_phone": "Telefon",
+    "required_name": "Ism",
+    "required_surname": "Familiya",
+    "required_birth_date": "Tug'ilgan sana",
     "logo_for_receipt": "Logotip (chek uchun)",
     "clinic_name": "Klinika nomi",
     "clinic_phone": "Telefon",

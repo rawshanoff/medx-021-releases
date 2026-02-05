@@ -251,6 +251,9 @@
     "refund_failed": "Ошибка возврата",
     "refund_only_waiting": "Возврат возможен только для неначатых приемов",
     "service": "Услуга",
+    "receipts_shift": "За смену",
+    "receipts_today": "За сегодня",
+    "receipts_last_2_days": "Последние 2 дня",
     "select_doctor_service": "Выберите врача и услугу"
   },
   "patients": {
@@ -443,6 +446,12 @@
     "clinic_description": "Данные клиники и QR/логотип для печати.",
     "section_basic": "Основное",
     "requisites_hint": "Эти данные отображаются в чеке и в QR‑блоке.",
+    "required_fields_title": "Обязательные поля",
+    "required_fields_desc": "Отметьте поля, которые обязательно должны быть заполнены при регистрации.",
+    "required_phone": "Телефон",
+    "required_name": "Имя",
+    "required_surname": "Фамилия",
+    "required_birth_date": "Дата рождения",
     "logo_for_receipt": "Логотип (для чека)",
     "clinic_name": "Название клиники",
     "clinic_phone": "Телефон",

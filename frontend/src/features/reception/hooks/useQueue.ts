@@ -2,25 +2,13 @@ import { useCallback, useState } from 'react';
 import client from '../../../api/client';
 import type { QueueItem, QueueStatus } from '../../../types/reception';
 
-function isSameLocalDay(iso: string, today: Date) {
-  const d = new Date(iso);
-  return (
-    d.getFullYear() === today.getFullYear() &&
-    d.getMonth() === today.getMonth() &&
-    d.getDate() === today.getDate()
-  );
-}
-
-export function useQueue() {
+export function useQueue(range: 'shift' | 'today' | '2days') {
   const [queue, setQueue] = useState<QueueItem[]>([]);
 
   const refresh = useCallback(async () => {
-    const res = await client.get('/reception/queue');
+    const res = await client.get('/reception/queue', { params: { range } });
     const list = Array.isArray(res.data) ? res.data : [];
-    const today = new Date();
-    const filtered = list.filter(
-      (q: any) => q?.created_at && isSameLocalDay(String(q.created_at), today),
-    );
+    const filtered = list.filter((q: any) => q?.created_at);
     filtered.sort((a: any, b: any) => {
       const ta = new Date(String(a.created_at)).getTime();
       const tb = new Date(String(b.created_at)).getTime();
@@ -28,7 +16,7 @@ export function useQueue() {
       return Number(b.id || 0) - Number(a.id || 0);
     });
     setQueue(filtered);
-  }, []);
+  }, [range]);
 
   const updateStatus = useCallback(
     async (id: number, status: QueueStatus) => {

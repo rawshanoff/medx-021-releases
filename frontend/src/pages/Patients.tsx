@@ -12,6 +12,11 @@ import { PatientSearch } from '../features/reception/PatientSearch';
 import { usePatientsSearch } from '../features/reception/hooks/usePatients';
 import type { PatientWithBalance } from '../types/patients';
 import type { PatientFile } from '../types/files';
+import {
+  defaultPatientRequiredFields,
+  getPatientRequiredFields,
+  type PatientRequiredFields,
+} from '../utils/patientRequiredFields';
 
 export default function Patients() {
   const { t } = useTranslation();
@@ -25,6 +30,9 @@ export default function Patients() {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [dob, setDob] = useState('');
+  const [requiredFields, setRequiredFields] = useState<PatientRequiredFields>(
+    defaultPatientRequiredFields,
+  );
   const phoneRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const surnameRef = useRef<HTMLInputElement>(null);
@@ -45,7 +53,11 @@ export default function Patients() {
   });
 
   const handleCreatePatient = async () => {
-    if (!name || !surname || !phone) {
+    const isPhoneOk = !requiredFields.phone || Boolean(String(phone || '').trim());
+    const isNameOk = !requiredFields.firstName || Boolean(String(name || '').trim());
+    const isSurnameOk = !requiredFields.lastName || Boolean(String(surname || '').trim());
+    const isDobOk = !requiredFields.birthDate || Boolean(String(dob || '').trim());
+    if (!isPhoneOk || !isNameOk || !isSurnameOk || !isDobOk) {
       showToast(
         t('patients.fill_required', { defaultValue: 'Заполните ФИО и телефон' }),
         'warning',
@@ -104,6 +116,12 @@ export default function Patients() {
     phoneRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    getPatientRequiredFields()
+      .then(setRequiredFields)
+      .catch(() => setRequiredFields(defaultPatientRequiredFields));
+  }, []);
+
   // Derive effective focus without setState-in-effect.
   const effectiveFocusedRowIndex =
     focusedRowIndex == null
@@ -130,7 +148,12 @@ export default function Patients() {
           surnameRef={surnameRef}
           dobRef={dobRef}
           createBtnRef={createBtnRef}
-          canCreate={Boolean(phone && name && surname)}
+          canCreate={
+            (!requiredFields.phone || Boolean(String(phone || '').trim())) &&
+            (!requiredFields.firstName || Boolean(String(name || '').trim())) &&
+            (!requiredFields.lastName || Boolean(String(surname || '').trim())) &&
+            (!requiredFields.birthDate || Boolean(String(dob || '').trim()))
+          }
           onCreate={handleCreatePatient}
           onFocusFirstResult={() => {
             if (patients.length > 0) focusRow(0);

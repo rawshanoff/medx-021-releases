@@ -143,6 +143,18 @@ def validate_setting_value(setting_key: str, value: Any) -> None:
     """Route to appropriate validation function based on setting key."""
     if setting_key == "print_config":
         validate_print_config(value)
+    elif setting_key == "patient_required_fields":
+        if not isinstance(value, dict):
+            raise HTTPException(
+                status_code=400,
+                detail="patient_required_fields value must be a JSON object",
+            )
+        for field in ("phone", "firstName", "lastName", "birthDate"):
+            if field in value and not isinstance(value.get(field), bool):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{field} must be a boolean (true/false)",
+                )
     # Add more validators for other setting keys as needed
     # elif setting_key == "ui_preferences":
     #     validate_ui_preferences(value)
@@ -398,6 +410,8 @@ async def list_setting_keys(
     # Ensure known keys are present even if not yet saved.
     if "print_config" not in keys:
         keys.insert(0, "print_config")
+    if "patient_required_fields" not in keys:
+        keys.append("patient_required_fields")
     return keys
 
 
