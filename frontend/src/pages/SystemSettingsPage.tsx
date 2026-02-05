@@ -777,7 +777,7 @@ export default function SystemSettingsPage() {
             </div>
           ) : (
             <div className="grid gap-2">
-              {quickConfig.bindings.map((b, idx) => {
+              {quickConfig.bindings.map((b) => {
                 const doctor = quickDoctors.find((d) => d.id === b.doctorId);
                 const services = doctor?.services || [];
                 return (

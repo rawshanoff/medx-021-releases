@@ -185,28 +185,6 @@ export default function Reception() {
   }, []);
 
   useEffect(() => {
-    if (!quickConfig.enabled || quickConfig.bindings.length === 0) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (
-        target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.tagName === 'SELECT' ||
-          target.isContentEditable)
-      ) {
-        return;
-      }
-      const match = quickConfig.bindings.find((b) => b.hotkey === e.key);
-      if (!match) return;
-      e.preventDefault();
-      void runQuickReceipt(match);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [quickConfig, runQuickReceipt]);
-
-  useEffect(() => {
     const onFocus = () => refreshQueue().catch(() => {});
     const onVis = () => {
       if (!document.hidden) onFocus();
@@ -326,7 +304,7 @@ export default function Reception() {
     return groups;
   }, [quickConfig.bindings]);
 
-  const addToQueue = async (patientId: number, patientName: string, doctorId: number) => {
+  async function addToQueue(patientId: number, patientName: string, doctorId: number) {
     try {
       const payload = {
         patient_name: patientName,
@@ -346,7 +324,29 @@ export default function Reception() {
       loggers.reception.error('Failed to add to queue', e);
       return '';
     }
-  };
+  }
+
+  useEffect(() => {
+    if (!quickConfig.enabled || quickConfig.bindings.length === 0) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      const match = quickConfig.bindings.find((b) => b.hotkey === e.key);
+      if (!match) return;
+      e.preventDefault();
+      void runQuickReceipt(match);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [quickConfig, runQuickReceipt]);
 
   const openMixedModal = (
     total: number,
