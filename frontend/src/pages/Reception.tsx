@@ -414,15 +414,16 @@ export default function Reception() {
                                   : t('reception.cash', { defaultValue: 'Наличные' });
                             const colorClass =
                               b.paymentMethod === 'CARD'
-                                ? 'bg-blue-600 hover:bg-blue-500'
+                                ? '!bg-blue-600 hover:!bg-blue-500'
                                 : b.paymentMethod === 'TRANSFER'
-                                  ? 'bg-violet-600 hover:bg-violet-500'
-                                  : 'bg-emerald-600 hover:bg-emerald-500';
+                                  ? '!bg-violet-600 hover:!bg-violet-500'
+                                  : '!bg-emerald-600 hover:!bg-emerald-500';
                             return (
                               <Button
                                 key={b.id}
                                 type="button"
-                                className={`h-12 justify-between px-3 text-sm text-white ${colorClass}`}
+                                variant="ghost"
+                                className={`h-12 justify-between px-3 text-sm !text-white ${colorClass}`}
                                 onClick={() => runQuickReceipt(b)}
                               >
                                 <span className="truncate">{label}</span>

@@ -30,6 +30,8 @@ export type PrintSettings = {
   showFooterNote: boolean;
   silentPrintMode: 'html' | 'image'; // Electron silent printing mode
   silentScalePercent: number; // Electron webContents.print scaleFactor (10..200)
+  logoMaxMm: number; // max logo height in mm
+  fontScalePercent: number; // receipt font scale (60..140)
   receiptWidthMode: 'standard' | 'safe'; // full width vs safe width with margins
   receiptTemplateId: ReceiptTemplateId;
   paperSize: '58' | '80';
@@ -127,6 +129,8 @@ export function defaultSettings(): PrintSettings {
     showFooterNote: true,
     silentPrintMode: 'html',
     silentScalePercent: 100,
+    logoMaxMm: 20,
+    fontScalePercent: 100,
     receiptWidthMode: 'standard',
     receiptTemplateId: 'check-6',
     paperSize: '80',
@@ -337,6 +341,16 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
   const doctorRoom = (p.doctorRoom || '').trim();
   const widthMm = s.paperSize === '58' ? 58 : 80;
   const contentMm = s.receiptWidthMode === 'safe' ? (s.paperSize === '58' ? 54 : 76) : widthMm;
+  const fontScalePercent =
+    typeof s.fontScalePercent === 'number' && Number.isFinite(s.fontScalePercent)
+      ? s.fontScalePercent
+      : 100;
+  const fontScale = Math.min(Math.max(fontScalePercent, 60), 140) / 100;
+  const scalePx = (px: number) => `${Math.max(1, Math.round(px * fontScale))}px`;
+  const defaultLogoMm = widthMm === 58 ? 20 : 16;
+  const logoMaxMm =
+    typeof s.logoMaxMm === 'number' && Number.isFinite(s.logoMaxMm) ? s.logoMaxMm : defaultLogoMm;
+  const logoMmClamped = Math.min(Math.max(logoMaxMm, 8), 40);
   const qr = s.qrUrl ? escapeHtml(s.qrUrl) : '';
   const underQr = (s.underQrText || '').trim();
   const logo = (s.logoDataUrl || '').trim();
@@ -362,23 +376,23 @@ export function buildReceiptHtml(p: ReceiptPayload, s: PrintSettings): string {
       @media print { body { margin: 0; padding: 0; } }
       .receipt { width: ${contentMm}mm; max-width: ${contentMm}mm; margin: 0 auto; padding: ${widthMm === 58 ? '4mm 2mm 6mm' : '4mm 3mm 6mm'}; font-family: "Courier New", monospace; }
       .center { text-align: center; }
-      .row { display:flex; justify-content:space-between; gap: 8px; font-size: 12px; }
+      .row { display:flex; justify-content:space-between; gap: 8px; font-size: ${scalePx(12)}; }
       .row > span { min-width: 0; }
       .divider { border-top: 1px dashed #000; margin: 6px 0; }
-      .logo { font-weight: 900; font-size: ${widthMm === 58 ? '16px' : '16px'}; text-transform: uppercase; }
-      .sub { font-size: 11px; line-height: 1.2; }
-      .logo-slot { display:flex; align-items:center; justify-content:center; margin: 2px 0 6px; min-height: ${widthMm === 58 ? '22mm' : '18mm'}; }
-      .logo-img { max-width: 100%; max-height: ${widthMm === 58 ? '20mm' : '16mm'}; object-fit: contain; }
+      .logo { font-weight: 900; font-size: ${scalePx(16)}; text-transform: uppercase; }
+      .sub { font-size: ${scalePx(11)}; line-height: 1.2; }
+      .logo-slot { display:flex; align-items:center; justify-content:center; margin: 2px 0 6px; min-height: ${logoMmClamped + 2}mm; }
+      .logo-img { max-width: 100%; max-height: ${logoMmClamped}mm; object-fit: contain; }
       .queue { text-align:center; margin: 8px 0; }
-      .queue-label { font-size: 11px; text-transform: uppercase; }
-      .queue-num { font-size: ${widthMm === 58 ? '42px' : '44px'}; font-weight: 900; letter-spacing: 2px; line-height: 1; }
-      .queue-doctor { margin-top: 4px; font-size: ${widthMm === 58 ? '12px' : '13px'}; font-weight: 900; }
-      .title { font-weight: 800; margin-top: 4px; font-size: 12px; }
-      .value { font-weight: 900; font-size: 13px; word-break: break-word; }
-      .total { display:flex; justify-content:space-between; font-weight: 900; font-size: 14px; }
-      .small { font-size: 11px; }
+      .queue-label { font-size: ${scalePx(11)}; text-transform: uppercase; }
+      .queue-num { font-size: ${scalePx(widthMm === 58 ? 42 : 44)}; font-weight: 900; letter-spacing: 2px; line-height: 1; }
+      .queue-doctor { margin-top: 4px; font-size: ${scalePx(widthMm === 58 ? 12 : 13)}; font-weight: 900; }
+      .title { font-weight: 800; margin-top: 4px; font-size: ${scalePx(12)}; }
+      .value { font-weight: 900; font-size: ${scalePx(13)}; word-break: break-word; }
+      .total { display:flex; justify-content:space-between; font-weight: 900; font-size: ${scalePx(14)}; }
+      .small { font-size: ${scalePx(11)}; }
       .qr { display:block; margin: 10px auto 4px; width: ${widthMm === 58 ? '120px' : '140px'}; height: ${widthMm === 58 ? '120px' : '140px'}; }
-      .underqr { margin-top: 6px; font-size: 11px; text-align: center; }
+      .underqr { margin-top: 6px; font-size: ${scalePx(11)}; text-align: center; }
     </style>
   `;
 
@@ -445,8 +459,8 @@ ${commonHead}
   <style>
     .queue-box { border: 2px solid #000; border-radius: 8px; padding: 6px 6px; }
     .service-row { display:flex; justify-content:space-between; align-items:flex-end; margin-top: 8px; }
-    .service-name { font-weight: 900; font-size: 12px; }
-    .price { font-weight: 900; font-size: 16px; }
+    .service-name { font-weight: 900; font-size: ${scalePx(12)}; }
+    .price { font-weight: 900; font-size: ${scalePx(16)}; }
   </style>
 </head>
 <body>
@@ -518,10 +532,10 @@ ${commonHead}
 <head>
 ${commonHead}
   <style>
-    .wrap { border: 2px dashed #000; padding: 8mm 4mm; text-align: center; font-size: 14px; }
-    .queue-num { font-size: 48px; letter-spacing: 3px; }
-    .service { font-size: 16px; font-weight: 900; margin-top: 10px; }
-    .price { font-size: 22px; font-weight: 900; }
+    .wrap { border: 2px dashed #000; padding: 8mm 4mm; text-align: center; font-size: ${scalePx(14)}; }
+    .queue-num { font-size: ${scalePx(48)}; letter-spacing: 3px; }
+    .service { font-size: ${scalePx(16)}; font-weight: 900; margin-top: 10px; }
+    .price { font-size: ${scalePx(22)}; font-weight: 900; }
   </style>
 </head>
 <body>
@@ -571,7 +585,7 @@ ${commonHead}
 <head>
 ${commonHead}
   <style>
-    .table-header, .table-row { display:flex; justify-content:space-between; font-size: 12px; }
+    .table-header, .table-row { display:flex; justify-content:space-between; font-size: ${scalePx(12)}; }
     .table-header span { font-weight: 900; border-bottom: 1px dashed #000; padding-bottom: 2px; }
     .col-service { width: 60%; text-align: left; }
     .col-qty { width: 10%; text-align: center; }

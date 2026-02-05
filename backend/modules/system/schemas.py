@@ -73,8 +73,10 @@ class PrintSettingsValue(BaseModel):
     showQr: bool = True
     showUnderQrText: bool = True
     showFooterNote: bool = True
-    silentPrintMode: str = "image"
+    silentPrintMode: str = "html"
     silentScalePercent: int = 100
+    logoMaxMm: int = 20
+    fontScalePercent: int = 100
     receiptWidthMode: str = "standard"
     receiptTemplateId: str = "check-6"
     paperSize: str = "80"

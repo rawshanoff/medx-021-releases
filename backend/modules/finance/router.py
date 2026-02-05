@@ -307,6 +307,23 @@ async def close_shift(
         f"shift_id={shift.id}, total_cash={shift.total_cash}, total_card={shift.total_card}, total_transfer={shift.total_transfer}",
     )
     close_time = datetime.now(timezone.utc)
+
+    # Mark waiting queue items as completed for this shift window
+    try:
+        from backend.modules.reception.models import QueueItem
+
+        await db.execute(
+            update(QueueItem)
+            .where(
+                QueueItem.status == "WAITING",
+                QueueItem.created_at >= shift.start_time,
+                QueueItem.created_at <= close_time,
+                QueueItem.deleted_at.is_(None),
+            )
+            .values(status="COMPLETED")
+        )
+    except Exception:
+        logger.exception("Failed to close waiting queue items on shift close")
     update_result = await db.execute(
         update(Shift)
         .where(

@@ -53,6 +53,24 @@ def validate_print_config(value: Any) -> None:
                 detail="silentScalePercent must be an integer between 10 and 200",
             )
 
+    # Validate logoMaxMm is within 8-40 range
+    if "logoMaxMm" in value:
+        logo_max = value.get("logoMaxMm")
+        if not isinstance(logo_max, int) or not (8 <= logo_max <= 40):
+            raise HTTPException(
+                status_code=400,
+                detail="logoMaxMm must be an integer between 8 and 40",
+            )
+
+    # Validate fontScalePercent is within 60-140 range
+    if "fontScalePercent" in value:
+        font_scale = value.get("fontScalePercent")
+        if not isinstance(font_scale, int) or not (60 <= font_scale <= 140):
+            raise HTTPException(
+                status_code=400,
+                detail="fontScalePercent must be an integer between 60 and 140",
+            )
+
     # Validate silentPrintMode is one of allowed values
     if "silentPrintMode" in value:
         mode = value.get("silentPrintMode")

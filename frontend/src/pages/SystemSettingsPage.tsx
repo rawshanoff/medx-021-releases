@@ -43,12 +43,7 @@ import { loggers } from '../utils/logger';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Switch } from '../components/ui/switch';
-import {
-  SettingsSidebar,
-  type SettingsNavGroup,
-  type SettingsNavKey,
-} from '../components/settings/SettingsSidebar';
+import { type SettingsNavGroup } from '../components/settings/SettingsSidebar';
 import { SectionHeader } from '../features/system-settings/SectionHeader';
 import { UsersPane } from '../features/system-settings/panes/UsersPane';
 import { HistoryPane } from '../features/system-settings/panes/HistoryPane';
@@ -78,6 +73,7 @@ type SectionKey =
   | 'license'
   | 'printer'
   | 'receipt'
+  | 'registration'
   | 'users'
   | 'updates'
   | 'history'
@@ -139,9 +135,8 @@ export default function SystemSettingsPage() {
   const [requiredFields, setRequiredFields] = useState<PatientRequiredFields>(
     defaultPatientRequiredFields,
   );
-  const [requiredFieldsBusy, setRequiredFieldsBusy] = useState(false);
   const [quickConfig, setQuickConfig] = useState<QuickReceiptConfig>(defaultQuickReceiptConfig);
-  const [quickConfigBusy, setQuickConfigBusy] = useState(false);
+  const [saveAllBusy, setSaveAllBusy] = useState(false);
   const [quickDoctors, setQuickDoctors] = useState<Doctor[]>([]);
   const [printers, setPrinters] = useState<
     Array<{ name: string; displayName: string; isDefault: boolean }>
@@ -214,6 +209,40 @@ export default function SystemSettingsPage() {
     if (activeKey !== 'history') return;
     void fetchAudit();
   }, [auditKey]);
+
+  const handleSaveAll = async () => {
+    setSaveAllBusy(true);
+    try {
+      await setPrintSettings(printSettings);
+      await setPatientRequiredFields(requiredFields);
+      await setQuickReceiptConfig(quickConfig);
+      showToast(tr('common.saved', 'Сохранено'), 'success');
+    } catch {
+      showToast(tr('common.error', 'Ошибка сохранения'), 'error');
+    } finally {
+      setSaveAllBusy(false);
+    }
+  };
+
+  const handleCancelAll = async () => {
+    if (!confirmReset()) return;
+    setSaveAllBusy(true);
+    try {
+      const [settings, fields, cfg] = await Promise.all([
+        getPrintSettings(),
+        getPatientRequiredFields(),
+        getQuickReceiptConfig(),
+      ]);
+      setLocalPrintSettings(settings);
+      setRequiredFields(fields);
+      setQuickConfig(cfg);
+      showToast(tr('system.settings_loaded', 'Настройки загружены'), 'success');
+    } catch {
+      showToast(tr('system.settings_load_failed', 'Не удалось загрузить настройки'), 'error');
+    } finally {
+      setSaveAllBusy(false);
+    }
+  };
 
   const fetchSystemInfo = async () => {
     try {
@@ -417,14 +446,25 @@ export default function SystemSettingsPage() {
           {
             key: 'printer',
             label: tr('system.printer_settings', 'Принтер'),
-            description: tr('system.printer_settings_desc', 'deviceName, бумага, silent‑печать'),
+            description: tr('system.printer_settings_desc', 'deviceName и бумага'),
             icon: <Printer size={18} />,
           },
           {
             key: 'receipt',
             label: tr('system.receipt_settings', 'Шаблон чека'),
-            description: tr('system.receipt_settings_desc', 'Поля, предпросмотр, тесты'),
+            description: tr('system.receipt_settings_desc', 'Поля, печать, предпросмотр, тесты'),
             icon: <FileText size={18} />,
+          },
+        ],
+      },
+      {
+        label: tr('system.group_registration', 'Регистрация'),
+        items: [
+          {
+            key: 'registration',
+            label: tr('system.registration_settings', 'Регистрация'),
+            description: tr('system.registration_desc', 'Обязательные поля и быстрые чеки'),
+            icon: <ShieldCheck size={18} />,
           },
         ],
       },
@@ -466,12 +506,7 @@ export default function SystemSettingsPage() {
     ];
   }, [canManageUsers, t]);
 
-  const activeMeta = useMemo(() => {
-    for (const g of navGroups) {
-      for (const it of g.items) if (it.key === activeKey) return { group: g.label, item: it };
-    }
-    return null;
-  }, [navGroups, activeKey]);
+  const navItems = useMemo(() => navGroups.flatMap((g) => g.items), [navGroups]);
 
   const PaneRequisites = () => (
     <div className="grid gap-6">
@@ -668,6 +703,18 @@ export default function SystemSettingsPage() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+
+  const PaneRegistration = () => (
+    <div className="grid gap-6">
+      <SectionHeader
+        title={tr('system.registration_title', 'Регистрация')}
+        subtitle={tr(
+          'system.registration_description',
+          'Обязательные поля и быстрые чеки для ресепшна.',
+        )}
+      />
 
       <Card>
         <CardHeader>
@@ -722,27 +769,9 @@ export default function SystemSettingsPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
-              type="button"
-              onClick={async () => {
-                setRequiredFieldsBusy(true);
-                try {
-                  await setPatientRequiredFields(requiredFields);
-                  showToast(tr('common.saved', 'Сохранено'), 'success');
-                } catch {
-                  showToast(tr('common.error', 'Ошибка сохранения'), 'error');
-                } finally {
-                  setRequiredFieldsBusy(false);
-                }
-              }}
-              disabled={requiredFieldsBusy}
-            >
-              {tr('common.save', 'Сохранить')}
-            </Button>
-            <Button
               variant="secondary"
               type="button"
               onClick={() => setRequiredFields(defaultPatientRequiredFields)}
-              disabled={requiredFieldsBusy}
             >
               {tr('common.reset', 'Сбросить')}
             </Button>
@@ -761,15 +790,17 @@ export default function SystemSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30">
-            <div className="text-sm font-medium">
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30">
+            <span className="text-sm font-medium">
               {tr('system.quick_receipts_enable', 'Включить быстрые чеки')}
-            </div>
-            <Switch
+            </span>
+            <input
+              className="h-4 w-4 accent-primary"
+              type="checkbox"
               checked={Boolean(quickConfig.enabled)}
-              onCheckedChange={(v) => setQuickConfig((p) => ({ ...p, enabled: v }))}
+              onChange={(e) => setQuickConfig((p) => ({ ...p, enabled: e.target.checked }))}
             />
-          </div>
+          </label>
 
           {quickConfig.bindings.length === 0 ? (
             <div className="text-xs text-muted-foreground">
@@ -920,61 +951,9 @@ export default function SystemSettingsPage() {
             >
               {tr('system.quick_receipts_add', 'Добавить кнопку')}
             </Button>
-            <Button
-              type="button"
-              onClick={async () => {
-                setQuickConfigBusy(true);
-                try {
-                  await setQuickReceiptConfig(quickConfig);
-                  showToast(tr('common.saved', 'Сохранено'), 'success');
-                } catch {
-                  showToast(tr('common.error', 'Ошибка сохранения'), 'error');
-                } finally {
-                  setQuickConfigBusy(false);
-                }
-              }}
-              disabled={quickConfigBusy}
-            >
-              {tr('common.save', 'Сохранить')}
-            </Button>
           </div>
         </CardContent>
       </Card>
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          onClick={async () => {
-            try {
-              await setPrintSettings(printSettings);
-              showToast(tr('common.saved', 'Сохранено'), 'success');
-            } catch {
-              showToast(tr('common.error', 'Ошибка сохранения'), 'error');
-            }
-          }}
-        >
-          {tr('common.save', 'Сохранить')}
-        </Button>
-        <Button
-          variant="secondary"
-          type="button"
-          onClick={async () => {
-            if (!confirmReset()) return;
-            try {
-              const settings = await getPrintSettings();
-              setLocalPrintSettings(settings);
-              showToast(tr('system.settings_loaded', 'Настройки загружены'), 'success');
-            } catch {
-              showToast(
-                tr('system.settings_load_failed', 'Не удалось загрузить настройки'),
-                'error',
-              );
-            }
-          }}
-        >
-          {tr('common.reset', 'Сбросить')}
-        </Button>
-      </div>
     </div>
   );
 
@@ -1066,20 +1045,14 @@ export default function SystemSettingsPage() {
     <div className="grid gap-6">
       <SectionHeader
         title={tr('system.printer_title', 'Настройка принтера')}
-        subtitle={tr(
-          'system.printer_description',
-          'Выбор принтера (deviceName) и параметры silent‑печати.',
-        )}
+        subtitle={tr('system.printer_description', 'Выбор принтера (deviceName) и размера бумаги.')}
       />
 
       <Card>
         <CardHeader>
           <CardTitle>{tr('system.printer_card_title', 'Принтер')}</CardTitle>
           <CardDescription>
-            {tr(
-              'system.printer_card_desc',
-              'В Electron можно выбрать `deviceName` для silent‑печати.',
-            )}
+            {tr('system.printer_card_desc', 'В Electron можно выбрать `deviceName` принтера.')}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1203,114 +1176,8 @@ export default function SystemSettingsPage() {
               <option value="80">{tr('system.paper_size_80', '80 мм')}</option>
             </select>
           </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {tr('system.print_scale', 'Масштаб печати (%)')}
-            </label>
-            <Input
-              type="number"
-              min={70}
-              max={120}
-              value={
-                Number.isFinite(Number(printSettings.silentScalePercent))
-                  ? Number(printSettings.silentScalePercent)
-                  : 100
-              }
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({
-                  ...p,
-                  silentScalePercent: Number(e.target.value || 100),
-                }))
-              }
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {tr('system.silent_print_mode', 'Режим silent‑печати')}
-            </label>
-            <select
-              className={cn(
-                'h-10 w-full rounded-md border border-border bg-background px-3 text-sm shadow-none outline-none',
-                'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
-              )}
-              value={printSettings.silentPrintMode || 'html'}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, silentPrintMode: e.target.value as any }))
-              }
-            >
-              <option value="html">{tr('system.silent_mode_html', 'HTML')}</option>
-              <option value="image">
-                {tr('system.silent_mode_image', 'Картинка (совместимость)')}
-              </option>
-            </select>
-          </div>
-
-          <div
-            className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30 cursor-pointer"
-            role="button"
-            tabIndex={0}
-            onClick={() => setLocalPrintSettings((p) => ({ ...p, autoPrint: !p.autoPrint }))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setLocalPrintSettings((p) => ({ ...p, autoPrint: !p.autoPrint }));
-              }
-            }}
-          >
-            <div className="min-w-0">
-              <div className="text-sm font-medium">
-                {tr('system.auto_print', 'Автопечать после оплаты')}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {tr('system.auto_print_hint', 'Silent‑печать без диалогов (Electron).')}
-              </div>
-            </div>
-            <span onClick={(e) => e.stopPropagation()}>
-              <Switch
-                checked={Boolean(printSettings.autoPrint)}
-                onCheckedChange={(v) => setLocalPrintSettings((p) => ({ ...p, autoPrint: v }))}
-              />
-            </span>
-          </div>
         </CardContent>
       </Card>
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          onClick={async () => {
-            try {
-              await setPrintSettings(printSettings);
-              showToast(tr('common.saved', 'Сохранено'), 'success');
-            } catch {
-              showToast(tr('common.error', 'Ошибка сохранения'), 'error');
-            }
-          }}
-        >
-          {tr('common.save', 'Сохранить')}
-        </Button>
-        <Button
-          variant="secondary"
-          type="button"
-          onClick={async () => {
-            if (!confirmReset()) return;
-            try {
-              const settings = await getPrintSettings();
-              setLocalPrintSettings(settings);
-              showToast(tr('system.settings_loaded', 'Настройки загружены'), 'success');
-            } catch {
-              showToast(
-                tr('system.settings_load_failed', 'Не удалось загрузить настройки'),
-                'error',
-              );
-            }
-          }}
-        >
-          {tr('common.reset', 'Сбросить')}
-        </Button>
-      </div>
     </div>
   );
 
@@ -1402,10 +1269,135 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{tr('system.receipt_fields', 'Поля чека')}</CardTitle>
+          <CardTitle>{tr('system.receipt_sizes', 'Размеры')}</CardTitle>
           <CardDescription>
-            {tr('system.receipt_fields_desc', 'Переключатели вместо чекбоксов — быстрее и чище.')}
+            {tr(
+              'system.receipt_sizes_desc',
+              'Управляйте размером логотипа и масштабом текста в чеке.',
+            )}
           </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {tr('system.logo_max_mm', 'Высота логотипа (мм)')}
+            </label>
+            <Input
+              type="number"
+              min={8}
+              max={40}
+              value={
+                Number.isFinite(Number(printSettings.logoMaxMm))
+                  ? Number(printSettings.logoMaxMm)
+                  : 20
+              }
+              onChange={(e) =>
+                setLocalPrintSettings((p) => ({
+                  ...p,
+                  logoMaxMm: Number(e.target.value || 20),
+                }))
+              }
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {tr('system.font_scale_percent', 'Масштаб текста (%)')}
+            </label>
+            <Input
+              type="number"
+              min={60}
+              max={140}
+              value={
+                Number.isFinite(Number(printSettings.fontScalePercent))
+                  ? Number(printSettings.fontScalePercent)
+                  : 100
+              }
+              onChange={(e) =>
+                setLocalPrintSettings((p) => ({
+                  ...p,
+                  fontScalePercent: Number(e.target.value || 100),
+                }))
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{tr('system.printing_options', 'Параметры печати')}</CardTitle>
+          <CardDescription>
+            {tr('system.printing_options_desc', 'Масштаб, режим silent‑печати и автопечать.')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {tr('system.print_scale', 'Масштаб печати (%)')}
+            </label>
+            <Input
+              type="number"
+              min={70}
+              max={120}
+              value={
+                Number.isFinite(Number(printSettings.silentScalePercent))
+                  ? Number(printSettings.silentScalePercent)
+                  : 100
+              }
+              onChange={(e) =>
+                setLocalPrintSettings((p) => ({
+                  ...p,
+                  silentScalePercent: Number(e.target.value || 100),
+                }))
+              }
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {tr('system.silent_print_mode', 'Режим silent‑печати')}
+            </label>
+            <select
+              className={cn(
+                'h-10 w-full rounded-md border border-border bg-background px-3 text-sm shadow-none outline-none',
+                'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
+              )}
+              value={printSettings.silentPrintMode || 'html'}
+              onChange={(e) =>
+                setLocalPrintSettings((p) => ({ ...p, silentPrintMode: e.target.value as any }))
+              }
+            >
+              <option value="html">{tr('system.silent_mode_html', 'HTML')}</option>
+              <option value="image">
+                {tr('system.silent_mode_image', 'Картинка (совместимость)')}
+              </option>
+            </select>
+          </div>
+
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30 md:col-span-2">
+            <span className="min-w-0">
+              <span className="text-sm font-medium">
+                {tr('system.auto_print', 'Автопечать после оплаты')}
+              </span>
+              <span className="mt-1 block text-xs text-muted-foreground">
+                {tr('system.auto_print_hint', 'Silent‑печать без диалогов (Electron).')}
+              </span>
+            </span>
+            <input
+              className="h-4 w-4 accent-primary"
+              type="checkbox"
+              checked={Boolean(printSettings.autoPrint)}
+              onChange={(e) =>
+                setLocalPrintSettings((p) => ({ ...p, autoPrint: e.target.checked }))
+              }
+            />
+          </label>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{tr('system.receipt_fields', 'Поля чека')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1574,41 +1566,6 @@ export default function SystemSettingsPage() {
           ) : null}
         </CardContent>
       </Card>
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          onClick={async () => {
-            try {
-              await setPrintSettings(printSettings);
-              showToast(tr('common.saved', 'Сохранено'), 'success');
-            } catch {
-              showToast(tr('common.error', 'Ошибка сохранения'), 'error');
-            }
-          }}
-        >
-          {tr('common.save', 'Сохранить')}
-        </Button>
-        <Button
-          variant="secondary"
-          type="button"
-          onClick={async () => {
-            if (!confirmReset()) return;
-            try {
-              const settings = await getPrintSettings();
-              setLocalPrintSettings(settings);
-              showToast(tr('system.settings_loaded', 'Настройки загружены'), 'success');
-            } catch {
-              showToast(
-                tr('system.settings_load_failed', 'Не удалось загрузить настройки'),
-                'error',
-              );
-            }
-          }}
-        >
-          {tr('common.reset', 'Сбросить')}
-        </Button>
-      </div>
     </div>
   );
 
@@ -1730,6 +1687,9 @@ export default function SystemSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
+          <Button type="button" variant="secondary" onClick={handleSaveAll} disabled={saveAllBusy}>
+            {tr('system.save_current', 'Сохранить текущие настройки')}
+          </Button>
           <Button
             type="button"
             variant="destructive"
@@ -1776,6 +1736,7 @@ export default function SystemSettingsPage() {
     if (activeKey === 'license') return PaneLicense();
     if (activeKey === 'printer') return PanePrinter();
     if (activeKey === 'receipt') return PaneReceipt();
+    if (activeKey === 'registration') return PaneRegistration();
     if (activeKey === 'users')
       return canManageUsers ? (
         <UsersPane
@@ -1816,53 +1777,39 @@ export default function SystemSettingsPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-160px)] w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:border-slate-700/60 dark:bg-slate-800">
-      <aside className="hidden w-[280px] shrink-0 border-r border-slate-200/80 bg-white/80 dark:border-slate-700/60 dark:bg-slate-800/60 lg:block">
-        <div className="sticky top-6">
-          <div className="px-6 pt-6">
-            <div className="text-base font-semibold">{tr('system.settings', 'Настройки')}</div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              {tr('system.settings_desc', 'Управление клиникой, оборудованием и системой')}
-            </div>
+      <div className="min-w-0 flex-1 overflow-auto bg-slate-50/70 px-6 pb-6 dark:bg-slate-900/30">
+        <div className="-mx-6 -mt-6 border-b border-slate-200/80 bg-white/90 px-6 py-3 dark:border-slate-700/60 dark:bg-slate-900/40">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {navItems.map((item) => (
+              <Button
+                key={item.key}
+                type="button"
+                size="sm"
+                variant={activeKey === item.key ? 'default' : 'secondary'}
+                onClick={() => setActive(item.key as SectionKey)}
+                disabled={item.disabled}
+              >
+                {item.label}
+              </Button>
+            ))}
           </div>
-          <SettingsSidebar
-            groups={navGroups}
-            activeKey={activeKey}
-            onSelect={(k: SettingsNavKey) => setActive(k as SectionKey)}
-          />
         </div>
-      </aside>
 
-      <div className="min-w-0 flex-1 overflow-auto bg-slate-50/70 p-6 dark:bg-slate-900/30">
-        {/* Mobile top selector */}
-        <div className="mb-4 grid gap-2 lg:hidden">
-          <div className="text-base font-semibold">{tr('system.settings', 'Настройки')}</div>
-          <select
-            className={cn(
-              'h-11 w-full rounded-md border border-border bg-background px-3 text-sm shadow-none outline-none',
-              'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
-            )}
-            value={activeKey}
-            onChange={(e) => setActive(e.target.value as SectionKey)}
+        <div className="pt-4">{renderPane()}</div>
+
+        <div className="mt-6 flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleCancelAll}
+            disabled={saveAllBusy}
           >
-            {navGroups.flatMap((g) =>
-              g.items.map((it) => (
-                <option key={it.key} value={it.key} disabled={it.disabled}>
-                  {g.label} · {it.label}
-                </option>
-              )),
-            )}
-          </select>
+            {tr('common.cancel', 'Отмена')}
+          </Button>
+          <Button type="button" onClick={handleSaveAll} disabled={saveAllBusy}>
+            {tr('common.save', 'Сохранить')}
+          </Button>
         </div>
-
-        {/* Optional breadcrumb */}
-        {activeMeta ? (
-          <div className="mb-4 text-xs text-muted-foreground">
-            {activeMeta.group} /{' '}
-            <span className="font-medium text-foreground">{activeMeta.item.label}</span>
-          </div>
-        ) : null}
-
-        {renderPane()}
       </div>
     </div>
   );

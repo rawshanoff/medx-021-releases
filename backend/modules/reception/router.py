@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from backend.core.database import get_db
 from backend.modules.auth import require_roles
 from backend.modules.doctors.models import Doctor
+from backend.modules.finance.models import Shift
 from backend.modules.reception.models import QueueItem
 from backend.modules.reception.schemas import (
     QueueItemCreate,
@@ -86,7 +87,13 @@ async def get_queue(
     if range == "2days":
         start = start_of_today - timedelta(days=1)
     elif range == "shift":
-        start = now - timedelta(hours=12)
+        shift_result = await db.execute(
+            select(Shift)
+            .where(Shift.is_closed.is_(False))
+            .order_by(Shift.start_time.desc())
+        )
+        active_shift = shift_result.scalars().first()
+        start = active_shift.start_time if active_shift else start_of_today
     else:
         start = start_of_today
 

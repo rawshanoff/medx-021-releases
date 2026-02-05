@@ -35,6 +35,8 @@ export default function Finance() {
   const [closeShiftOpen, setCloseShiftOpen] = useState(false);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [cashCounted, setCashCounted] = useState('');
+  const [waitingQueueCount, setWaitingQueueCount] = useState(0);
+  const [waitingQueueLoading, setWaitingQueueLoading] = useState(false);
 
   // For Mixed Payment (Expense doesn't usually use mixed but keep logic just in case or simplify)
   // Expense is usually pure Cash or pure Card from company account.
@@ -42,6 +44,35 @@ export default function Finance() {
   useEffect(() => {
     checkActiveShift();
   }, []);
+
+  useEffect(() => {
+    if (!closeShiftOpen) {
+      return;
+    }
+    let cancelled = false;
+    const loadWaiting = async () => {
+      setWaitingQueueLoading(true);
+      try {
+        const res = await client.get('/reception/queue', { params: { range: 'shift' } });
+        if (cancelled) return;
+        const items = Array.isArray(res.data) ? res.data : [];
+        const count = items.filter((item: any) => item?.status === 'WAITING').length;
+        setWaitingQueueCount(count);
+      } catch (e) {
+        if (!cancelled) {
+          setWaitingQueueCount(0);
+        }
+      } finally {
+        if (!cancelled) {
+          setWaitingQueueLoading(false);
+        }
+      }
+    };
+    loadWaiting();
+    return () => {
+      cancelled = true;
+    };
+  }, [closeShiftOpen]);
 
   // Auto-refresh every 15 seconds
   useEffect(() => {
@@ -557,6 +588,19 @@ export default function Finance() {
               defaultValue:
                 'После закрытия смены данные будут зафиксированы и больше нельзя будет добавлять операции.',
             })}
+          </div>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-400/40 dark:bg-amber-950/40 dark:text-amber-200">
+            {waitingQueueLoading
+              ? t('finance.close_shift_waiting_loading', { defaultValue: 'Проверяем очередь…' })
+              : waitingQueueCount > 0
+                ? t('finance.close_shift_waiting', {
+                    defaultValue:
+                      'В очереди есть ожидание: {{count}}. При закрытии смены они будут отмечены как завершенные.',
+                    count: waitingQueueCount,
+                  })
+                : t('finance.close_shift_waiting_empty', {
+                    defaultValue: 'Ожидающих пациентов в очереди нет.',
+                  })}
           </div>
         </div>
 
