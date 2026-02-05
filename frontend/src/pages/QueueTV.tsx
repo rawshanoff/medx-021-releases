@@ -6,7 +6,7 @@ import { loggers } from '../utils/logger';
 
 export default function QueueTV() {
   const { t, i18n } = useTranslation();
-  const { queue, refresh } = useQueue();
+  const { queue, refresh } = useQueue('today');
   const previousTicketIdRef = useRef<number | null>(null);
 
   const dateLocale = useMemo(() => {
