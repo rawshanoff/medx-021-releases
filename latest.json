@@ -1,7 +1,7 @@
 {
-  "version": "1.0.30-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.30-mvp.zip",
-  "sha256": "f6b700477e1ec857ac59efbbffad63b9ae9d3500cbe0edf54ffc66edf2a34bc9",
+  "version": "1.0.31-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.31-mvp.zip",
+  "sha256": "43359eb229578c675c856cc4f8e619345ce9400926d1ad0ef7e7607ebee5a2b6",
   "notes": "021 rename and icon update",
-  "published_at": "2026-02-05T04:19:22.610581+00:00"
+  "published_at": "2026-02-05T04:21:46.143498+00:00"
 }
