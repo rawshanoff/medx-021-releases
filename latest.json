@@ -1,7 +1,7 @@
 {
   "version": "1.0.30-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.30-mvp.zip",
-  "sha256": "b6048fc18f653384f9443005ac6494a6172610b4ee9bcac67f7893a559f463ab",
-  "notes": "Quick receipts with hotkeys; queue range refresh",
-  "published_at": "2026-02-05T02:21:24.891869+00:00"
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.30-mvp.zip",
+  "sha256": "f6b700477e1ec857ac59efbbffad63b9ae9d3500cbe0edf54ffc66edf2a34bc9",
+  "notes": "021 rename and icon update",
+  "published_at": "2026-02-05T04:19:22.610581+00:00"
 }
