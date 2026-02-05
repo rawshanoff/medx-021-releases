@@ -1,7 +1,7 @@
 {
-  "version": "1.0.36-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.36-mvp.zip",
-  "sha256": "c631c62fb78c7bd147c71126456dd8e22129a97a4b6b954707506e3cb8f07c07",
-  "notes": "Rebuild backend exe for doctor room and quick receipts",
-  "published_at": "2026-02-05T07:00:28.236998+00:00"
+  "version": "1.0.37-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.37-mvp.zip",
+  "sha256": "294d59ec45134265d58a5025e1e87720e87c74e2ee718adedfc60511c25938bb",
+  "notes": "021 1.0.37-mvp release",
+  "published_at": "2026-02-05T20:09:53.035731+00:00"
 }
