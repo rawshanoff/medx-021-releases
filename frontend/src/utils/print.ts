@@ -125,7 +125,7 @@ export function defaultSettings(): PrintSettings {
     showQr: true,
     showUnderQrText: true,
     showFooterNote: true,
-    silentPrintMode: 'image',
+    silentPrintMode: 'html',
     silentScalePercent: 100,
     receiptWidthMode: 'standard',
     receiptTemplateId: 'check-6',

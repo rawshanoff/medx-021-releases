@@ -105,8 +105,8 @@ export function Topbar() {
 
   return (
     <header className="relative flex h-[55px] items-center justify-between gap-3 border-b border-border bg-background/40 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/30">
-      <div className="flex min-w-0 items-center">
-        <span className="block h-[18px] w-[200px] truncate px-[38px] text-[14px] text-muted-foreground">
+      <div className="flex min-w-0 flex-1 items-center">
+        <span className="block min-w-0 flex-1 px-4 text-[14px] text-muted-foreground">
           {routeLabel}
         </span>
       </div>

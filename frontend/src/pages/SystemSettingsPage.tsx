@@ -13,7 +13,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { getUser, hasAnyRole } from '../utils/auth';
 import {
@@ -74,12 +74,18 @@ const DEFAULT_SECTION: SectionKey = 'requisites';
 export default function SystemSettingsPage() {
   const { t } = useTranslation();
   const { showToast } = useToast();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tr = (key: string, defaultValue: string) => t(key, { defaultValue });
   const confirmReset = () =>
     confirm(tr('system.confirm_reset', 'Сбросить изменения и загрузить сохранённые настройки?'));
+  const confirmResetDefaults = () => {
+    if (!confirm(tr('system.confirm_reset_defaults', 'Сбросить настройки к умолчанию?')))
+      return false;
+    return confirm(
+      tr('system.confirm_reset_defaults_again', 'Подтвердите ещё раз сброс к умолчанию'),
+    );
+  };
 
   const canManageUsers = useMemo(() => hasAnyRole(['admin', 'owner']), []);
 
@@ -226,7 +232,8 @@ export default function SystemSettingsPage() {
           setVersion(newVersion);
           showToast(
             t('system.update_installed', {
-              defaultValue: `Обновление установлено: ${newVersion}`,
+              defaultValue: 'Обновление установлено: {{version}}',
+              version: newVersion,
             }),
             'success',
           );
@@ -438,13 +445,15 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Основное</CardTitle>
-          <CardDescription>Эти данные отображаются в чеке и в QR‑блоке.</CardDescription>
+          <CardTitle>{tr('system.section_basic', 'Основное')}</CardTitle>
+          <CardDescription>
+            {tr('system.requisites_hint', 'Эти данные отображаются в чеке и в QR‑блоке.')}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Логотип (для чека)
+              {tr('system.logo_for_receipt', 'Логотип (для чека)')}
             </label>
             <Input
               type="file"
@@ -462,11 +471,13 @@ export default function SystemSettingsPage() {
             />
             {printSettings.logoDataUrl ? (
               <div className="mt-3 flex items-center gap-3">
-                <img
-                  src={printSettings.logoDataUrl}
-                  alt="logo-preview"
-                  className="h-12 rounded-md border border-slate-200 bg-white p-1 object-contain dark:border-slate-700 dark:bg-slate-800"
-                />
+                <div className="h-32 w-32 overflow-hidden rounded-md border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
+                  <img
+                    src={printSettings.logoDataUrl}
+                    alt="logo-preview"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
                 <Button
                   variant="secondary"
                   size="sm"
@@ -481,7 +492,7 @@ export default function SystemSettingsPage() {
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Название клиники
+              {tr('system.clinic_name', 'Название клиники')}
             </label>
             <Input
               value={printSettings.clinicName}
@@ -490,7 +501,7 @@ export default function SystemSettingsPage() {
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Телефон
+              {tr('system.clinic_phone', 'Телефон')}
             </label>
             <Input
               value={printSettings.clinicPhone}
@@ -501,7 +512,7 @@ export default function SystemSettingsPage() {
           </div>
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Адрес
+              {tr('system.clinic_address', 'Адрес')}
             </label>
             <Input
               value={printSettings.clinicAddress}
@@ -512,7 +523,7 @@ export default function SystemSettingsPage() {
           </div>
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Примечание внизу
+              {tr('system.footer_note', 'Примечание внизу')}
             </label>
             <Input
               value={printSettings.footerNote}
@@ -521,7 +532,7 @@ export default function SystemSettingsPage() {
           </div>
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Текст под QR
+              {tr('system.under_qr_text', 'Текст под QR')}
             </label>
             <Input
               placeholder={tr('system.telegram_placeholder', 'Например: t.me/ваш_канал')}
@@ -533,12 +544,12 @@ export default function SystemSettingsPage() {
           </div>
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              QR ссылка (опционально)
+              {tr('system.qr_url_optional', 'QR ссылка (опционально)')}
             </label>
             <div className="flex gap-2">
               <Input
                 className="flex-1"
-                placeholder="https://..."
+                placeholder={tr('system.qr_url_placeholder', 'https://...')}
                 value={printSettings.qrUrl}
                 onChange={(e) => setLocalPrintSettings((p) => ({ ...p, qrUrl: e.target.value }))}
               />
@@ -637,8 +648,10 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Статус</CardTitle>
-          <CardDescription>Лицензирование работает в режиме fail‑closed.</CardDescription>
+          <CardTitle>{tr('system.license_status', 'Статус')}</CardTitle>
+          <CardDescription>
+            {tr('system.license_fail_closed', 'Лицензирование работает в режиме fail‑closed.')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -678,8 +691,10 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Загрузка ключа</CardTitle>
-          <CardDescription>Файл лицензии `.key`.</CardDescription>
+          <CardTitle>{tr('system.license_upload', 'Загрузка ключа')}</CardTitle>
+          <CardDescription>
+            {tr('system.license_file_hint', 'Файл лицензии `.key`.')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3">
@@ -715,15 +730,18 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Принтер</CardTitle>
+          <CardTitle>{tr('system.printer_card_title', 'Принтер')}</CardTitle>
           <CardDescription>
-            В Electron можно выбрать `deviceName` для silent‑печати.
+            {tr(
+              'system.printer_card_desc',
+              'В Electron можно выбрать `deviceName` для silent‑печати.',
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Название принтера (для интерфейса)
+              {tr('system.printer_display_name', 'Название принтера (для интерфейса)')}
             </label>
             <Input
               placeholder={tr('system.printer_placeholder', 'Например: Epson TM‑T20')}
@@ -736,13 +754,15 @@ export default function SystemSettingsPage() {
 
           <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2">
             <div className="text-sm">
-              <span className="text-muted-foreground">Текущий </span>
+              <span className="text-muted-foreground">
+                {tr('system.current_label', 'Текущий')}{' '}
+              </span>
               <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-900/40">
                 deviceName
               </code>
               <span className="text-muted-foreground">: </span>
               <span className="font-medium text-foreground">
-                {printSettings.preferredPrinterDeviceName || 'не выбран'}
+                {printSettings.preferredPrinterDeviceName || tr('system.not_selected', 'не выбран')}
               </span>
             </div>
             <Button
@@ -766,7 +786,9 @@ export default function SystemSettingsPage() {
                 setShowPrintersInline((v) => !v);
               }}
             >
-              {showPrintersInline ? 'Скрыть список' : 'Показать список принтеров'}
+              {showPrintersInline
+                ? tr('system.hide_printers', 'Скрыть список')
+                : tr('system.show_printers', 'Показать список принтеров')}
             </Button>
           </div>
 
@@ -774,7 +796,9 @@ export default function SystemSettingsPage() {
             <div className="md:col-span-2">
               <div className="rounded-xl border border-slate-200/80 bg-slate-50 p-3 dark:border-slate-700/60 dark:bg-slate-900/30">
                 {printers.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">Список пуст</div>
+                  <div className="text-sm text-muted-foreground">
+                    {tr('system.printers_empty', 'Список пуст')}
+                  </div>
                 ) : (
                   <div className="grid gap-2">
                     {printers.map((p) => (
@@ -790,21 +814,27 @@ export default function SystemSettingsPage() {
                             preferredPrinterDeviceName: p.name,
                             preferredPrinterName: p.displayName || p.name,
                           }));
-                          showToast(`Выбран принтер: ${p.displayName || p.name}`, 'success');
+                          showToast(
+                            tr('system.printer_selected', 'Выбран принтер: {{name}}', {
+                              name: p.displayName || p.name,
+                            }),
+                            'success',
+                          );
                         }}
                       >
                         <span className="min-w-0 flex-1 truncate text-left">
                           {p.displayName || p.name}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {p.isDefault ? 'Default' : ''}
+                          {p.isDefault ? tr('system.default_printer', 'Default') : ''}
                         </span>
                       </Button>
                     ))}
                   </div>
                 )}
                 <div className="mt-3 text-xs text-muted-foreground">
-                  Это выбирает <code>deviceName</code> для silent‑печати в Electron.
+                  {tr('system.printer_device_hint_prefix', 'Это выбирает')} <code>deviceName</code>{' '}
+                  {tr('system.printer_device_hint_suffix', 'для silent‑печати в Electron.')}
                 </div>
               </div>
             </div>
@@ -812,7 +842,7 @@ export default function SystemSettingsPage() {
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Размер бумаги
+              {tr('system.paper_size', 'Размер бумаги')}
             </label>
             <select
               className={cn(
@@ -824,14 +854,14 @@ export default function SystemSettingsPage() {
                 setLocalPrintSettings((p) => ({ ...p, paperSize: e.target.value as any }))
               }
             >
-              <option value="58">58 мм</option>
-              <option value="80">80 мм</option>
+              <option value="58">{tr('system.paper_size_58', '58 мм')}</option>
+              <option value="80">{tr('system.paper_size_80', '80 мм')}</option>
             </select>
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Масштаб печати (%)
+              {tr('system.print_scale', 'Масштаб печати (%)')}
             </label>
             <Input
               type="number"
@@ -853,7 +883,7 @@ export default function SystemSettingsPage() {
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Режим silent‑печати
+              {tr('system.silent_print_mode', 'Режим silent‑печати')}
             </label>
             <select
               className={cn(
@@ -865,22 +895,39 @@ export default function SystemSettingsPage() {
                 setLocalPrintSettings((p) => ({ ...p, silentPrintMode: e.target.value as any }))
               }
             >
-              <option value="html">HTML</option>
-              <option value="image">Картинка (совместимость)</option>
+              <option value="html">{tr('system.silent_mode_html', 'HTML')}</option>
+              <option value="image">
+                {tr('system.silent_mode_image', 'Картинка (совместимость)')}
+              </option>
             </select>
           </div>
 
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30">
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30 cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onClick={() => setLocalPrintSettings((p) => ({ ...p, autoPrint: !p.autoPrint }))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setLocalPrintSettings((p) => ({ ...p, autoPrint: !p.autoPrint }));
+              }
+            }}
+          >
             <div className="min-w-0">
-              <div className="text-sm font-medium">Автопечать после оплаты</div>
+              <div className="text-sm font-medium">
+                {tr('system.auto_print', 'Автопечать после оплаты')}
+              </div>
               <div className="text-xs text-muted-foreground">
-                Silent‑печать без диалогов (Electron).
+                {tr('system.auto_print_hint', 'Silent‑печать без диалогов (Electron).')}
               </div>
             </div>
-            <Switch
-              checked={Boolean(printSettings.autoPrint)}
-              onCheckedChange={(v) => setLocalPrintSettings((p) => ({ ...p, autoPrint: v }))}
-            />
+            <span onClick={(e) => e.stopPropagation()}>
+              <Switch
+                checked={Boolean(printSettings.autoPrint)}
+                onCheckedChange={(v) => setLocalPrintSettings((p) => ({ ...p, autoPrint: v }))}
+              />
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -923,22 +970,22 @@ export default function SystemSettingsPage() {
   );
 
   const receiptFieldDefs: Array<{ key: keyof typeof printSettings; label: string }> = [
-    { key: 'showLogo', label: 'Показывать логотип' },
-    { key: 'showClinicName', label: 'Показывать название клиники' },
-    { key: 'showClinicAddress', label: 'Показывать адрес' },
-    { key: 'showClinicPhone', label: 'Показывать телефон' },
-    { key: 'showDateTime', label: 'Показывать дату/время' },
-    { key: 'showPatientName', label: 'Показывать пациента' },
-    { key: 'showQueue', label: 'Показывать номер очереди' },
-    { key: 'showDoctor', label: 'Показывать врача' },
-    { key: 'showDoctorRoom', label: 'Показывать кабинет врача' },
-    { key: 'showServices', label: 'Показывать услуги' },
-    { key: 'showTotalAmount', label: 'Показывать итого сумму' },
-    { key: 'showPaymentType', label: 'Показывать тип оплаты' },
-    { key: 'showQr', label: 'Показывать QR' },
-    { key: 'showUnderQrText', label: 'Показывать текст под QR' },
-    { key: 'showFooterNote', label: 'Показывать нижнюю подпись' },
-    { key: 'boldAllText', label: 'Жирный шрифт (весь чек)' },
+    { key: 'showLogo', label: tr('system.show_logo', 'Показывать логотип') },
+    { key: 'showClinicName', label: tr('system.show_clinic_name', 'Показывать название клиники') },
+    { key: 'showClinicAddress', label: tr('system.show_clinic_address', 'Показывать адрес') },
+    { key: 'showClinicPhone', label: tr('system.show_clinic_phone', 'Показывать телефон') },
+    { key: 'showDateTime', label: tr('system.show_date_time', 'Показывать дату/время') },
+    { key: 'showPatientName', label: tr('system.show_patient', 'Показывать пациента') },
+    { key: 'showQueue', label: tr('system.show_queue', 'Показывать номер очереди') },
+    { key: 'showDoctor', label: tr('system.show_doctor', 'Показывать врача') },
+    { key: 'showDoctorRoom', label: tr('system.show_doctor_room', 'Показывать кабинет врача') },
+    { key: 'showServices', label: tr('system.show_services', 'Показывать услуги') },
+    { key: 'showTotalAmount', label: tr('system.show_total', 'Показывать итого сумму') },
+    { key: 'showPaymentType', label: tr('system.show_payment_type', 'Показывать тип оплаты') },
+    { key: 'showQr', label: tr('system.show_qr', 'Показывать QR') },
+    { key: 'showUnderQrText', label: tr('system.show_under_qr', 'Показывать текст под QR') },
+    { key: 'showFooterNote', label: tr('system.show_footer', 'Показывать нижнюю подпись') },
+    { key: 'boldAllText', label: tr('system.bold_all', 'Жирный шрифт (весь чек)') },
   ];
 
   const PaneReceipt = () => (
@@ -949,29 +996,22 @@ export default function SystemSettingsPage() {
           'system.receipt_description',
           'Шаблон, что показывать в чеке, предпросмотр и тесты.',
         )}
-        right={
-          <Button
-            variant="secondary"
-            size="sm"
-            type="button"
-            onClick={() => navigate('/system/audit?key=print_config')}
-          >
-            {tr('system.audit_log', 'История изменений')}
-          </Button>
-        }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Шаблон и ширина</CardTitle>
+          <CardTitle>{tr('system.receipt_template_width', 'Шаблон и ширина')}</CardTitle>
           <CardDescription>
-            Выберите стиль и “безопасную” ширину, если принтер обрезает.
+            {tr(
+              'system.receipt_template_width_desc',
+              'Выберите стиль и “безопасную” ширину, если принтер обрезает.',
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Шаблон чека
+              {tr('system.receipt_template', 'Шаблон чека')}
             </label>
             <select
               className={cn(
@@ -983,14 +1023,16 @@ export default function SystemSettingsPage() {
                 setLocalPrintSettings((p) => ({ ...p, receiptTemplateId: e.target.value as any }))
               }
             >
-              <option value="check-6">check-6 (таблица)</option>
-              <option value="check-1">check-1 (рамка)</option>
-              <option value="check-4-58">check-4 58 (блок очереди)</option>
+              <option value="check-6">{tr('system.template_check_6', 'check-6 (таблица)')}</option>
+              <option value="check-1">{tr('system.template_check_1', 'check-1 (рамка)')}</option>
+              <option value="check-4-58">
+                {tr('system.template_check_4_58', 'check-4 58 (блок очереди)')}
+              </option>
             </select>
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Ширина чека
+              {tr('system.receipt_width', 'Ширина чека')}
             </label>
             <select
               className={cn(
@@ -1002,8 +1044,12 @@ export default function SystemSettingsPage() {
                 setLocalPrintSettings((p) => ({ ...p, receiptWidthMode: e.target.value as any }))
               }
             >
-              <option value="standard">Стандарт (58/80мм)</option>
-              <option value="safe">Безопасная (если обрезает)</option>
+              <option value="standard">
+                {tr('system.receipt_width_standard', 'Стандарт (58/80мм)')}
+              </option>
+              <option value="safe">
+                {tr('system.receipt_width_safe', 'Безопасная (если обрезает)')}
+              </option>
             </select>
           </div>
         </CardContent>
@@ -1011,8 +1057,10 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Поля чека</CardTitle>
-          <CardDescription>Переключатели вместо чекбоксов — быстрее и чище.</CardDescription>
+          <CardTitle>{tr('system.receipt_fields', 'Поля чека')}</CardTitle>
+          <CardDescription>
+            {tr('system.receipt_fields_desc', 'Переключатели вместо чекбоксов — быстрее и чище.')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -1025,17 +1073,40 @@ export default function SystemSettingsPage() {
               return (
                 <div
                   key={String(f.key)}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() =>
+                    setLocalPrintSettings((p) => {
+                      const nextChecked = String(f.key).startsWith('show')
+                        ? (p as any)[f.key] !== false
+                        : Boolean((p as any)[f.key]);
+                      return { ...p, [f.key]: !nextChecked } as any;
+                    })
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setLocalPrintSettings((p) => {
+                        const nextChecked = String(f.key).startsWith('show')
+                          ? (p as any)[f.key] !== false
+                          : Boolean((p as any)[f.key]);
+                        return { ...p, [f.key]: !nextChecked } as any;
+                      });
+                    }
+                  }}
                 >
                   <div className="min-w-0 text-sm">
                     <div className="font-medium">{f.label}</div>
                   </div>
-                  <Switch
-                    checked={checked}
-                    onCheckedChange={(v) =>
-                      setLocalPrintSettings((p) => ({ ...p, [f.key]: v }) as any)
-                    }
-                  />
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={checked}
+                      onCheckedChange={(v) =>
+                        setLocalPrintSettings((p) => ({ ...p, [f.key]: v }) as any)
+                      }
+                    />
+                  </span>
                 </div>
               );
             })}
@@ -1045,8 +1116,10 @@ export default function SystemSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Предпросмотр и тест</CardTitle>
-          <CardDescription>Проверьте итоговый HTML и запустите печать.</CardDescription>
+          <CardTitle>{tr('system.preview_test', 'Предпросмотр и тест')}</CardTitle>
+          <CardDescription>
+            {tr('system.preview_test_desc', 'Проверьте итоговый HTML и запустите печать.')}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
           <div className="flex flex-wrap gap-2">
@@ -1065,7 +1138,7 @@ export default function SystemSettingsPage() {
                     doctorRoom: '7',
                     serviceName: 'Test Service',
                     amount: 12345,
-                    currency: "so'm",
+                    currency: t('common.currency', { defaultValue: "so'm" }),
                     paymentMethod: 'CASH',
                   } as any,
                   { ...printSettings, autoPrint: false } as any,
@@ -1097,7 +1170,7 @@ export default function SystemSettingsPage() {
                     doctorRoom: '7',
                     serviceName: 'Test Service',
                     amount: 12345,
-                    currency: "so'm",
+                    currency: t('common.currency', { defaultValue: "so'm" }),
                     paymentMethod: 'CASH',
                   } as any;
 
@@ -1150,20 +1223,28 @@ export default function SystemSettingsPage() {
 
           {lastSilentPrint ? (
             <div className="rounded-xl border border-slate-200/80 bg-slate-50 p-3 text-xs text-muted-foreground dark:border-slate-700/60 dark:bg-slate-900/30">
-              <div className="font-medium text-foreground">Последний результат</div>
+              <div className="font-medium text-foreground">
+                {tr('system.last_result', 'Последний результат')}
+              </div>
               <div className="mt-1 break-words">
-                <span className="font-medium text-foreground">ok:</span>{' '}
+                <span className="font-medium text-foreground">
+                  {tr('system.last_result_ok', 'ok')}:
+                </span>{' '}
                 {String(Boolean(lastSilentPrint.ok))}
               </div>
               {lastSilentPrint?.error ? (
                 <div className="mt-1 break-words">
-                  <span className="font-medium text-foreground">error:</span>{' '}
+                  <span className="font-medium text-foreground">
+                    {tr('system.last_result_error', 'error')}:
+                  </span>{' '}
                   {String(lastSilentPrint.error)}
                 </div>
               ) : null}
               {lastSilentPrint?.debug ? (
                 <div className="mt-1 break-words">
-                  <span className="font-medium text-foreground">debug:</span>{' '}
+                  <span className="font-medium text-foreground">
+                    {tr('system.last_result_debug', 'debug')}:
+                  </span>{' '}
                   <code>{JSON.stringify(lastSilentPrint.debug)}</code>
                 </div>
               ) : null}
@@ -1231,7 +1312,9 @@ export default function SystemSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>{tr('system.update_status', 'Статус')}</CardTitle>
-          <CardDescription>Версия приложения и наличие обновлений.</CardDescription>
+          <CardDescription>
+            {tr('system.update_status_desc', 'Версия приложения и наличие обновлений.')}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between gap-2">
@@ -1300,7 +1383,7 @@ export default function SystemSettingsPage() {
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">
-              {tr('system.check_updates', 'Проверьте обновления')}
+              {tr('system.check_updates_prompt', 'Проверьте обновления')}
             </div>
           )}
         </CardContent>
@@ -1329,12 +1412,7 @@ export default function SystemSettingsPage() {
             type="button"
             variant="destructive"
             onClick={async () => {
-              if (
-                !confirm(
-                  tr('system.confirm_reset_defaults', 'Сбросить настройки печати к умолчанию?'),
-                )
-              )
-                return;
+              if (!confirmResetDefaults()) return;
               try {
                 const next = defaultSettings();
                 const saved = await setPrintSettings(next);

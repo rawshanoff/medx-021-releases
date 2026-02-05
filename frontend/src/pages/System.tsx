@@ -612,11 +612,13 @@ export default function System() {
             />
             {printSettings.logoDataUrl ? (
               <div className="mt-2 flex items-center gap-2">
-                <img
-                  src={printSettings.logoDataUrl}
-                  alt="logo-preview"
-                  className="h-11 rounded-md border border-border bg-background p-1 object-contain"
-                />
+                <div className="h-32 w-32 overflow-hidden rounded-md border border-border bg-background p-1">
+                  <img
+                    src={printSettings.logoDataUrl}
+                    alt="logo-preview"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
