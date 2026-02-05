@@ -830,7 +830,8 @@ export default function SystemSettingsPage() {
                             preferredPrinterName: p.displayName || p.name,
                           }));
                           showToast(
-                            tr('system.printer_selected', 'Выбран принтер: {{name}}', {
+                            t('system.printer_selected', {
+                              defaultValue: 'Выбран принтер: {{name}}',
                               name: p.displayName || p.name,
                             }),
                             'success',
@@ -1086,43 +1087,20 @@ export default function SystemSettingsPage() {
                 : Boolean((printSettings as any)[f.key]);
 
               return (
-                <div
+                <label
                   key={String(f.key)}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30 cursor-pointer"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    setLocalPrintSettings((p) => {
-                      const nextChecked = String(f.key).startsWith('show')
-                        ? (p as any)[f.key] !== false
-                        : Boolean((p as any)[f.key]);
-                      return { ...p, [f.key]: !nextChecked } as any;
-                    })
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setLocalPrintSettings((p) => {
-                        const nextChecked = String(f.key).startsWith('show')
-                          ? (p as any)[f.key] !== false
-                          : Boolean((p as any)[f.key]);
-                        return { ...p, [f.key]: !nextChecked } as any;
-                      });
-                    }
-                  }}
+                  className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700/60 dark:bg-slate-900/30"
                 >
-                  <div className="min-w-0 text-sm">
-                    <div className="font-medium">{f.label}</div>
-                  </div>
-                  <span onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={checked}
-                      onCheckedChange={(v) =>
-                        setLocalPrintSettings((p) => ({ ...p, [f.key]: v }) as any)
-                      }
-                    />
-                  </span>
-                </div>
+                  <input
+                    className="h-4 w-4 accent-primary"
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) =>
+                      setLocalPrintSettings((p) => ({ ...p, [f.key]: e.target.checked }) as any)
+                    }
+                  />
+                  <span className="font-medium">{f.label}</span>
+                </label>
               );
             })}
           </div>
@@ -1465,10 +1443,10 @@ export default function SystemSettingsPage() {
   );
 
   const renderPane = () => {
-    if (activeKey === 'requisites') return <PaneRequisites />;
-    if (activeKey === 'license') return <PaneLicense />;
-    if (activeKey === 'printer') return <PanePrinter />;
-    if (activeKey === 'receipt') return <PaneReceipt />;
+    if (activeKey === 'requisites') return PaneRequisites();
+    if (activeKey === 'license') return PaneLicense();
+    if (activeKey === 'printer') return PanePrinter();
+    if (activeKey === 'receipt') return PaneReceipt();
     if (activeKey === 'users')
       return canManageUsers ? (
         <UsersPane
@@ -1486,9 +1464,9 @@ export default function SystemSettingsPage() {
           handleDeleteUser={handleDeleteUser}
         />
       ) : (
-        <PaneDanger />
+        PaneDanger()
       );
-    if (activeKey === 'updates') return <PaneUpdates />;
+    if (activeKey === 'updates') return PaneUpdates();
     if (activeKey === 'history')
       return (
         <HistoryPane
@@ -1503,8 +1481,8 @@ export default function SystemSettingsPage() {
           me={getUser()}
         />
       );
-    if (activeKey === 'danger') return <PaneDanger />;
-    return <PaneRequisites />;
+    if (activeKey === 'danger') return PaneDanger();
+    return PaneRequisites();
   };
 
   return (
