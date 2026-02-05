@@ -29,6 +29,7 @@ import {
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Switch } from '../components/ui/switch';
 import { cn } from '../lib/cn';
 import { loggers } from '../utils/logger';
 
@@ -108,6 +109,7 @@ export default function System() {
   const canManageUsers = useMemo(() => hasAnyRole(['admin', 'owner']), []);
   const [openSection, setOpenSection] = useState<SystemSection | null>(null);
   const updatesPanelRef = useRef<HTMLDivElement | null>(null);
+  const hasEditedSettingsRef = useRef(false);
 
   const tr = (key: string, defaultValue: string) => t(key, { defaultValue });
   const confirmReset = () =>
@@ -160,7 +162,9 @@ export default function System() {
       // Load print settings from server
       try {
         const settings = await getPrintSettings();
-        setLocalPrintSettings(settings);
+        if (!hasEditedSettingsRef.current) {
+          setLocalPrintSettings(settings);
+        }
       } catch (e) {
         loggers.system.error('Failed to load print settings', e);
         // Will use defaults if loading fails
@@ -638,7 +642,10 @@ export default function System() {
             </label>
             <Input
               value={printSettings.clinicName}
-              onChange={(e) => setLocalPrintSettings((p) => ({ ...p, clinicName: e.target.value }))}
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, clinicName: e.target.value }));
+              }}
             />
           </div>
           <div>
@@ -647,9 +654,10 @@ export default function System() {
             </label>
             <Input
               value={printSettings.clinicPhone}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, clinicPhone: e.target.value }))
-              }
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, clinicPhone: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -658,9 +666,10 @@ export default function System() {
             </label>
             <Input
               value={printSettings.clinicAddress}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, clinicAddress: e.target.value }))
-              }
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, clinicAddress: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -669,7 +678,10 @@ export default function System() {
             </label>
             <Input
               value={printSettings.footerNote}
-              onChange={(e) => setLocalPrintSettings((p) => ({ ...p, footerNote: e.target.value }))}
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, footerNote: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -679,9 +691,10 @@ export default function System() {
             <Input
               placeholder={t('system.telegram_placeholder')}
               value={printSettings.underQrText}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, underQrText: e.target.value }))
-              }
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, underQrText: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -693,7 +706,10 @@ export default function System() {
                 className="flex-1"
                 placeholder="https://..."
                 value={printSettings.qrUrl}
-                onChange={(e) => setLocalPrintSettings((p) => ({ ...p, qrUrl: e.target.value }))}
+                onChange={(e) => {
+                  hasEditedSettingsRef.current = true;
+                  setLocalPrintSettings((p) => ({ ...p, qrUrl: e.target.value }));
+                }}
               />
               <Button
                 variant="secondary"
@@ -885,19 +901,15 @@ export default function System() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              id="autoPrint"
-              className="h-4 w-4 accent-primary"
-              type="checkbox"
-              checked={printSettings.autoPrint}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, autoPrint: e.target.checked }))
-              }
-            />
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30">
             <label htmlFor="autoPrint" className="text-[13px]">
               Автопечать после оплаты (silent)
             </label>
+            <Switch
+              id="autoPrint"
+              checked={Boolean(printSettings.autoPrint)}
+              onCheckedChange={(v) => setLocalPrintSettings((p) => ({ ...p, autoPrint: v }))}
+            />
           </div>
         </div>
 
@@ -992,182 +1004,42 @@ export default function System() {
           <div className="md:col-span-2 grid gap-2">
             <label className="text-[13px] font-medium text-muted-foreground">Поля чека</label>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showLogo !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showLogo: e.target.checked }))
-                  }
-                />
-                <span>Показывать логотип</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showClinicName !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showClinicName: e.target.checked }))
-                  }
-                />
-                <span>Показывать название клиники</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showClinicAddress !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showClinicAddress: e.target.checked }))
-                  }
-                />
-                <span>Показывать адрес</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showClinicPhone !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showClinicPhone: e.target.checked }))
-                  }
-                />
-                <span>Показывать телефон</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showDateTime !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showDateTime: e.target.checked }))
-                  }
-                />
-                <span>Показывать дату/время</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showPatientName !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showPatientName: e.target.checked }))
-                  }
-                />
-                <span>Показывать пациента</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showQueue !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showQueue: e.target.checked }))
-                  }
-                />
-                <span>Показывать номер очереди</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showDoctor !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showDoctor: e.target.checked }))
-                  }
-                />
-                <span>Показывать врача</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showDoctorRoom !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showDoctorRoom: e.target.checked }))
-                  }
-                />
-                <span>Показывать кабинет врача</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showServices !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showServices: e.target.checked }))
-                  }
-                />
-                <span>Показывать услуги</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showTotalAmount !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showTotalAmount: e.target.checked }))
-                  }
-                />
-                <span>Показывать итого сумму</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showPaymentType !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showPaymentType: e.target.checked }))
-                  }
-                />
-                <span>Показывать тип оплаты</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showQr !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showQr: e.target.checked }))
-                  }
-                />
-                <span>Показывать QR</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showUnderQrText !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showUnderQrText: e.target.checked }))
-                  }
-                />
-                <span>Показывать текст под QR</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={printSettings.showFooterNote !== false}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, showFooterNote: e.target.checked }))
-                  }
-                />
-                <span>Показывать нижнюю подпись</span>
-              </label>
-              <label className="flex items-center gap-2 text-[13px]">
-                <input
-                  className="h-4 w-4 accent-primary"
-                  type="checkbox"
-                  checked={Boolean(printSettings.boldAllText)}
-                  onChange={(e) =>
-                    setLocalPrintSettings((p) => ({ ...p, boldAllText: e.target.checked }))
-                  }
-                />
-                <span>Жирный шрифт (весь чек)</span>
-              </label>
+              {[
+                { key: 'showLogo', label: 'Показывать логотип', defaultOn: true },
+                { key: 'showClinicName', label: 'Показывать название клиники', defaultOn: true },
+                { key: 'showClinicAddress', label: 'Показывать адрес', defaultOn: true },
+                { key: 'showClinicPhone', label: 'Показывать телефон', defaultOn: true },
+                { key: 'showDateTime', label: 'Показывать дату/время', defaultOn: true },
+                { key: 'showPatientName', label: 'Показывать пациента', defaultOn: true },
+                { key: 'showQueue', label: 'Показывать номер очереди', defaultOn: true },
+                { key: 'showDoctor', label: 'Показывать врача', defaultOn: true },
+                { key: 'showDoctorRoom', label: 'Показывать кабинет врача', defaultOn: true },
+                { key: 'showServices', label: 'Показывать услуги', defaultOn: true },
+                { key: 'showTotalAmount', label: 'Показывать итого сумму', defaultOn: true },
+                { key: 'showPaymentType', label: 'Показывать тип оплаты', defaultOn: true },
+                { key: 'showQr', label: 'Показывать QR', defaultOn: true },
+                { key: 'showUnderQrText', label: 'Показывать текст под QR', defaultOn: true },
+                { key: 'showFooterNote', label: 'Показывать нижнюю подпись', defaultOn: true },
+                { key: 'boldAllText', label: 'Жирный шрифт (весь чек)', defaultOn: false },
+              ].map((field) => {
+                const checked = field.key.startsWith('show')
+                  ? (printSettings as any)[field.key] !== false
+                  : Boolean((printSettings as any)[field.key]);
+                return (
+                  <div
+                    key={field.key}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 text-[13px] dark:border-slate-700/60 dark:bg-slate-900/30"
+                  >
+                    <span>{field.label}</span>
+                    <Switch
+                      checked={checked}
+                      onCheckedChange={(v) =>
+                        setLocalPrintSettings((p) => ({ ...p, [field.key]: v }) as any)
+                      }
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import client from '../api/client';
 import {
   Building2,
@@ -121,6 +121,7 @@ export default function SystemSettingsPage() {
 
   // Print settings
   const [printSettings, setLocalPrintSettings] = useState(defaultSettings());
+  const hasEditedSettingsRef = useRef(false);
   const [printers, setPrinters] = useState<
     Array<{ name: string; displayName: string; isDefault: boolean }>
   >([]);
@@ -151,7 +152,9 @@ export default function SystemSettingsPage() {
       if (canManageUsers) void fetchUsers();
       try {
         const settings = await getPrintSettings();
-        setLocalPrintSettings(settings);
+        if (!hasEditedSettingsRef.current) {
+          setLocalPrintSettings(settings);
+        }
       } catch (e) {
         loggers.system.error('Failed to load print settings', e);
       }
@@ -496,7 +499,10 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.clinicName}
-              onChange={(e) => setLocalPrintSettings((p) => ({ ...p, clinicName: e.target.value }))}
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, clinicName: e.target.value }));
+              }}
             />
           </div>
           <div>
@@ -505,9 +511,10 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.clinicPhone}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, clinicPhone: e.target.value }))
-              }
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, clinicPhone: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -516,9 +523,10 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.clinicAddress}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, clinicAddress: e.target.value }))
-              }
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, clinicAddress: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -527,7 +535,10 @@ export default function SystemSettingsPage() {
             </label>
             <Input
               value={printSettings.footerNote}
-              onChange={(e) => setLocalPrintSettings((p) => ({ ...p, footerNote: e.target.value }))}
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, footerNote: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -537,9 +548,10 @@ export default function SystemSettingsPage() {
             <Input
               placeholder={tr('system.telegram_placeholder', 'Например: t.me/ваш_канал')}
               value={printSettings.underQrText}
-              onChange={(e) =>
-                setLocalPrintSettings((p) => ({ ...p, underQrText: e.target.value }))
-              }
+              onChange={(e) => {
+                hasEditedSettingsRef.current = true;
+                setLocalPrintSettings((p) => ({ ...p, underQrText: e.target.value }));
+              }}
             />
           </div>
           <div className="md:col-span-2">
@@ -551,7 +563,10 @@ export default function SystemSettingsPage() {
                 className="flex-1"
                 placeholder={tr('system.qr_url_placeholder', 'https://...')}
                 value={printSettings.qrUrl}
-                onChange={(e) => setLocalPrintSettings((p) => ({ ...p, qrUrl: e.target.value }))}
+                onChange={(e) => {
+                  hasEditedSettingsRef.current = true;
+                  setLocalPrintSettings((p) => ({ ...p, qrUrl: e.target.value }));
+                }}
               />
               <Button
                 variant="secondary"
