@@ -1,7 +1,7 @@
 {
-  "version": "1.0.34-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.34-mvp.zip",
-  "sha256": "690420991d07d1b4b73cfc8be1d429f222dcd71c35583d1a6df3801a5da2ebb0",
-  "notes": "Fix doctor room save and quick receipt name",
-  "published_at": "2026-02-05T06:35:53.850481+00:00"
+  "version": "1.0.35-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.35-mvp.zip",
+  "sha256": "52113dfd3f30374a1297b7920310f1b375cec2092faac40623c12ba8a50aa53c",
+  "notes": "Fix doctor room save and hide patient in quick receipts",
+  "published_at": "2026-02-05T06:50:43.463733+00:00"
 }
