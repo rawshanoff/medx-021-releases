@@ -30,6 +30,14 @@ import {
   setPatientRequiredFields,
   type PatientRequiredFields,
 } from '../utils/patientRequiredFields';
+import {
+  defaultQuickReceiptConfig,
+  getQuickReceiptConfig,
+  setQuickReceiptConfig,
+  type QuickReceiptBinding,
+  type QuickReceiptConfig,
+} from '../utils/quickReceipts';
+import type { Doctor } from '../types/doctors';
 import { cn } from '../lib/cn';
 import { loggers } from '../utils/logger';
 import { Button } from '../components/ui/button';
@@ -132,6 +140,9 @@ export default function SystemSettingsPage() {
     defaultPatientRequiredFields,
   );
   const [requiredFieldsBusy, setRequiredFieldsBusy] = useState(false);
+  const [quickConfig, setQuickConfig] = useState<QuickReceiptConfig>(defaultQuickReceiptConfig);
+  const [quickConfigBusy, setQuickConfigBusy] = useState(false);
+  const [quickDoctors, setQuickDoctors] = useState<Doctor[]>([]);
   const [printers, setPrinters] = useState<
     Array<{ name: string; displayName: string; isDefault: boolean }>
   >([]);
@@ -173,6 +184,18 @@ export default function SystemSettingsPage() {
         setRequiredFields(fields);
       } catch (e) {
         loggers.system.error('Failed to load required fields settings', e);
+      }
+      try {
+        const cfg = await getQuickReceiptConfig();
+        setQuickConfig(cfg);
+      } catch (e) {
+        loggers.system.error('Failed to load quick receipts settings', e);
+      }
+      try {
+        const res = await client.get('/doctors/');
+        setQuickDoctors(Array.isArray(res.data) ? res.data : []);
+      } catch (e) {
+        loggers.system.error('Failed to load doctors for quick receipts', e);
       }
     };
     void initializeSettings();
@@ -722,6 +745,197 @@ export default function SystemSettingsPage() {
               disabled={requiredFieldsBusy}
             >
               {tr('common.reset', 'Сбросить')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{tr('system.quick_receipts_title', 'Быстрые чеки')}</CardTitle>
+          <CardDescription>
+            {tr(
+              'system.quick_receipts_desc',
+              'Кнопки для мгновенной печати чека без записи пациента.',
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2 dark:border-slate-700/60 dark:bg-slate-900/30">
+            <div className="text-sm font-medium">
+              {tr('system.quick_receipts_enable', 'Включить быстрые чеки')}
+            </div>
+            <Switch
+              checked={Boolean(quickConfig.enabled)}
+              onCheckedChange={(v) => setQuickConfig((p) => ({ ...p, enabled: v }))}
+            />
+          </div>
+
+          {quickConfig.bindings.length === 0 ? (
+            <div className="text-xs text-muted-foreground">
+              {tr('system.quick_receipts_empty', 'Кнопки ещё не добавлены')}
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              {quickConfig.bindings.map((b, idx) => {
+                const doctor = quickDoctors.find((d) => d.id === b.doctorId);
+                const services = doctor?.services || [];
+                return (
+                  <div
+                    key={b.id}
+                    className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200/80 bg-slate-50 p-2 dark:border-slate-700/60 dark:bg-slate-900/30 md:grid-cols-[140px_1fr_1fr_1fr_auto]"
+                  >
+                    <select
+                      className={cn(
+                        'h-10 rounded-md border border-border bg-background px-2 text-sm outline-none',
+                        'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
+                      )}
+                      value={b.hotkey}
+                      onChange={(e) =>
+                        setQuickConfig((p) => ({
+                          ...p,
+                          bindings: p.bindings.map((x) =>
+                            x.id === b.id ? { ...x, hotkey: e.target.value } : x,
+                          ),
+                        }))
+                      }
+                    >
+                      {['F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'].map(
+                        (k) => (
+                          <option key={k} value={k}>
+                            {k}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                    <select
+                      className={cn(
+                        'h-10 rounded-md border border-border bg-background px-2 text-sm outline-none',
+                        'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
+                      )}
+                      value={b.doctorId ?? ''}
+                      onChange={(e) => {
+                        const nextDoctorId = e.target.value ? Number(e.target.value) : null;
+                        setQuickConfig((p) => ({
+                          ...p,
+                          bindings: p.bindings.map((x) =>
+                            x.id === b.id ? { ...x, doctorId: nextDoctorId, serviceId: null } : x,
+                          ),
+                        }));
+                      }}
+                    >
+                      <option value="">{tr('system.quick_receipts_doctor', 'Врач')}</option>
+                      {quickDoctors.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.full_name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className={cn(
+                        'h-10 rounded-md border border-border bg-background px-2 text-sm outline-none',
+                        'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
+                      )}
+                      value={b.serviceId ?? ''}
+                      onChange={(e) =>
+                        setQuickConfig((p) => ({
+                          ...p,
+                          bindings: p.bindings.map((x) =>
+                            x.id === b.id
+                              ? {
+                                  ...x,
+                                  serviceId: e.target.value ? Number(e.target.value) : null,
+                                }
+                              : x,
+                          ),
+                        }))
+                      }
+                    >
+                      <option value="">{tr('system.quick_receipts_service', 'Услуга')}</option>
+                      {services.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className={cn(
+                        'h-10 rounded-md border border-border bg-background px-2 text-sm outline-none',
+                        'focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:border-blue-500',
+                      )}
+                      value={b.paymentMethod}
+                      onChange={(e) =>
+                        setQuickConfig((p) => ({
+                          ...p,
+                          bindings: p.bindings.map((x) =>
+                            x.id === b.id ? { ...x, paymentMethod: e.target.value as any } : x,
+                          ),
+                        }))
+                      }
+                    >
+                      <option value="CASH">{tr('system.quick_receipts_cash', 'Наличные')}</option>
+                      <option value="CARD">{tr('system.quick_receipts_card', 'Карта')}</option>
+                      <option value="TRANSFER">
+                        {tr('system.quick_receipts_transfer', 'Перевод')}
+                      </option>
+                    </select>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={() =>
+                        setQuickConfig((p) => ({
+                          ...p,
+                          bindings: p.bindings.filter((x) => x.id !== b.id),
+                        }))
+                      }
+                    >
+                      {tr('common.delete', 'Удалить')}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                setQuickConfig((p) => ({
+                  ...p,
+                  bindings: [
+                    ...p.bindings,
+                    {
+                      id: crypto.randomUUID(),
+                      hotkey: 'F2',
+                      doctorId: null,
+                      serviceId: null,
+                      paymentMethod: 'CASH',
+                    },
+                  ] as QuickReceiptBinding[],
+                }))
+              }
+            >
+              {tr('system.quick_receipts_add', 'Добавить кнопку')}
+            </Button>
+            <Button
+              type="button"
+              onClick={async () => {
+                setQuickConfigBusy(true);
+                try {
+                  await setQuickReceiptConfig(quickConfig);
+                  showToast(tr('common.saved', 'Сохранено'), 'success');
+                } catch {
+                  showToast(tr('common.error', 'Ошибка сохранения'), 'error');
+                } finally {
+                  setQuickConfigBusy(false);
+                }
+              }}
+              disabled={quickConfigBusy}
+            >
+              {tr('common.save', 'Сохранить')}
             </Button>
           </div>
         </CardContent>

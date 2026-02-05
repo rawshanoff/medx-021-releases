@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import client from '../api/client';
@@ -23,6 +23,12 @@ import {
   getPatientRequiredFields,
   type PatientRequiredFields,
 } from '../utils/patientRequiredFields';
+import {
+  defaultQuickReceiptConfig,
+  getQuickReceiptConfig,
+  type QuickReceiptConfig,
+} from '../utils/quickReceipts';
+import { getPrintSettings, printReceipt, saveReceiptForTicket } from '../utils/print';
 
 export default function Reception() {
   const { t } = useTranslation();
@@ -35,6 +41,7 @@ export default function Reception() {
     defaultPatientRequiredFields,
   );
   const [receiptRange, setReceiptRange] = useState<'shift' | 'today' | '2days'>('today');
+  const [quickConfig, setQuickConfig] = useState<QuickReceiptConfig>(defaultQuickReceiptConfig);
 
   const phoneRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -162,10 +169,42 @@ export default function Reception() {
   }, [refreshQueue]);
 
   useEffect(() => {
+    refreshQueue().catch(() => {});
+  }, [receiptRange, refreshQueue]);
+
+  useEffect(() => {
     getPatientRequiredFields()
       .then(setRequiredFields)
       .catch(() => setRequiredFields(defaultPatientRequiredFields));
   }, []);
+
+  useEffect(() => {
+    getQuickReceiptConfig()
+      .then(setQuickConfig)
+      .catch(() => setQuickConfig(defaultQuickReceiptConfig));
+  }, []);
+
+  useEffect(() => {
+    if (!quickConfig.enabled || quickConfig.bindings.length === 0) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      const match = quickConfig.bindings.find((b) => b.hotkey === e.key);
+      if (!match) return;
+      e.preventDefault();
+      void runQuickReceipt(match);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [quickConfig, runQuickReceipt]);
 
   useEffect(() => {
     const onFocus = () => refreshQueue().catch(() => {});
@@ -200,6 +239,92 @@ export default function Reception() {
       },
     });
   };
+
+  const errorMessageIsShiftRelated = useCallback((msg: string) => {
+    return msg.toLowerCase().includes('shift') || msg.toLowerCase().includes('active');
+  }, []);
+
+  const createQuickPatient = useCallback(async () => {
+    const seed = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const digits = seed.slice(-9).padStart(9, '0');
+    const phone = `+998${digits}`;
+    const res = await client.post('/patients/', {
+      full_name: t('reception.quick_patient_name', { defaultValue: 'Пациент' }),
+      phone,
+      birth_date: null,
+    });
+    return res.data as Patient;
+  }, [t]);
+
+  const runQuickReceipt = useCallback(
+    async (binding: {
+      doctorId: number | null;
+      serviceId: number | null;
+      paymentMethod: 'CASH' | 'CARD' | 'TRANSFER';
+    }) => {
+      if (!binding.doctorId || !binding.serviceId) return;
+      try {
+        const doctor = doctors.find((d) => d.id === binding.doctorId);
+        const service = doctor?.services?.find((s) => s.id === binding.serviceId);
+        if (!doctor || !service) return;
+
+        const patient = await createQuickPatient();
+        const transactionData = {
+          patient_id: patient.id,
+          amount: service.price,
+          doctor_id: String(doctor.id),
+          payment_method: binding.paymentMethod,
+          description: service.name,
+          idempotency_key: crypto.randomUUID(),
+        };
+
+        const txRes = await client.post('/finance/transactions', transactionData);
+
+        const ticket = await addToQueue(patient.id, patient.full_name, Number(doctor.id));
+
+        try {
+          const loadedSettings = await getPrintSettings();
+          const settings = { ...loadedSettings, autoPrint: true };
+          const nowIso = new Date().toISOString();
+          const payload = {
+            receiptNo: String(txRes?.data?.id ?? txRes?.data?.tx_id ?? 'AA-000000'),
+            ticket,
+            createdAtIso: nowIso,
+            patientName: patient.full_name,
+            doctorName: doctor.full_name,
+            doctorRoom: doctor.room_number ?? undefined,
+            serviceName: service.name,
+            amount: service.price,
+            currency: t('common.currency'),
+            paymentMethod: binding.paymentMethod,
+          };
+          saveReceiptForTicket(ticket, payload);
+          printReceipt(payload, settings);
+        } catch {
+          // ignore printing errors
+        }
+      } catch (e: any) {
+        const detail = e?.response?.data?.detail;
+        if (typeof detail === 'string' && errorMessageIsShiftRelated(detail)) {
+          setShowShiftModal(true);
+          return;
+        }
+        showToast(t('common.error', { defaultValue: 'Ошибка' }), 'error');
+      }
+    },
+    [addToQueue, createQuickPatient, doctors, errorMessageIsShiftRelated, showToast, t],
+  );
+
+  const quickBindingsByDoctor = useMemo(() => {
+    const groups = new Map<number, typeof quickConfig.bindings>();
+    for (const b of quickConfig.bindings) {
+      if (!b.doctorId) continue;
+      const list = groups.get(b.doctorId) || [];
+      list.push(b);
+      groups.set(b.doctorId, list);
+    }
+    return groups;
+  }, [quickConfig.bindings]);
 
   const addToQueue = async (patientId: number, patientName: string, doctorId: number) => {
     try {
@@ -261,6 +386,60 @@ export default function Reception() {
         <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_340px] gap-3">
           {/* LEFT */}
           <div className="flex min-h-0 flex-col gap-3">
+            {quickConfig.enabled ? (
+              <div className="rounded-md border border-slate-200 bg-card p-3 dark:border-slate-800">
+                <div className="mb-2 text-sm font-semibold">
+                  {t('reception.quick_receipts', { defaultValue: 'Быстрые чеки' })}
+                </div>
+                <div className="grid gap-3">
+                  {Array.from(quickBindingsByDoctor.entries()).map(([doctorId, bindings]) => {
+                    const doctor = doctors.find((d) => d.id === doctorId);
+                    if (!doctor) return null;
+                    return (
+                      <div
+                        key={doctorId}
+                        className="rounded-xl border border-slate-200/80 bg-slate-50 p-3 dark:border-slate-700/60 dark:bg-slate-900/30"
+                      >
+                        <div className="mb-2 text-sm font-semibold">{doctor.full_name}</div>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                          {bindings.map((b) => {
+                            const service = doctor.services?.find((s) => s.id === b.serviceId);
+                            const label =
+                              service?.name || t('reception.service', { defaultValue: 'Услуга' });
+                            const paymentLabel =
+                              b.paymentMethod === 'CARD'
+                                ? t('reception.card', { defaultValue: 'Карта' })
+                                : b.paymentMethod === 'TRANSFER'
+                                  ? t('reception.transfer', { defaultValue: 'Перевод' })
+                                  : t('reception.cash', { defaultValue: 'Наличные' });
+                            const colorClass =
+                              b.paymentMethod === 'CARD'
+                                ? 'bg-blue-600 hover:bg-blue-500'
+                                : b.paymentMethod === 'TRANSFER'
+                                  ? 'bg-violet-600 hover:bg-violet-500'
+                                  : 'bg-emerald-600 hover:bg-emerald-500';
+                            return (
+                              <Button
+                                key={b.id}
+                                type="button"
+                                className={`h-12 justify-between px-3 text-sm text-white ${colorClass}`}
+                                onClick={() => runQuickReceipt(b)}
+                              >
+                                <span className="truncate">{label}</span>
+                                <span className="text-xs opacity-90">
+                                  {paymentLabel} • {b.hotkey}
+                                </span>
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
             {/* Search */}
             <PatientSearch
               phone={phone}

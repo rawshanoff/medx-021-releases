@@ -155,6 +155,49 @@ def validate_setting_value(setting_key: str, value: Any) -> None:
                     status_code=400,
                     detail=f"{field} must be a boolean (true/false)",
                 )
+    elif setting_key == "quick_receipts":
+        if not isinstance(value, dict):
+            raise HTTPException(
+                status_code=400,
+                detail="quick_receipts value must be a JSON object",
+            )
+        if "enabled" in value and not isinstance(value.get("enabled"), bool):
+            raise HTTPException(
+                status_code=400,
+                detail="enabled must be a boolean (true/false)",
+            )
+        bindings = value.get("bindings")
+        if bindings is not None:
+            if not isinstance(bindings, list):
+                raise HTTPException(
+                    status_code=400,
+                    detail="bindings must be a list",
+                )
+            for idx, item in enumerate(bindings):
+                if not isinstance(item, dict):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"bindings[{idx}] must be an object",
+                    )
+                hotkey = item.get("hotkey")
+                if hotkey is not None and not isinstance(hotkey, str):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"bindings[{idx}].hotkey must be a string",
+                    )
+                payment = item.get("paymentMethod")
+                if payment not in (None, "CASH", "CARD", "TRANSFER"):
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"bindings[{idx}].paymentMethod invalid",
+                    )
+                for field in ("doctorId", "serviceId"):
+                    if field in item and item.get(field) is not None:
+                        if not isinstance(item.get(field), int):
+                            raise HTTPException(
+                                status_code=400,
+                                detail=f"bindings[{idx}].{field} must be an int",
+                            )
     # Add more validators for other setting keys as needed
     # elif setting_key == "ui_preferences":
     #     validate_ui_preferences(value)
@@ -412,6 +455,8 @@ async def list_setting_keys(
         keys.insert(0, "print_config")
     if "patient_required_fields" not in keys:
         keys.append("patient_required_fields")
+    if "quick_receipts" not in keys:
+        keys.append("quick_receipts")
     return keys
 
 
