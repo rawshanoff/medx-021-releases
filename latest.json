@@ -1,7 +1,7 @@
 {
-  "version": "1.0.33-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.33-mvp.zip",
-  "sha256": "39f550792aa57f63b94cdbd0d58981493120c23e53250a127721fb80f9703dcd",
-  "notes": "Receipt layout tweaks",
-  "published_at": "2026-02-05T06:19:16.295892+00:00"
+  "version": "1.0.34-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.34-mvp.zip",
+  "sha256": "690420991d07d1b4b73cfc8be1d429f222dcd71c35583d1a6df3801a5da2ebb0",
+  "notes": "Fix doctor room save and quick receipt name",
+  "published_at": "2026-02-05T06:35:53.850481+00:00"
 }
