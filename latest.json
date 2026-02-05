@@ -1,7 +1,7 @@
 {
-  "version": "1.0.27-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.27-mvp.zip",
-  "sha256": "71895066617e44c577bb598e61efaa25cce200255f65b769ee3e1591026ad282",
-  "notes": "System: requisites focus fix, larger switches",
-  "published_at": "2026-02-05T00:34:31.285657+00:00"
+  "version": "1.0.28-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.28-mvp.zip",
+  "sha256": "dacc0d2dd8af448c3b179beabc97a03d22b914aa3bf07dcf2fd74d4052563688",
+  "notes": "System: requisites focus fix, receipt toggles",
+  "published_at": "2026-02-05T01:14:46.442791+00:00"
 }
