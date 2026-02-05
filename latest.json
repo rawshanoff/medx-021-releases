@@ -1,7 +1,7 @@
 {
-  "version": "1.0.29-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.29-mvp.zip",
-  "sha256": "a3456380d7686d77dc2ed38272d5d25216ab8e6b3aee2346b16450b574efa3d0",
-  "notes": "Queue range filter, required fields, service price input",
-  "published_at": "2026-02-05T02:04:47.959432+00:00"
+  "version": "1.0.30-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/medx-1.0.30-mvp.zip",
+  "sha256": "b6048fc18f653384f9443005ac6494a6172610b4ee9bcac67f7893a559f463ab",
+  "notes": "Quick receipts with hotkeys; queue range refresh",
+  "published_at": "2026-02-05T02:21:24.891869+00:00"
 }
