@@ -1,7 +1,7 @@
 {
-  "version": "1.0.41-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.41-mvp.zip",
-  "sha256": "ba748570d916ff9687a95d6079f3ed049b3bf6feea5b49f17e1b80f2f67c7f73",
-  "notes": "Отступ сверху для шаблона чека",
-  "published_at": "2026-02-06T03:59:59.487219+00:00"
+  "version": "1.0.43-mvp",
+  "url": "https://raw.githubusercontent.com/rawshanoff/medx-021-releases/main/021-1.0.43-mvp.zip",
+  "sha256": "59f17b83f66b85564eff207c07a3536a64ea549672c588bfacad3960fb7bb216",
+  "notes": "021 1.0.43-mvp release",
+  "published_at": "2026-02-11T21:51:29.029960+00:00"
 }
