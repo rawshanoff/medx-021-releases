@@ -2,6 +2,6 @@
   "version": "1.0.43-mvp",
   "url": "https://raw.githubusercontent.com/rawshanoff/medx-021-releases/main/021-1.0.43-mvp.zip",
   "sha256": "59f17b83f66b85564eff207c07a3536a64ea549672c588bfacad3960fb7bb216",
-  "notes": "021 1.0.43-mvp release",
+  "notes": "021 1.0.43-mvp release (trigger workflow)",
   "published_at": "2026-02-11T21:51:29.029960+00:00"
 }
