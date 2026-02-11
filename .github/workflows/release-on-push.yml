@@ -9,6 +9,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +31,5 @@ jobs:
           body: Release ${{ steps.version.outputs.version }}
           files: ${{ steps.version.outputs.zip_name }}
           generate_release_notes: true
-          update_existing: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
