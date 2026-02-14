@@ -1,7 +1,7 @@
 {
-  "version": "1.0.54-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.54-mvp/021-1.0.54-mvp.zip",
-  "sha256": "2f32dfabf1f68439e9e030231fec1933cfe8cd6674f91492068527b88bee23cb",
-  "notes": "Release 1.0.54-mvp: widen Amount column for discount button visibility",
-  "published_at": "2026-02-14T07:35:05.692521+00:00"
+  "version": "1.0.55-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.55-mvp/021-1.0.55-mvp.zip",
+  "sha256": "7f0da1fe0b38a6b656dde0d5f4aa344e53c71ba3d4a4b661efd280a74232b5dd",
+  "notes": "021 1.0.55-mvp: performance indexes, React Query, debounce search",
+  "published_at": "2026-02-14T08:08:11.616335+00:00"
 }
