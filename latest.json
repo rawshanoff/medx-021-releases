@@ -1,7 +1,7 @@
 {
-  "version": "1.0.58-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.58-mvp/021-1.0.58-mvp.zip",
-  "sha256": "da01635531971a7116cff2e00723329c438e142bbebbc93f590ddb5c62d5de79",
-  "notes": "Release 1.0.58-mvp - hide Lab, Inventory, Archive",
-  "published_at": "2026-02-14T08:57:01.107027+00:00"
+  "version": "1.0.59-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.59-mvp/021-1.0.59-mvp.zip",
+  "sha256": "fed4e6bb90bd5535a28e6ee43c166b08c15b0842a3bb4005c6694b0a2e5b2902",
+  "notes": "Release 1.0.59-mvp - detailed Excel, PDF in new window",
+  "published_at": "2026-02-14T09:25:15.717794+00:00"
 }
