@@ -1,7 +1,7 @@
 {
-  "version": "1.0.56-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.56-mvp/021-1.0.56-mvp.zip",
-  "sha256": "e1d88454a2472e1b89c2bd8afd14ebe0740867089ff1b6b992cce27d7d96d6e9",
-  "notes": "Release 1.0.56-mvp",
-  "published_at": "2026-02-14T08:28:15.968547+00:00"
+  "version": "1.0.57-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.57-mvp/021-1.0.57-mvp.zip",
+  "sha256": "db7bf837ccee4785289adfdc19ee095f4d96df265c814c1b85fd59eeb7003728",
+  "notes": "Release 1.0.57-mvp - queue validation, patient-in-queue hint",
+  "published_at": "2026-02-14T08:48:16.194991+00:00"
 }
