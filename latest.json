@@ -1,7 +1,7 @@
 {
-  "version": "1.0.44-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.44-mvp/021-1.0.44-mvp.zip",
-  "sha256": "f9ee88a3dd84fe4a0ea8562a16346d2c6b1172ca79fc82ffda498fd256e595c0",
-  "notes": "Release 1.0.44-mvp: New Income, misc services, Finance UX",
-  "published_at": "2026-02-14T03:32:56.870438+00:00"
+  "version": "1.0.45-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.45-mvp/021-1.0.45-mvp.zip",
+  "sha256": "5a77835a921ed65cca11a9cc404cbd5ebb27792ff6350ca694338d8ea2af0eee",
+  "notes": "Fix: migration handles duplicate (doctor_id, queue_date, manual_queue_number) before unique index",
+  "published_at": "2026-02-14T04:00:00.000000+00:00"
 }
