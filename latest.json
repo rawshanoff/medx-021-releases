@@ -1,7 +1,7 @@
 {
-  "version": "1.0.45-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.45-mvp/021-1.0.45-mvp.zip",
-  "sha256": "5a77835a921ed65cca11a9cc404cbd5ebb27792ff6350ca694338d8ea2af0eee",
-  "notes": "Fix: migration handles duplicate (doctor_id, queue_date, manual_queue_number) before unique index",
-  "published_at": "2026-02-14T04:00:00.000000+00:00"
+  "version": "1.0.46-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.46-mvp/021-1.0.46-mvp.zip",
+  "sha256": "e0b64b785a2313610b287d3c96967eccc7a227d211b56b1ea952adc103d283be",
+  "notes": "Release 1.0.46-mvp",
+  "published_at": "2026-02-14T04:28:19.544519+00:00"
 }
