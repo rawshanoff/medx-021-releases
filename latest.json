@@ -1,7 +1,7 @@
 {
-  "version": "1.0.48-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.48-mvp/021-1.0.48-mvp.zip",
-  "sha256": "eb362655b96e985b5c58e89639d2d38734e6887983f7866fc4133540ee9d8b3f",
-  "notes": "Release 1.0.48-mvp: Telegram ERROR logs, queue notes save on Enter",
-  "published_at": "2026-02-14T05:56:55.525372+00:00"
+  "version": "1.0.49-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.49-mvp/021-1.0.49-mvp.zip",
+  "sha256": "9321a12c5cdffafa6d3605656f27981bb47a940b4a96a0c2b63fa166b910f4ee",
+  "notes": "Release 1.0.49-mvp: Telegram WARNING+ logs, HTTP 4xx/5xx, bot start delay",
+  "published_at": "2026-02-14T06:17:36.158009+00:00"
 }
