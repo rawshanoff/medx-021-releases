@@ -1,7 +1,7 @@
 {
-  "version": "1.0.51-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.51-mvp/021-1.0.51-mvp.zip",
-  "sha256": "44fd49fdb5301d59ecd6fc09d838e4d21e255550b6ada8ce5519f16f59e3e296",
-  "notes": "Release 1.0.51-mvp: full Telegram logs, hostname, startup notification, LOG_TELEGRAM_LEVEL",
-  "published_at": "2026-02-14T06:57:24.812478+00:00"
+  "version": "1.0.52-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.52-mvp/021-1.0.52-mvp.zip",
+  "sha256": "b56fceb35d2899b0da4a8ff94d40f4f891b010110fd5025958ec210cff975970",
+  "notes": "Release 1.0.52-mvp: startup diagnostics for remote debugging",
+  "published_at": "2026-02-14T07:08:20.990246+00:00"
 }
