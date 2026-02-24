@@ -1,7 +1,7 @@
 {
-  "version": "1.0.59-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.59-mvp/021-1.0.59-mvp.zip",
-  "sha256": "fed4e6bb90bd5535a28e6ee43c166b08c15b0842a3bb4005c6694b0a2e5b2902",
-  "notes": "Release 1.0.59-mvp - detailed Excel, PDF in new window",
-  "published_at": "2026-02-14T09:25:15.717794+00:00"
+  "version": "1.0.60-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.60-mvp/021-1.0.60-mvp.zip",
+  "sha256": "a1b6c2b6f3094af04cb9b51a42465b50fdf49ef9fe61bc796c4cba90ac4e1cba",
+  "notes": "Release 1.0.60-mvp",
+  "published_at": "2026-02-24T20:31:16.938252+00:00"
 }
