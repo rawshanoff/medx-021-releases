@@ -1,7 +1,7 @@
 {
-  "version": "1.0.63-mvp",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.63-mvp.zip",
-  "sha256": "c6b2cd48c339d68938cb6ae113dfc4b47c7476d9c75973ee5b169690c5e07d18",
-  "notes": "021 1.0.63-mvp release",
-  "published_at": "2026-02-26T10:35:22.180545+00:00"
+  "version": "1.0.64-mvp",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.64-mvp.zip",
+  "sha256": "f827c6a4f2798c7cde31f655af63f439653baf7f37d57541bdd2e179581b7db4",
+  "notes": "021 1.0.64-mvp release",
+  "published_at": "2026-02-26T10:46:39.495353+00:00"
 }
