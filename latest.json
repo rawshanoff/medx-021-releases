@@ -1,7 +1,7 @@
 {
-  "version": "1.0.69",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.0.69/021-1.0.69.zip",
-  "sha256": "0178c2f3d78bc63f6596c586addd28091109dabcf7251ed8ef04d8d700a908ae",
-  "notes": "Release v1.0.69",
-  "published_at": "2026-06-19T16:55:36.768951+00:00"
+  "version": "1.0.70",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.70.zip",
+  "sha256": "fc23feab8a6db3f74af4b355361c42c118a533a19e4ccef51a89506b735016cc",
+  "notes": "Release 1.0.70: QR code in extra services receipt now matches main receipt",
+  "published_at": "2026-06-20T19:50:40.701308+00:00"
 }
