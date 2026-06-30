@@ -1,7 +1,7 @@
 {
-  "version": "1.0.71",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.71.zip",
-  "sha256": "6d87410f37d8da5ffae93b43d278206920c6e798d948cfe840b93fa532e3af3e",
-  "notes": "Release 1.0.71: fix patient creation feedback",
-  "published_at": "2026-06-30T15:23:43.074093+00:00"
+  "version": "1.0.72",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/latest/download/021-1.0.72.zip",
+  "sha256": "6f5043303ab7b81fdf492abb05f900e089f60baf3aba6ea45e21d436d046cd49",
+  "notes": "Release v1.0.72",
+  "published_at": "2026-06-30T20:58:39.208398+00:00"
 }
