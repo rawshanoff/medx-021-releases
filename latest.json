@@ -1,8 +1,8 @@
 {
-  "version": "1.1.20",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.20/021-1.1.20.zip",
-  "sha256": "c726cbd27014855ffecd4a4a8eb54c08c5e8d7f7e0fab0d3a53680f67488fb59",
-  "notes": "«Опоздал» сдвигает на 3 места в очереди своего врача; таблица очереди обновляется быстрее; страницы и табло открываются без ожидания интернета.",
-  "published_at": "2026-10-08T16:09:21.156386+00:00",
-  "size": 49712117
+  "version": "1.1.21",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.21/021-1.1.21.zip",
+  "sha256": "81b4fb0458bef0e84775101254abdc2c886597d126069754e9b1dbced67a4e7f",
+  "notes": "1.1.21: Позвать/Приём/Приготовьтесь, картинка неоплаченных для Telegram, защита от двойной оплаты, исправления",
+  "published_at": "2026-10-10T14:07:16.098771+00:00",
+  "size": 49890974
 }
