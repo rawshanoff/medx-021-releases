@@ -1,25 +1,25 @@
 {
-  "version": "1.1.70",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.70/021-1.1.70.zip",
-  "sha256": "247fe1fcddfcba7fccaa0e64adebe79a03001900fb6eeec201fbf6133ab7fa70",
-  "notes": "РЕСЕПШН\r\n• Очередь на ресепшне больше не «прыгает» во время работы: если с другого компьютера добавили пациента, правка имени или номера остаётся на своём пациенте.\r\n• Ресепшн работает быстрее на слабых компьютерах: при обновлении очереди перерисовываются только изменившиеся строки.\r\n• Если связь с сервером пропала, рядом с поиском появляется метка: жёлтая «Обновление раз в 5 с» или красная «Нет связи с сервером».\r\n• Удаление пациента из очереди и отмена визита ожидающего больше не спрашивают «Вы уверены?»: 5 секунд можно нажать «Вернуть».\r\n• Начатая запись пациента не пропадает, если окно перезагрузилось (например, после обновления программы).\r\n• Ресепшн открывается быстрее: окна «Дни рождения» и «История визитов» загружаются только при открытии.",
-  "published_at": "2026-10-14T20:27:48.994397+00:00",
-  "size": 30778469,
+  "version": "1.1.71",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.71/021-1.1.71.zip",
+  "sha256": "7dc4866350842aa5179ced5be11bb9bd1969b0749d3342b7a4cf12be593e9468",
+  "notes": "РЕСЕПШН\r\n• На ресепшне появилась анимация: новый пациент в очереди подсвечивается, при смене статуса или суммы строка коротко вспыхивает.\r\n• Удалённая строка плавно исчезает, а после «Вернуть» плавно появляется обратно.\r\n• У пациента, который сейчас у врача, рядом со статусом пульсирует зелёная точка.\r\n• Цифры над очередью плавно докручиваются до нового значения, а сообщения плавно выезжают справа.\r\n• Анимацию можно выключить на каждом компьютере: Настройки → Внешний вид → «Анимация». Пока не выбрано — как в настройках Windows.",
+  "published_at": "2026-10-14T20:55:03.197927+00:00",
+  "size": 30781639,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.70/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.71/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.70/021-1.1.70-lite.zip",
-    "sha256": "58176e94ecd2d6c0e54dfa8e70d7cea4760399876b656ce7ba99d54e6af50a42",
-    "size": 1740105,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.71/021-1.1.71-lite.zip",
+    "sha256": "89ad6514e14c44d9dfd9864b5aa0a3ec643298130abdd5fbc5dcad083d96dfb3",
+    "size": 1742722,
     "libs": "d9c7c022af18c15f",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAMnas_mPCK-35EUhNmZJ3B7FCumCIgAAlSgAAL6IIFKWqZajGEszVY9BA",
-          "size": 1740105
+          "file_id": "BQACAgIAAyEGAATiX3V3AAMras_smFd2KqcI2HbWYElSCuPL_zgAApSgAAL6IIFKbThYmlswW5w9BA",
+          "size": 1742722
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMkas_l97b93wz3eP1It0x6H2jh5esAAkygAAL6IIFK1wUVJefKy1A9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMoas_sUyoYmj_kisztzpVahlNPA3wAAo-gAAL6IIFKAc6Pp2d8qQM9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMlas_mD3Wq2bcyhlnxdlK9SGybokQAAk6gAAL6IIFK0BeoOoR_F4o9BA",
-        "size": 10855525
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMpas_sa3G2C0WZ1iIkQ0_Pe7UcMocAApCgAAL6IIFKcNnKKlrD1MQ9BA",
+        "size": 10858695
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAMmas_mOYprxBEw9Irs1LV6F8oTygcAAlOgAAL6IIFKpmedfVhcdTk9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAMqas_slIdtFHUnNbL2oxbXtQ7HnMwAApOgAAL6IIFKsc-b-scCFvM9BA",
       "size": 18871741
     }
   }
