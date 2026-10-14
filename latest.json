@@ -1,0 +1,8 @@
+{
+  "version": "1.1.51",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.51/021-1.1.51.zip",
+  "sha256": "8860225051ce8543944ead51f7ae15f4a824efcd44491178d5720abc490bd410",
+  "notes": "TELEGRAM\r\n• В Observer повторное нажатие кнопки (например, «◀️ К врачам» дважды) больше не выдаёт «❌ Ошибка».",
+  "published_at": "2026-10-14T09:42:28.478048+00:00",
+  "size": 50059480
+}
