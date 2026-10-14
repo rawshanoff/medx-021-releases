@@ -1,13 +1,29 @@
 {
-  "version": "1.1.61",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.61/021-1.1.61.zip",
-  "sha256": "b5c344f834fd7778c5874a1e34b72ae48fa83b6b4c73fa62cb42f73402c206e0",
-  "notes": "ОБНОВЛЕНИЕ ПРОГРАММЫ\r\n• Клиника, пропустившая несколько версий, всё равно получает новейший установщик обновлений — программа сама докачивает его, только когда он нужен.",
-  "published_at": "2026-10-14T14:40:35.117509+00:00",
-  "size": 31444238,
+  "version": "1.1.62",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.62/021-1.1.62.zip",
+  "sha256": "31f04c2859b5519aa42ea21a74e19957bb453853a4868a59264197b61c906215",
+  "notes": "ОБНОВЛЕНИЕ ПРОГРАММЫ\r\n• Обновления теперь скачиваются одновременно через Telegram и GitHub — ставится то, что скачалось первым. Это заработает со следующего обновления.\r\n• Если Telegram или GitHub недоступен, обновление всё равно скачается через другой.",
+  "published_at": "2026-10-14T18:00:21.137608+00:00",
+  "size": 31463160,
   "updater": {
     "sha256": "afc275850d5aa7d3f133b581d715d3ceae5d7c60256068aa6474ce3547adcfae",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.61/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.62/medx-updater.exe",
     "size": 18871619
+  },
+  "telegram": {
+    "parts": [
+      {
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMGas_DYmAWRrID1B-ROh-NPq0lkaoAAl6lAAL6IHlKoDJsalzCEX49BA",
+        "size": 19922944
+      },
+      {
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMHas_DfMZxQxdr089YLkxVAlbWXZoAAl-lAAL6IHlKfizvYiSyeEU9BA",
+        "size": 11540216
+      }
+    ],
+    "updater": {
+      "file_id": "BQACAgIAAyEGAATiX3V3AAMIas_DpXtEGQi9mp69aVIcJky00kYAAmClAAL6IHlKio1vQIRbiGc9BA",
+      "size": 18871619
+    }
   }
 }
