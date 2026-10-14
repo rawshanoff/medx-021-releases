@@ -1,28 +1,28 @@
 {
-  "version": "1.1.63",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.63/021-1.1.63.zip",
-  "sha256": "174bb151dca0554edf0e2111853d551e93b381beb4dbc93474cc6dfcc8c9f97d",
-  "notes": "ОБНОВЛЕНИЕ ПРОГРАММЫ\r\n• В Настройки → Обновления → «История обновлений» видно, откуда и за сколько скачалось обновление: например, «скачано через Telegram за 11 с».",
-  "published_at": "2026-10-14T18:13:50.749731+00:00",
-  "size": 31464626,
+  "version": "1.1.64",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.64/021-1.1.64.zip",
+  "sha256": "66d81f5162f0f6f6b3edaa1b1faa5e13a3c22d1252c66386d7c5330a8a7f3357",
+  "notes": "ОБНОВЛЕНИЕ ПРОГРАММЫ\r\n• В Настройки → Обновления появилась кнопка «Установить прямо сейчас»: обновление начинается сразу, без ожидания 2 минуты.",
+  "published_at": "2026-10-14T18:28:02.101601+00:00",
+  "size": 31464289,
   "updater": {
     "sha256": "afc275850d5aa7d3f133b581d715d3ceae5d7c60256068aa6474ce3547adcfae",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.63/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.64/medx-updater.exe",
     "size": 18871619
   },
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMJas_GkWzuLci2yPr0Tw-17m4E7KcAAm-lAAL6IHlKhjZ8f6EMK_89BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMMas_J3Eema-5EPw68H_ughKMOqmYAAoWlAAL6IHlK3aY0F8g8T7o9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMKas_Gq804OnOpIbbqIx4PDNh6mi4AAnClAAL6IHlK6hzeC_NdOsI9BA",
-        "size": 11541682
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMNas_J9Mh33SYL_5hLfJNB6sx_mO0AAoelAAL6IHlKjBGAETvMHus9BA",
+        "size": 11541345
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAMLas_G1gSlTczfkch9jth00wM3j48AAnGlAAL6IHlKxm2AM9ioUmk9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAMOas_KHISZ_wcWyMhL_9-9O2rOTQMAAoilAAL6IHlKnupt7p-gHq49BA",
       "size": 18871619
     }
   }
