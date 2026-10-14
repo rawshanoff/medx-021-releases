@@ -1,25 +1,25 @@
 {
-  "version": "1.1.67",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.67/021-1.1.67.zip",
-  "sha256": "9910e2e92a8981f9ea911ca5fb5ca65f2e5e8c0dd083429090a40c950f139dd9",
-  "notes": "ТАБЛИЦЫ\r\n• В таблицах (отчёты, финансы, очередь и другие) появились линии между столбцами и строками — сразу видно, какое число к какому столбцу относится.",
-  "published_at": "2026-10-14T19:29:36.724847+00:00",
-  "size": 30772915,
+  "version": "1.1.68",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.68/021-1.1.68.zip",
+  "sha256": "9b75d93b535b4e9e71547ef34e016490b20e0f49eeb26ca69b887a555464f202",
+  "notes": "ТАБЛИЦЫ\r\n• Названия столбцов в таблицах теперь стоят по центру столбца.",
+  "published_at": "2026-10-14T19:42:05.217701+00:00",
+  "size": 30772343,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.67/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.68/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.67/021-1.1.67-lite.zip",
-    "sha256": "28292b1873514ba2e61d52b54378ddec74d54301bd82f3ad2b0404909e6a4930",
-    "size": 1734712,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.68/021-1.1.68-lite.zip",
+    "sha256": "db7c1d5065f6a972da177ff02a67819ea885ddac97fed88e9f0109bae54d5196",
+    "size": 1734829,
     "libs": "d9c7c022af18c15f",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAMbas_YkFMSdwmts1hHJVc3MjtiqOgAAuyfAAL6IIFK8yh81rhKKSA9BA",
-          "size": 1734712
+          "file_id": "BQACAgIAAyEGAATiX3V3AAMfas_bF_TKyjargubVOnwKBjnRqbwAAgSgAAL6IIFK5XakiF1PtJY9BA",
+          "size": 1734829
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMYas_YT45hwObaMBpmYcx0m_K1duYAAuifAAL6IIFKI4jSqO24CPY9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMcas_bEyOOX1pwHNtuCuzDmFNul3UAAgGgAAL6IIFKfoeIOyKD8y49BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMZas_YZcw75Ik3U-Bhe0Y1s2r8aaoAAuqfAAL6IIFKThDAJna5wSM9BA",
-        "size": 10849971
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMdas_bFZMBjFkQibShPL2Bzf-HQ2sAAgKgAAL6IIFKHyQRl9RtOWs9BA",
+        "size": 10849399
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAMaas_YjPAd6eM9ixPuK78kSym-2jIAAuufAAL6IIFKYLTm2VGKZvM9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAMeas_bF-81PkxyPR3v192cQ8e7tkcAAgOgAAL6IIFKIUcd8M6yuO89BA",
       "size": 18871741
     }
   }
