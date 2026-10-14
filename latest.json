@@ -1,29 +1,47 @@
 {
-  "version": "1.1.64",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.64/021-1.1.64.zip",
-  "sha256": "66d81f5162f0f6f6b3edaa1b1faa5e13a3c22d1252c66386d7c5330a8a7f3357",
-  "notes": "ОБНОВЛЕНИЕ ПРОГРАММЫ\r\n• В Настройки → Обновления появилась кнопка «Установить прямо сейчас»: обновление начинается сразу, без ожидания 2 минуты.",
-  "published_at": "2026-10-14T18:28:02.101601+00:00",
-  "size": 31464289,
+  "version": "1.1.65",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.65/021-1.1.65.zip",
+  "sha256": "35bc81b915d220b6d08a3652ef376c4a8d991d04ec126dc71853e931d02b0c16",
+  "notes": "ОБНОВЛЕНИЕ ПРОГРАММЫ\r\n• Обновления стали маленькими: обычно 2–4 МБ вместо 30, поэтому скачиваются намного быстрее. Обновление до этой версии ещё полное, 30 МБ.",
+  "published_at": "2026-10-14T18:55:20.753055+00:00",
+  "size": 49413378,
   "updater": {
-    "sha256": "afc275850d5aa7d3f133b581d715d3ceae5d7c60256068aa6474ce3547adcfae",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.64/medx-updater.exe",
-    "size": 18871619
+    "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.65/medx-updater.exe",
+    "size": 18871741
+  },
+  "lite": {
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.65/021-1.1.65-lite.zip",
+    "sha256": "df44912e3a9c7912ce2928ffb6a53d1d912ac6ba919077366ffd9f0246083f5e",
+    "size": 1733578,
+    "libs": "d9c7c022af18c15f",
+    "telegram": {
+      "parts": [
+        {
+          "file_id": "BQACAgIAAyEGAATiX3V3AAMTas_QvU2DNV_qjtbcLgABcvqVOKE0AAKqpQAC-iB5SpFIoSrIu1d2PQQ",
+          "size": 1733578
+        }
+      ]
+    }
   },
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMMas_J3Eema-5EPw68H_ughKMOqmYAAoWlAAL6IHlK3aY0F8g8T7o9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMPas_QR-qxnMxkAc6V7hu-xG9kbrsAAqSlAAL6IHlKe06PbDvLTN09BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMNas_J9Mh33SYL_5hLfJNB6sx_mO0AAoelAAL6IHlKjBGAETvMHus9BA",
-        "size": 11541345
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMQas_QdBUIbJIQZ-sEX5xLEGkMCUkAAqalAAL6IHlKBAABiPaXNiYEPQQ",
+        "size": 19922944
+      },
+      {
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMRas_QitbDE04flzC_cv9RPxWlbisAAqelAAL6IHlKr466BOr2AXw9BA",
+        "size": 9567490
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAMOas_KHISZ_wcWyMhL_9-9O2rOTQMAAoilAAL6IHlKnupt7p-gHq49BA",
-      "size": 18871619
+      "file_id": "BQACAgIAAyEGAATiX3V3AAMSas_QufFO7jH2HxmJ5rKD8-fOZHkAAqmlAAL6IHlKqQ09yLdOMUo9BA",
+      "size": 18871741
     }
   }
 }
