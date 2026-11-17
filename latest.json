@@ -1,25 +1,25 @@
 {
-  "version": "1.1.72",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.72/021-1.1.72.zip",
-  "sha256": "a91a2ed7362801a7667883698017431324303c1adc655787f19dd8292612f1fb",
-  "notes": "ИСПРАВЛЕНИЯ\r\n• Панель владельца больше не открывается пустой страницей с ошибкой, если модуль не входит в лицензию: теперь она пишет, какой модуль нужен.\r\n• Сообщения об ошибках во всей программе больше не показывают «[object Object]» — только понятный текст.",
-  "published_at": "2026-11-17T19:53:54.297331+00:00",
-  "size": 30779663,
+  "version": "1.1.73",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.73/021-1.1.73.zip",
+  "sha256": "47cc629e743cd2956b1b1309c22f63766437f5f8344b09fc143637255392bf9c",
+  "notes": "ТАБЛО И РЕСЕПШН\r\n• Табло: пока утром ни один врач не начал приём, на табло показывается объявление на весь экран, а внизу — «Приём начнётся через …».\r\n• Объявление пропадает само, как только врач позовёт первого пациента или на ресепшне нажмут «Врач пришёл».\r\n• На ресепшне новая кнопка «📢 Объявление на табло»: вставьте текст, время начала подставится само; удобные тексты можно сохранить как шаблоны.\r\n• Рядом с 📺 у врача появились кнопки «Врач пришёл» и «Сегодня не придёт».\r\n• Если врач сегодня не придёт, табло каждые 5 минут крупно пишет «Врач … сегодня не принимает», и то же бежит в строке внизу. Утром следующего дня отметка снимается сама.\r\n• В Настройки → Табло у объявления можно поставить галочку «На весь экран», а для «Сегодня не придёт» — выбрать, как часто и сколько секунд показывать.",
+  "published_at": "2026-11-17T21:02:31.950593+00:00",
+  "size": 30793877,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.72/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.73/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.72/021-1.1.72-lite.zip",
-    "sha256": "66b5e92a6d4b5a06dc585b883388b0ac6649842a4479817b6ebd2f2e5c412b85",
-    "size": 1742360,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.73/021-1.1.73-lite.zip",
+    "sha256": "78c9dc9be0f26b5a75c1f6fd0a02d9ff3cec960a96242958a45eb4427b58002d",
+    "size": 1755262,
     "libs": "d9c7c022af18c15f",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAMvavyxQzU6KMZZpHM5YVwUcd6zYXgAAhOtAALFs-BLeiKrB93MM7U9BA",
-          "size": 1742360
+          "file_id": "BQACAgIAAyEGAATiX3V3AAMzavzBV0_ShjSS0oF-FzQKZX8bc_0AAmqtAALFs-BL6C4sT_aoO-A9BA",
+          "size": 1755262
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMsavyw_jkpVZR6H7FvhTx1VM_W0LEAAhCtAALFs-BL2sMmR9MRJHs9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMwavzBEwGuiNWxiB8HkReyYf7JcE0AAmGtAALFs-BLFXuZelZkGtE9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAMtavyxFUw1D0kBxGBi9LA51pH5EzcAAhGtAALFs-BL6Cx9cT3-vqE9BA",
-        "size": 10856719
+        "file_id": "BQACAgIAAyEGAATiX3V3AAMxavzBKlgBT7Sx_iKLlTwSJ-U6zlEAAmKtAALFs-BLxb_tROpKPno9BA",
+        "size": 10870933
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAMuavyxP2F6oDgReSAh8C_2NUJNDpYAAhKtAALFs-BLEVx4Nd9HPts9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAMyavzBUyHXYSfhRnGHQOszSOxJjCEAAmitAALFs-BLke-7mFbeE3c9BA",
       "size": 18871741
     }
   }
