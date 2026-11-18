@@ -1,25 +1,25 @@
 {
-  "version": "1.1.77",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.77/021-1.1.77.zip",
-  "sha256": "50f7a54244669268a6b526e777972e4b4e1dfbfa2d00bb92be7bacb02e62b376",
-  "notes": "ДНИ РОЖДЕНИЯ\r\n• На открытках и в поздравлениях именинников больше не называют «бемор» / «пациент»: теперь «Бугун 38 нафар азизимизнинг туғилган куни», «Қадрли азизларимиз!», «Дорогие наши друзья!».",
-  "published_at": "2026-11-17T23:58:36.186433+00:00",
-  "size": 30804987,
+  "version": "1.1.78",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.78/021-1.1.78.zip",
+  "sha256": "5d92c36e8894b54861b1887e80cc6821fa6d17dc6b95a8f1dc1177fef33afa32",
+  "notes": "РЕСЕПШН\r\n• Ресепшн: на обычном ноутбуке ФИО пациента теперь видно целиком — раньше его почти полностью закрывала дата рождения. Дата рождения стоит под именем мелким шрифтом.\r\n• Таблица очереди помещается на экране 1280 без прокрутки вбок; кнопки «Позвать», «Приём», «Возврат» и печать больше не обрезаются и стоят ровно в ряд.\r\n• Суммы в таблице показываются с пробелами («80 000»), «Скидка» стала маленькой кнопкой «%», время записи — без секунд (секунды видны при наведении).\r\n• Над таблицей врача всё в одну строку, строка записи и строки очереди стали компактнее — на экране видно больше пациентов.\r\n• В строке записи ФИО получило больше места, а сумма и количество — сколько нужно. Окна «Объявление» и «Дни рождения»: кнопки выровнены справа.\r\n• Ширины колонок очереди один раз вернутся к новым настройкам по умолчанию; дальше ваши изменения снова запоминаются.",
+  "published_at": "2026-11-18T00:24:28.189063+00:00",
+  "size": 30805786,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.77/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.78/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.77/021-1.1.77-lite.zip",
-    "sha256": "61a2764bb4c8cc30bac1804f30f950a518420a810c52eac07a330f600efcaa84",
-    "size": 1766364,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.78/021-1.1.78-lite.zip",
+    "sha256": "cf3a2a5e722fbc4892c168753fd8c6ff349e342561ab97a2760a4ad86afb7e60",
+    "size": 1768793,
     "libs": "d9c7c022af18c15f",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANDavzqnAO-BB9mUovFvcVK-p-1mmkAAjmbAALFs-hLgKPfnirPIf09BA",
-          "size": 1766364
+          "file_id": "BQACAgIAAyEGAATiX3V3AANHavzwqtB3YslVZetnadqOWgdfRmsAAkGbAALFs-hLYAABey9-TUjxPQQ",
+          "size": 1768793
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANAavzqWNotINvgTBQ_4L0bXN6fBpsAAjabAALFs-hLOvrA9XWa1l09BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANEavzwZ827kNeJcSdrscy071LKD9cAAj2bAALFs-hLzTreK-K6rx89BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANBavzqcKI8K1mdt-hiwe4Rd5ywSNQAAjebAALFs-hL12cjPIxJEwI9BA",
-        "size": 10882043
+        "file_id": "BQACAgIAAyEGAATiX3V3AANFavzwfqe9YEWQGLe95m1cKGkNddMAAj6bAALFs-hL5tDhggr8bw49BA",
+        "size": 10882842
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANCavzqmGj5g_muxq12IAfwDgSl1GcAAjibAALFs-hLjkEu5fhG8CI9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANGavzwp4_BS_ncpm8g8okCQaW7B_AAAkCbAALFs-hLy4y_GhwPa149BA",
       "size": 18871741
     }
   }
