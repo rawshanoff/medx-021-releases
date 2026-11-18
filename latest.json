@@ -1,25 +1,25 @@
 {
-  "version": "1.1.81",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.81/021-1.1.81.zip",
-  "sha256": "6c54e0d1f4dc0c2dc9d3427a6f2dcf6b11a0901e8f848ce6e91cc0de4d9f16f1",
-  "notes": "ТАБЛО: СЛАЙДЫ\r\n• На табло теперь можно показывать фото, видео и текст: ресепшн → «📢» → «Слайды».\r\n• Слайд «Утром» идёт на всё табло, пока врачи не начали приём. Слайд «Днём» появляется поверх очереди каждые несколько минут.\r\n• Кнопка «Показать сейчас» на 1, 3 или 5 минут сразу выводит слайды на табло. Вызов пациента всё равно показывается первым.\r\n• Фото или видео с текстом: слева фото, справа текст. Без текста фото или видео занимает весь экран.\r\n• Для слайда можно выбрать дни недели, часы и даты показа, а также добавить QR-код.\r\n• Слайд можно изменить, выключить на время и передвинуть выше или ниже в списке. Перед сохранением видно, как он будет выглядеть на табло.\r\n• Если видео в формате, который телевизор не покажет, программа сразу об этом скажет и подскажет, как его сохранить.\r\n• В «Настройки → Табло» можно выбрать, как часто показывать слайды днём, и включить или выключить звук видео.",
-  "published_at": "2026-11-18T11:42:16.277874+00:00",
-  "size": 37156054,
+  "version": "1.1.82",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.82/021-1.1.82.zip",
+  "sha256": "f22ff2d28fe845ac7ab06a1716c9d9544218ed9673889172cca892e6f0a54ec9",
+  "notes": "СТРАНИЦЫ ПРОГРАММЫ\r\n• На всех страницах кнопки, поля и списки над таблицами теперь одной высоты.\r\n• В таблицах время, номер, дата, способ оплаты и тип стоят по центру столбца — их легче найти глазами.\r\n• В «Пациентах» номер пациента написан обычным шрифтом, кнопки «Редактировать» и «Файлы» стали компактнее.\r\n• В «Отчётах» вся страница листается целиком. Раньше отчёты смены внизу помещались в узкую полоску.\r\n• В «Доп. услугах» плитки услуг одной ширины и стоят ровными рядами.\r\n• У услуг врача кнопки «Изменить» и «Удалить» видны сразу, без наведения мыши. Лишний пустой столбец убран.\r\n• В «Системе» значок поиска больше не закрывает текст, длинные пункты меню видны целиком.",
+  "published_at": "2026-11-18T12:12:53.977977+00:00",
+  "size": 37158058,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.81/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.82/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.81/021-1.1.81-lite.zip",
-    "sha256": "511ce4767182b38694c5ad2f002f90eda5e67095d6aa26d7f127dd908e698175",
-    "size": 1791811,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.82/021-1.1.82-lite.zip",
+    "sha256": "96efcf9f41e8deb41e22be7b0bc91fe95026448979506bf38f861f8b70859c23",
+    "size": 1792988,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANTav2P2EVwFtmoevWd80Cnv7xecqwAAmCfAALFs-hLT11LCcG1Z6I9BA",
-          "size": 1791811
+          "file_id": "BQACAgIAAyEGAATiX3V3AANXav2WdwbMMFVe3-bR8KwAAX_naU-JAAK5nwACxbPoS8MieaV9kyUDPQQ",
+          "size": 1792988
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANQav2PZiqR7QLUWOcY3Hn8fdbd7OMAAlqfAALFs-hLo1NG3nfTN8o9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANUav2WXxQcbu7upDA0wyR9XSpKNMcAArWfAALFs-hLG-o8C1aP5x89BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANRav2Po8cuFL8DYZXZThSSLGUtbZUAAlyfAALFs-hLH0S-CzO14AQ9BA",
-        "size": 17233110
+        "file_id": "BQACAgIAAyEGAATiX3V3AANVav2WZwa17YGTZLVhT7yFfDPcNWQAArefAALFs-hLwu17JVWDuXk9BA",
+        "size": 17235114
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANSav2P0xJCsNXd99dFN_5ATeBnO9QAAl-fAALFs-hLs9_p1UYyV_09BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANWav2WdbG8G-0ePU3VaYJlxAPsHwgAArifAALFs-hLsVGGGGDxBq89BA",
       "size": 18871741
     }
   }
