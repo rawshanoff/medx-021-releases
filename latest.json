@@ -1,25 +1,25 @@
 {
-  "version": "1.1.76",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.76/021-1.1.76.zip",
-  "sha256": "fbe15dc7acf71fc7ccb3a6deab416953090673925c7d969a8afcc3d0e536a59f",
-  "notes": "ДНИ РОЖДЕНИЯ\r\n• В окне «🎂 Дни рождения» появились красивые открытки для Telegram-группы: по 12 именинников на открытке, телефон по маске, возраст. 30–40 человек раскладываются на несколько открыток — альбом.\r\n• Каждый день недели — свой стиль и цвета (звёздная ночь, воздушные шары, подарочная лента, полароид с тортом), узоры меняются по дате — картинки в группе не повторяются.\r\n• Кнопка «Копировать открытку 1/3» копирует открытки по очереди; кнопка «Текст поздравления» копирует готовое поздравление на узбекском (кириллица или латиница), русском или английском.\r\n• На открытки попадают только непоздравленные, а после последней открытки программа предлагает отметить всех «Поздравил».",
-  "published_at": "2026-11-17T23:47:26.747884+00:00",
-  "size": 30805037,
+  "version": "1.1.77",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.77/021-1.1.77.zip",
+  "sha256": "50f7a54244669268a6b526e777972e4b4e1dfbfa2d00bb92be7bacb02e62b376",
+  "notes": "ДНИ РОЖДЕНИЯ\r\n• На открытках и в поздравлениях именинников больше не называют «бемор» / «пациент»: теперь «Бугун 38 нафар азизимизнинг туғилган куни», «Қадрли азизларимиз!», «Дорогие наши друзья!».",
+  "published_at": "2026-11-17T23:58:36.186433+00:00",
+  "size": 30804987,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.76/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.77/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.76/021-1.1.76-lite.zip",
-    "sha256": "68abcefa4dc0410a47a417bd93eae9eb2f408bbc1b1065b7b481bd043adcb850",
-    "size": 1766085,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.77/021-1.1.77-lite.zip",
+    "sha256": "61a2764bb4c8cc30bac1804f30f950a518420a810c52eac07a330f600efcaa84",
+    "size": 1766364,
     "libs": "d9c7c022af18c15f",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAM_avznnXy1BObVkeRhUD0-nTG8N7cAAjGbAALFs-hLOYgBkb4H60g9BA",
-          "size": 1766085
+          "file_id": "BQACAgIAAyEGAATiX3V3AANDavzqnAO-BB9mUovFvcVK-p-1mmkAAjmbAALFs-hLgKPfnirPIf09BA",
+          "size": 1766364
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAM8avznmNurMJ14DElQxcCM-2WtkfwAAi6bAALFs-hLEYY3RAyEHGI9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANAavzqWNotINvgTBQ_4L0bXN6fBpsAAjabAALFs-hLOvrA9XWa1l09BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAM9avznmuI_WBydlU4YiEnWmSVR3BUAAi-bAALFs-hLkw1Oq0WjESc9BA",
-        "size": 10882093
+        "file_id": "BQACAgIAAyEGAATiX3V3AANBavzqcKI8K1mdt-hiwe4Rd5ywSNQAAjebAALFs-hL12cjPIxJEwI9BA",
+        "size": 10882043
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAM-avznnboyGP-ryLvY0dPLN3WWbTEAAjCbAALFs-hLM-QJM2_xRZA9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANCavzqmGj5g_muxq12IAfwDgSl1GcAAjibAALFs-hLjkEu5fhG8CI9BA",
       "size": 18871741
     }
   }
