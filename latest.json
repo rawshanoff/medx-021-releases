@@ -1,25 +1,25 @@
 {
-  "version": "1.1.79",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.79/021-1.1.79.zip",
-  "sha256": "7410713caf9279da793c6fa39535f2c5b09eb9bbe67f8228da4285fe0ef5361f",
-  "notes": "РЕСЕПШН\r\n• Над таблицей врача количество и сумма разделены тире: «3 — 240 000», а не «3 240 000», которое читалось как три миллиона.\r\n• Если все статусы не помещаются в строку над таблицей, плашки становятся плотнее, а на узком экране название статуса прячется в подсказку — ничего не обрезается.\r\n• Таблица очереди: номер, количество, ожидаемое время и время записи стоят по центру под заголовками; остальной текст начинается с одного отступа; заголовки ровно по центру колонок.\r\n• Сумма у неоплаченных больше не обрезается рядом с кнопкой «%», а текст комментария важнее времени его правки.",
-  "published_at": "2026-11-18T01:02:00.046714+00:00",
-  "size": 30808179,
+  "version": "1.1.80",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.80/021-1.1.80.zip",
+  "sha256": "f1724b60ea7e67a9cfa355f7c7b5436364f4de8062c429ebfed587da5692f73a",
+  "notes": "РЕСЕПШН И ОКНА\r\n• На ресепшне статус «В приёме» больше не короче остальных: зелёная точка теперь внутри поля. «Завершено» помещается целиком.\r\n• Все окна программы открываются той ширины, какая им задана: маленькие окна (дата рождения, подтверждение, смена) стали компактнее, большие (врачи, файлы, дни рождения) — шире.\r\n• В окнах кнопки внизу всегда справа и одного размера; в окнах кассы они больше не растянуты на всю ширину.\r\n• Поля ввода во всех окнах одной высоты, кнопки окна «Вы уверены?» — того же размера, что и остальные.",
+  "published_at": "2026-11-18T01:22:55.629018+00:00",
+  "size": 30809112,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.79/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.80/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.79/021-1.1.79-lite.zip",
-    "sha256": "78bd39ef9ccb94a16cdb50c9fe925bcd178d8919a9c8568426fd6be05fa87802",
-    "size": 1769890,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.80/021-1.1.80-lite.zip",
+    "sha256": "379e173815a52780698729cd6e5115f658747804ae25b20e1e93810e32e512c9",
+    "size": 1770676,
     "libs": "d9c7c022af18c15f",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANLavz5ekzRKr6iDSEQgztpzYnz5D0AAkebAALFs-hL_Bf3CVWnfdk9BA",
-          "size": 1769890
+          "file_id": "BQACAgIAAyEGAATiX3V3AANPavz-Ys8cLwABqQvo8G_6Ikmt_Qh2AAJPmwACxbPoS-5Q-TM8f0rVPQQ",
+          "size": 1770676
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANIavz5NLoFRghUpXOrV_epyig4FhYAAkSbAALFs-hL7UDh5AZISJ49BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANMavz-HbAgxamdHNg1DDOoNXzp_DMAAkubAALFs-hLU19Cc9lVvcM9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANJavz5TW1AsjULln6-d37rie4n92oAAkWbAALFs-hLLfU4BzAHYv09BA",
-        "size": 10885235
+        "file_id": "BQACAgIAAyEGAATiX3V3AANNavz-NQgySVQ85vsGSHt00D-tsyQAAkybAALFs-hLYMMMyS1nroQ9BA",
+        "size": 10886168
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANKavz5dr6Lbt5L4Zvkue3j7MbtDuAAAkabAALFs-hLfm693MWozvQ9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANOavz-XpKxYzBTn43ar_v9-xnvrrkAAk6bAALFs-hLijI8h7D21509BA",
       "size": 18871741
     }
   }
