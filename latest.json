@@ -1,25 +1,25 @@
 {
-  "version": "1.1.80",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.80/021-1.1.80.zip",
-  "sha256": "f1724b60ea7e67a9cfa355f7c7b5436364f4de8062c429ebfed587da5692f73a",
-  "notes": "РЕСЕПШН И ОКНА\r\n• На ресепшне статус «В приёме» больше не короче остальных: зелёная точка теперь внутри поля. «Завершено» помещается целиком.\r\n• Все окна программы открываются той ширины, какая им задана: маленькие окна (дата рождения, подтверждение, смена) стали компактнее, большие (врачи, файлы, дни рождения) — шире.\r\n• В окнах кнопки внизу всегда справа и одного размера; в окнах кассы они больше не растянуты на всю ширину.\r\n• Поля ввода во всех окнах одной высоты, кнопки окна «Вы уверены?» — того же размера, что и остальные.",
-  "published_at": "2026-11-18T01:22:55.629018+00:00",
-  "size": 30809112,
+  "version": "1.1.81",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.81/021-1.1.81.zip",
+  "sha256": "6c54e0d1f4dc0c2dc9d3427a6f2dcf6b11a0901e8f848ce6e91cc0de4d9f16f1",
+  "notes": "ТАБЛО: СЛАЙДЫ\r\n• На табло теперь можно показывать фото, видео и текст: ресепшн → «📢» → «Слайды».\r\n• Слайд «Утром» идёт на всё табло, пока врачи не начали приём. Слайд «Днём» появляется поверх очереди каждые несколько минут.\r\n• Кнопка «Показать сейчас» на 1, 3 или 5 минут сразу выводит слайды на табло. Вызов пациента всё равно показывается первым.\r\n• Фото или видео с текстом: слева фото, справа текст. Без текста фото или видео занимает весь экран.\r\n• Для слайда можно выбрать дни недели, часы и даты показа, а также добавить QR-код.\r\n• Слайд можно изменить, выключить на время и передвинуть выше или ниже в списке. Перед сохранением видно, как он будет выглядеть на табло.\r\n• Если видео в формате, который телевизор не покажет, программа сразу об этом скажет и подскажет, как его сохранить.\r\n• В «Настройки → Табло» можно выбрать, как часто показывать слайды днём, и включить или выключить звук видео.",
+  "published_at": "2026-11-18T11:42:16.277874+00:00",
+  "size": 37156054,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.80/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.81/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.80/021-1.1.80-lite.zip",
-    "sha256": "379e173815a52780698729cd6e5115f658747804ae25b20e1e93810e32e512c9",
-    "size": 1770676,
-    "libs": "d9c7c022af18c15f",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.81/021-1.1.81-lite.zip",
+    "sha256": "511ce4767182b38694c5ad2f002f90eda5e67095d6aa26d7f127dd908e698175",
+    "size": 1791811,
+    "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANPavz-Ys8cLwABqQvo8G_6Ikmt_Qh2AAJPmwACxbPoS-5Q-TM8f0rVPQQ",
-          "size": 1770676
+          "file_id": "BQACAgIAAyEGAATiX3V3AANTav2P2EVwFtmoevWd80Cnv7xecqwAAmCfAALFs-hLT11LCcG1Z6I9BA",
+          "size": 1791811
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANMavz-HbAgxamdHNg1DDOoNXzp_DMAAkubAALFs-hLU19Cc9lVvcM9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANQav2PZiqR7QLUWOcY3Hn8fdbd7OMAAlqfAALFs-hLo1NG3nfTN8o9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANNavz-NQgySVQ85vsGSHt00D-tsyQAAkybAALFs-hLYMMMyS1nroQ9BA",
-        "size": 10886168
+        "file_id": "BQACAgIAAyEGAATiX3V3AANRav2Po8cuFL8DYZXZThSSLGUtbZUAAlyfAALFs-hLH0S-CzO14AQ9BA",
+        "size": 17233110
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANOavz-XpKxYzBTn43ar_v9-xnvrrkAAk6bAALFs-hLijI8h7D21509BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANSav2P0xJCsNXd99dFN_5ATeBnO9QAAl-fAALFs-hLs9_p1UYyV_09BA",
       "size": 18871741
     }
   }
