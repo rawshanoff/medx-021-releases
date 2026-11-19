@@ -1,25 +1,25 @@
 {
-  "version": "1.1.82",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.82/021-1.1.82.zip",
-  "sha256": "f22ff2d28fe845ac7ab06a1716c9d9544218ed9673889172cca892e6f0a54ec9",
-  "notes": "СТРАНИЦЫ ПРОГРАММЫ\r\n• На всех страницах кнопки, поля и списки над таблицами теперь одной высоты.\r\n• В таблицах время, номер, дата, способ оплаты и тип стоят по центру столбца — их легче найти глазами.\r\n• В «Пациентах» номер пациента написан обычным шрифтом, кнопки «Редактировать» и «Файлы» стали компактнее.\r\n• В «Отчётах» вся страница листается целиком. Раньше отчёты смены внизу помещались в узкую полоску.\r\n• В «Доп. услугах» плитки услуг одной ширины и стоят ровными рядами.\r\n• У услуг врача кнопки «Изменить» и «Удалить» видны сразу, без наведения мыши. Лишний пустой столбец убран.\r\n• В «Системе» значок поиска больше не закрывает текст, длинные пункты меню видны целиком.",
-  "published_at": "2026-11-18T12:12:53.977977+00:00",
-  "size": 37158058,
+  "version": "1.1.83",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.83/021-1.1.83.zip",
+  "sha256": "263161b099ee05e7b8c53775b120cb032834d42cb900eda8247d7d1232cfdb29",
+  "notes": "ПАЦИЕНТЫ\r\n• В днях рождения человек с несколькими карточками показывается один раз, а отметка «Поздравил» стоит сразу на всех его карточках.\r\n• Если при записи ФИО и дата рождения уже есть в другой карточке, программа предупредит: «Такой пациент уже есть».\r\n• В «Пациентах» появилась кнопка «Возможные дубли»: там можно объединить карточки одного человека или отметить, что это разные люди.\r\n• При объединении визиты, оплаты и файлы переходят в одну карточку, а лишние карточки уходят в архив.",
+  "published_at": "2026-11-19T07:43:24.617586+00:00",
+  "size": 37167943,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.82/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.83/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.82/021-1.1.82-lite.zip",
-    "sha256": "96efcf9f41e8deb41e22be7b0bc91fe95026448979506bf38f861f8b70859c23",
-    "size": 1792988,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.83/021-1.1.83-lite.zip",
+    "sha256": "45345daba3471f2121720c429243d6ebc7d2e5a1bdcbb7dd38cc198161a0c106",
+    "size": 1803119,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANXav2WdwbMMFVe3-bR8KwAAX_naU-JAAK5nwACxbPoS8MieaV9kyUDPQQ",
-          "size": 1792988
+          "file_id": "BQACAgIAAyEGAATiX3V3AANbav6pFLnsgv4DkexoJITAlsXGCjYAAlSjAALg7fhLEAui8RD3OAE9BA",
+          "size": 1803119
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANUav2WXxQcbu7upDA0wyR9XSpKNMcAArWfAALFs-hLG-o8C1aP5x89BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANYav6oxm3NIuGktWVMvmXsYmHEWfEAAlGjAALg7fhLTohnCK_SH2A9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANVav2WZwa17YGTZLVhT7yFfDPcNWQAArefAALFs-hLwu17JVWDuXk9BA",
-        "size": 17235114
+        "file_id": "BQACAgIAAyEGAATiX3V3AANZav6o6QJZMcow-9blSTJ7r4u1TwUAAlKjAALg7fhLMhbLaZxbmz09BA",
+        "size": 17244999
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANWav2WdbG8G-0ePU3VaYJlxAPsHwgAArifAALFs-hLsVGGGGDxBq89BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANaav6pED7IuGHo2z1PerAcUTOREcoAAlOjAALg7fhLtTvokkDvp309BA",
       "size": 18871741
     }
   }
