@@ -1,25 +1,25 @@
 {
-  "version": "1.1.86",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.86/021-1.1.86.zip",
-  "sha256": "00642c4bffc493539fe3e84506bcd5efb7486a13d05d2d27f415757a228b3046",
-  "notes": "ЧЕК И TELEGRAM\r\n• На чеке может быть QR очереди: пациент сканирует его камерой, и бот показывает его талон, врача и сколько человек впереди.\r\n• Кто отсканировал QR, получит в Telegram сообщения «Вы следующий» и «Ваша очередь».\r\n• Результаты анализов по QR не открываются — для них пациент, как и раньше, отправляет боту номер телефона.\r\n• QR чека действует только в день приёма.\r\n• Включается в Настройки → Реквизиты → «QR-код и ссылка» → «QR — очередь в Telegram». Выключите — на чеке снова будет QR сайта.",
-  "published_at": "2026-11-19T13:44:08.869876+00:00",
-  "size": 37182430,
+  "version": "1.1.87",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.87/021-1.1.87.zip",
+  "sha256": "18a21197cf814c0bdded6d08a6b4bda951f2d00be86013b16634d1ed05fc5e25",
+  "notes": "ИСПРАВЛЕНИЯ\r\n• Окно, открытое во время обновления, при переходе в «Систему» больше не показывает ошибку на миг перед перезагрузкой.\r\n• Если отчёт или копия базы не дошли до владельца в Telegram, в журнале теперь видна причина.",
+  "published_at": "2026-11-19T14:13:12.687414+00:00",
+  "size": 37183926,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.86/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.87/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.86/021-1.1.86-lite.zip",
-    "sha256": "e75e30e22a11d102105bcbbce0305ea739a21fad22e898537055f12652ffb62e",
-    "size": 1818001,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.87/021-1.1.87-lite.zip",
+    "sha256": "78d552ab7820b1af5bacf147b1e43301fa44814ebcc9c59b9add2f99a247a226",
+    "size": 1819274,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANnav79qQ59fDUOLyigYvWVe3oZ2zYAAkCoAALg7fhLkl0dayp404k9BA",
-          "size": 1818001
+          "file_id": "BQACAgIAAyEGAATiX3V3AANrav8Ev4AAAXKamlvpUKRn71Iq9jH_AAK5qAAC4O34S5k-fcQnPEjLPQQ",
+          "size": 1819274
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANkav79Vectgt3NApuBme83yXPMDTYAAjuoAALg7fhLJKmri2VoHrs9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANoav8EVB2yOQPBcAstpnMSV-GsoeQAAraoAALg7fhLxtCLLsx6M9w9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANlav79e8MmWPGb0CzVp9pvR8Z3nL8AAj2oAALg7fhL9UncDBzW3vY9BA",
-        "size": 17259486
+        "file_id": "BQACAgIAAyEGAATiX3V3AANpav8EhoH-GeSvy0Un8vPAqVLVQfIAAreoAALg7fhL5j9URvbR0as9BA",
+        "size": 17260982
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANmav79pQ5Jx0rXcz8zkr7Kbz7c7g0AAj-oAALg7fhLcu5ZOP_mT4U9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANqav8EubUEIDOKloiqCASb0Rf9WwMAArioAALg7fhLT-xDlNNsXHY9BA",
       "size": 18871741
     }
   }
