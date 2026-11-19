@@ -1,25 +1,25 @@
 {
-  "version": "1.1.84",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.84/021-1.1.84.zip",
-  "sha256": "405f812b7a478041e23dfc7ea6a3019c1d83eee53bb8c43d4979cdd1e649b1fe",
-  "notes": "TELEGRAM-БОТ\r\n• У пациента в боте внизу есть кнопки «Моя очередь», «Мои анализы» и «Язык» — команды с «/» набирать не нужно.\r\n• Пациент, который уже подключён, после повторного запуска бота сразу видит кнопки, а не просьбу прислать номер.\r\n• Для сотрудников можно подключить отдельного бота: наблюдатели и отчёты владельцу идут через него, а бот для пациентов отвечает только пациентам.",
-  "published_at": "2026-11-19T12:53:33.533848+00:00",
-  "size": 37174230,
+  "version": "1.1.85",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.85/021-1.1.85.zip",
+  "sha256": "9d3a9e4feaab14dcf198439ce5ee4001fb783a917b16e3936224210e916c1fb1",
+  "notes": "TELEGRAM-БОТ\r\n• В боте для пациентов больше нет синей кнопки «Меню» — остались только кнопки внизу.",
+  "published_at": "2026-11-19T13:05:55.314693+00:00",
+  "size": 37174259,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.84/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.85/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.84/021-1.1.84-lite.zip",
-    "sha256": "b79ac0e49bafd258dd0a7a98b8feee547f82ac344b17e3322c82642e3073795a",
-    "size": 1809381,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.85/021-1.1.85-lite.zip",
+    "sha256": "0d1c656e32a58489f78b7f56fd6aeab311c6bf6892e9e03f4db17e6ded0e4a3a",
+    "size": 1809425,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANfav7x6dcqBb2gmKbeZQ8443PpRvEAAqWnAALg7fhLTMxzxdtyl289BA",
-          "size": 1809381
+          "file_id": "BQACAgIAAyEGAATiX3V3AANjav705I9Q2SgulDLIHjhnb4AWKAQAAsenAALg7fhLODcx8d4Fbok9BA",
+          "size": 1809425
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANcav7xl1sGZgq3FZyqN2izl2s6XKoAAqCnAALg7fhLM9aDE9rSNrY9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANgav70j-DU3bkVVkGc-4a8hEAv-sYAAsOnAALg7fhLRixwZC1xdDc9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANdav7xvL3oLLYFF_x7-buzEVFV9KAAAqKnAALg7fhL2CxOHWEm6Uc9BA",
-        "size": 17251286
+        "file_id": "BQACAgIAAyEGAATiX3V3AANhav70tqf2Hmu_irtYhIMBcQ-DpqcAAsSnAALg7fhLrdF-kBd6-9U9BA",
+        "size": 17251315
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANeav7x5RtMOt6JN2puOTm6MtvMiVwAAqSnAALg7fhL7vJcDasnqVI9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANiav704NkGS7xHqj3lh-g5sB1wzXAAAsanAALg7fhLJ7iDEsEFl-w9BA",
       "size": 18871741
     }
   }
