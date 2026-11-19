@@ -1,25 +1,25 @@
 {
-  "version": "1.1.83",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.83/021-1.1.83.zip",
-  "sha256": "263161b099ee05e7b8c53775b120cb032834d42cb900eda8247d7d1232cfdb29",
-  "notes": "ПАЦИЕНТЫ\r\n• В днях рождения человек с несколькими карточками показывается один раз, а отметка «Поздравил» стоит сразу на всех его карточках.\r\n• Если при записи ФИО и дата рождения уже есть в другой карточке, программа предупредит: «Такой пациент уже есть».\r\n• В «Пациентах» появилась кнопка «Возможные дубли»: там можно объединить карточки одного человека или отметить, что это разные люди.\r\n• При объединении визиты, оплаты и файлы переходят в одну карточку, а лишние карточки уходят в архив.",
-  "published_at": "2026-11-19T07:43:24.617586+00:00",
-  "size": 37167943,
+  "version": "1.1.84",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.84/021-1.1.84.zip",
+  "sha256": "405f812b7a478041e23dfc7ea6a3019c1d83eee53bb8c43d4979cdd1e649b1fe",
+  "notes": "TELEGRAM-БОТ\r\n• У пациента в боте внизу есть кнопки «Моя очередь», «Мои анализы» и «Язык» — команды с «/» набирать не нужно.\r\n• Пациент, который уже подключён, после повторного запуска бота сразу видит кнопки, а не просьбу прислать номер.\r\n• Для сотрудников можно подключить отдельного бота: наблюдатели и отчёты владельцу идут через него, а бот для пациентов отвечает только пациентам.",
+  "published_at": "2026-11-19T12:53:33.533848+00:00",
+  "size": 37174230,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.83/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.84/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.83/021-1.1.83-lite.zip",
-    "sha256": "45345daba3471f2121720c429243d6ebc7d2e5a1bdcbb7dd38cc198161a0c106",
-    "size": 1803119,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.84/021-1.1.84-lite.zip",
+    "sha256": "b79ac0e49bafd258dd0a7a98b8feee547f82ac344b17e3322c82642e3073795a",
+    "size": 1809381,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANbav6pFLnsgv4DkexoJITAlsXGCjYAAlSjAALg7fhLEAui8RD3OAE9BA",
-          "size": 1803119
+          "file_id": "BQACAgIAAyEGAATiX3V3AANfav7x6dcqBb2gmKbeZQ8443PpRvEAAqWnAALg7fhLTMxzxdtyl289BA",
+          "size": 1809381
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANYav6oxm3NIuGktWVMvmXsYmHEWfEAAlGjAALg7fhLTohnCK_SH2A9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANcav7xl1sGZgq3FZyqN2izl2s6XKoAAqCnAALg7fhLM9aDE9rSNrY9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANZav6o6QJZMcow-9blSTJ7r4u1TwUAAlKjAALg7fhLMhbLaZxbmz09BA",
-        "size": 17244999
+        "file_id": "BQACAgIAAyEGAATiX3V3AANdav7xvL3oLLYFF_x7-buzEVFV9KAAAqKnAALg7fhL2CxOHWEm6Uc9BA",
+        "size": 17251286
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANaav6pED7IuGHo2z1PerAcUTOREcoAAlOjAALg7fhLtTvokkDvp309BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANeav7x5RtMOt6JN2puOTm6MtvMiVwAAqSnAALg7fhL7vJcDasnqVI9BA",
       "size": 18871741
     }
   }
