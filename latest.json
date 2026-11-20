@@ -1,25 +1,25 @@
 {
-  "version": "1.1.96",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.96/021-1.1.96.zip",
-  "sha256": "8dd6b991f7e822ff1dee3c533fde7ce571fbc16baf9a6dbb266179300042ac3e",
-  "notes": "ИСПРАВЛЕНИЯ\r\n• В «Отчётах» отчёт больше не ломается, пока вы вводите год в дате: он ждёт, пока дата будет полной.\r\n• В журнале программы больше нет лишних предупреждений, когда пациент дважды нажимает на звезду или поздно нажимает кнопку в боте.",
-  "published_at": "2026-11-20T11:31:34.800324+00:00",
-  "size": 37242798,
+  "version": "1.1.97",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.97/021-1.1.97.zip",
+  "sha256": "c7056fa8b4e8e110195942da042d55b7fa1626246e79be1b3fc1627554a4d8d6",
+  "notes": "РЕГИСТРАТУРА\r\n• Новая кнопка «Журнал очереди» рядом с «Днями рождения»: видно, кто и когда записал, оплатил, передвинул талон, сменил номер, отметил «Опоздал», «Приём» или удалил талон, с какого места на какое.\r\n• Действия наблюдателей в Telegram-боте тоже попадают в журнал очереди.\r\n\r\nTELEGRAM-БОТ\r\n• Если у мамы несколько детей с одним номером, бот теперь подключает всех, а не только одного: значок BOT появится у каждого.\r\n• Маме приходит отдельное сообщение об очереди по каждому ребёнку, с его именем; в «Моя очередь» видны талоны всех детей.\r\n• В анализах и в просьбе оценить приём видно имя ребёнка, чтобы не путать.",
+  "published_at": "2026-11-20T13:12:11.641976+00:00",
+  "size": 37255559,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.96/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.97/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.96/021-1.1.96-lite.zip",
-    "sha256": "9d99de480170274a31bf0fdf071194037d04d5094e1968a8168e4303a39af1ba",
-    "size": 1877384,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.97/021-1.1.97-lite.zip",
+    "sha256": "110ee2b53f89bc10c0fd91fbba5ec59e0962e3a247e6bfb5b4f35ff2bdb6ba2b",
+    "size": 1891355,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAOPawABMA_woYmwDVFADMgd6xY--zlLAAI0oAACSLIBSP6XHKp4cZpOPQQ",
-          "size": 1877384
+          "file_id": "BQACAgIAAyEGAATiX3V3AAOTawABSEDyd3G-G6esIXI2WunPr-yzAAJgoQACSLIBSAd9dmc-IuFVPQQ",
+          "size": 1891355
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOMawABL8CUKTHpuvjdIyyxxiFnDFKfAAIqoAACSLIBSGQ33YQh2ivQPQQ",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOQawABR-JXlGbfSRm3aR_AqXRVYqhLAAJboQACSLIBSKptmpYyRPYMPQQ",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAONawABL-SEUOlzAkXNjH2xk3LF5k8dAAIvoAACSLIBSGroIzo9V2O5PQQ",
-        "size": 17319854
+        "file_id": "BQACAgIAAyEGAATiX3V3AAORawABSAyxSLdaoPeaxEnARHv2bp7fAAJdoQACSLIBSLBur5znRZvMPQQ",
+        "size": 17332615
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAOOawABMAujxyu-s3_nvJJ-21_d8mPBAAIyoAACSLIBSMrYIdKYjRQ9PQQ",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAOSawABSDtkLLfFdiOuQWZlDEDQ4gUkAAJfoQACSLIBSB8EMr2ViC3cPQQ",
       "size": 18871741
     }
   }
