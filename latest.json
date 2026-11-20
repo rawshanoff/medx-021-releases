@@ -1,25 +1,25 @@
 {
-  "version": "1.1.88",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.88/021-1.1.88.zip",
-  "sha256": "9db8b5f2fbbaf12c4d3b02a60ad98d41bc0f588358716505938310fa4cb6a515",
-  "notes": "TELEGRAM-БОТ\r\n• Бот для пациентов теперь по умолчанию пишет на узбекском, на каком бы языке ни был телефон.\r\n• У всех уже подключённых пациентов язык бота стал узбекским; кому нужен русский или английский, выбирает его кнопкой «Язык».",
-  "published_at": "2026-11-19T14:58:17.046472+00:00",
-  "size": 37184042,
+  "version": "1.1.89",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.89/021-1.1.89.zip",
+  "sha256": "c22522b44c748f4c3f8aed4c3be1d1ea08312ccb9fa6aea82919c459c08325cf",
+  "notes": "ОЧЕРЕДЬ В TELEGRAM\r\n• Сообщение об очереди в боте теперь обновляется само, а не приходит каждый раз новое.\r\n• Под сообщением об очереди есть кнопка «Обновить» — пациент сразу видит, сколько людей перед ним.\r\n• Когда перед пациентом остаётся 2 человека, бот пишет: «Подходите к кабинету».\r\n• Один талон теперь могут отслеживать до трёх телефонов, например мама и папа ребёнка.\r\n• QR очереди для телевизора: «Объявление на табло» → «Слайды» → кнопка «QR — очередь в Telegram». Пациент сканирует, пишет номер талона и последние 4 цифры телефона.\r\n• В настройках («Реквизиты» → QR) и в итогах дня видно, сколько талонов сегодня отслеживали в Telegram.",
+  "published_at": "2026-11-20T00:20:32.114138+00:00",
+  "size": 37204857,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.88/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.89/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.88/021-1.1.88-lite.zip",
-    "sha256": "e872622f11a1d7f9619026fee787f3bc1575b2864bc2173bb747ee1e5e569351",
-    "size": 1821880,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.89/021-1.1.89-lite.zip",
+    "sha256": "004ac5013c8e0e458e2972eec048d4e75b6fb486eed47d5a12460d756082a09b",
+    "size": 1839594,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANvav8OlfPDPmy6DGhKKswUGyTJIGAAAmOpAALg7fhLrWYBFPuZf9Q9BA",
-          "size": 1821880
+          "file_id": "BQACAgIAAyEGAATiX3V3AANzav-SzxPOW0oLjPPLZhUZEhxMIRsAAg-yAALg7QABSNRMhLeA8RO1PQQ",
+          "size": 1839594
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANsav8OjtLuQPZc1wjdTtdi605UHZ0AAmCpAALg7fhLA-R1dQKyV-o9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AANwav-SfNSxpoTFpdFW2yXAZlXH328AAgqyAALg7QABSEXXQF4i3Yx_PQQ",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANtav8Okmzz8egyy4R1Eo9SlYDeX6oAAmGpAALg7fhLkwQnJt2N1Pc9BA",
-        "size": 17261098
+        "file_id": "BQACAgIAAyEGAATiX3V3AANxav-SojZxzysg2p5dRhH4YplLrs4AAgyyAALg7QABSFJTIfTXi-MDPQQ",
+        "size": 17281913
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANuav8OlVPO3Hl3oOpAL9JCDnTQ2cIAAmKpAALg7fhL7aWjzXIsuOw9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AANyav-SyxD24sp4-NeutnWNekHJqX8AAg6yAALg7QABSJm4e1JrJJqmPQQ",
       "size": 18871741
     }
   }
