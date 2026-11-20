@@ -1,25 +1,25 @@
 {
-  "version": "1.1.91",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.91/021-1.1.91.zip",
-  "sha256": "ba24623af7ccc5dd7b5797a5f557db25dcb6bb7b6d4180d63822ed0843dec0bb",
-  "notes": "РЕСЕПШН\r\n• После номера телефона стоит значок 🤖, если пациент подключён к нашему боту в Telegram.\r\n• Рядом с ФИО врача над очередью видна его оценка, например «5⭐» — средняя по последним 150 оценкам пациентов.",
-  "published_at": "2026-11-20T00:54:31.521087+00:00",
-  "size": 37215061,
+  "version": "1.1.92",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.92/021-1.1.92.zip",
+  "sha256": "14d5e0b41b7e67d1fbf4c0b370964a73940e765851b2c3d20040824fb974edd7",
+  "notes": "РЕСЕПШН\r\n• Оценка пациента теперь хорошо видна на любом цвете строки, в том числе в «Завершено».\r\n• Пациент, подключённый к нашему боту, теперь отмечен синей меткой «BOT» после номера телефона вместо 🤖.",
+  "published_at": "2026-11-20T01:07:38.058532+00:00",
+  "size": 37215401,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.91/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.92/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.91/021-1.1.91-lite.zip",
-    "sha256": "ce35d39cd4fb9f877a543c1cfb42d48ddbad02e257d4b51456dcd8bce95ac61e",
-    "size": 1850210,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.92/021-1.1.92-lite.zip",
+    "sha256": "33d3c1cbedb695fd8c6c1744e5ea9074c6c9913d1f7d1158c2dfdcef53fe8a56",
+    "size": 1850592,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAN7av-awZQRZ9Q6GHtCkmQlSoe6CjQAAjGyAALg7QABSDv15d3OPI_TPQQ",
-          "size": 1850210
+          "file_id": "BQACAgIAAyEGAATiX3V3AAN_av-d2x43zVg9UgWYJ_cqff-sR84AAjmyAALg7QABSPTKEUYIfjOIPQQ",
+          "size": 1850592
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAN4av-acQ9NdXOUtZcx_UlstWuIeu0AAi2yAALg7QABSKIODhdzuBXuPQQ",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAN8av-dhf269UxBu_6W3NB2l46Yaq4AAjWyAALg7QABSIyidocW6y21PQQ",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAN5av-ali3duZt6ZV0M7Eqjp4a10iEAAi-yAALg7QABSOOWxAYEy5maPQQ",
-        "size": 17292117
+        "file_id": "BQACAgIAAyEGAATiX3V3AAN9av-dq9SaWOhRN3EB7boj-5P8lJsAAjayAALg7QABSK9AMlbwPdkMPQQ",
+        "size": 17292457
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAN6av-avZu9LkTfNnk5apXLjkLiSNwAAjCyAALg7QABSIkP9RIIjd2mPQQ",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAN-av-d1bGsoYF4nQ0O57YmX8P4uGEAAjiyAALg7QABSAUzgXlgw2yBPQQ",
       "size": 18871741
     }
   }
