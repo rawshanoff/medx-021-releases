@@ -1,25 +1,25 @@
 {
-  "version": "1.1.93",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.93/021-1.1.93.zip",
-  "sha256": "6c7d4c07942d80ef8b97e96f8bea9cbfe4e3e424ebc0ee9d0349b2231ce194f5",
-  "notes": "TELEGRAM-БОТ\r\n• Пациенту, подключённому к боту, сообщение об очереди приходит само сразу после оплаты — нажимать «Моя очередь» не нужно.\r\n• Если пациента отметили «Опоздал», бот пишет ему: «Вас вызывали, но вы не подошли — подойдите к регистратуре».\r\n• После оценки 1–3 ⭐ бот спрашивает «Что не понравилось?», и ответ пациента сразу приходит владельцу.\r\n• Утром бот сам поздравляет с днём рождения подключённых пациентов; в «Днях рождения» они отмечены как поздравленные «Telegram-ботом».\r\n• В боте появилась кнопка «О клинике»: адрес, телефон и точка на карте. Точку укажите в Настройки → Реквизиты → «Локация на карте».\r\n• В настройках (Реквизиты → QR) и в «Итогах дня» видно, сколько пациентов подключено к боту.",
-  "published_at": "2026-11-20T01:42:24.322604+00:00",
-  "size": 37227972,
+  "version": "1.1.94",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.94/021-1.1.94.zip",
+  "sha256": "a3db39dc6a66c632edb91de50294a09046337c970963211b31fcc95cc42d0a45",
+  "notes": "TELEGRAM-БОТ\r\n• В сообщениях бота номер в очереди теперь с буквой врача, как на чеке: «J-4», а не «4».\r\n• На узбекском бот пишет «Navbat raqamingiz» вместо «Taloningiz».",
+  "published_at": "2026-11-20T02:05:31.899859+00:00",
+  "size": 37229357,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.93/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.94/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.93/021-1.1.93-lite.zip",
-    "sha256": "9f202f0fe280661f203cab8b0773e86e4424a14b51e68523cf9a9453bf80af8a",
-    "size": 1863844,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.94/021-1.1.94-lite.zip",
+    "sha256": "a2a903a62e4d016e6fef3c78ab303bd63f96bc0e794c79db621c273d4795b417",
+    "size": 1864654,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAODav-l_-rtXFYBMxkhcBHUgUupArMAAkWyAALg7QABSKWxkULYJmXtPQQ",
-          "size": 1863844
+          "file_id": "BQACAgIAAyEGAATiX3V3AAOHav-rcKHIsctNa8diaNKjNWrHXb0AAlKyAALg7QABSHXI97sH6MJuPQQ",
+          "size": 1864654
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOAav-lrPqrMdbrVJBv39erAT1VewEAAkKyAALg7QABSCn0QUyOcOjoPQQ",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOEav-rHYq_uiGMNI153EEIy5OQdn8AAk2yAALg7QABSNrUUk-DzlyJPQQ",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOBav-l0SAKfl2S2By2G37IXlyhleUAAkOyAALg7QABSECqvU9Os9K_PQQ",
-        "size": 17305028
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOFav-rQxzDL9k9yFCasdfOVVyd7O4AAk-yAALg7QABSNGji_lyYQAB2j0E",
+        "size": 17306413
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAOCav-l-9t9gSvTDzYjmdgovSYl4oYAAkSyAALg7QABSJX4Q6BIKtDIPQQ",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAOGav-rbJAOG_m_6xWnSJMiS10ggvsAAlGyAALg7QABSMAmR0ltPN4lPQQ",
       "size": 18871741
     }
   }
