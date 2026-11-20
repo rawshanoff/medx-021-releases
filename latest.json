@@ -1,25 +1,25 @@
 {
-  "version": "1.1.89",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.89/021-1.1.89.zip",
-  "sha256": "c22522b44c748f4c3f8aed4c3be1d1ea08312ccb9fa6aea82919c459c08325cf",
-  "notes": "ОЧЕРЕДЬ В TELEGRAM\r\n• Сообщение об очереди в боте теперь обновляется само, а не приходит каждый раз новое.\r\n• Под сообщением об очереди есть кнопка «Обновить» — пациент сразу видит, сколько людей перед ним.\r\n• Когда перед пациентом остаётся 2 человека, бот пишет: «Подходите к кабинету».\r\n• Один талон теперь могут отслеживать до трёх телефонов, например мама и папа ребёнка.\r\n• QR очереди для телевизора: «Объявление на табло» → «Слайды» → кнопка «QR — очередь в Telegram». Пациент сканирует, пишет номер талона и последние 4 цифры телефона.\r\n• В настройках («Реквизиты» → QR) и в итогах дня видно, сколько талонов сегодня отслеживали в Telegram.",
-  "published_at": "2026-11-20T00:20:32.114138+00:00",
-  "size": 37204857,
+  "version": "1.1.90",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.90/021-1.1.90.zip",
+  "sha256": "a26fe90361de4846bd07d9e7ec324efd66d3eae188b1a2e854ee88e0b6b43b8a",
+  "notes": "ОЦЕНКА ПРИЁМА\r\n• После приёма бот просит пациента оценить приём от 1 до 5 ⭐.\r\n• В ресепшне оценка видна рядом с датой рождения пациента, например «5⭐»; оценки 1–3 — красным.\r\n• Оценку 1–3 ⭐ владелец сразу получает в Telegram: врач, пациент, телефон и талон.\r\n• В вечернем отчёте и в «Итогах дня» видна средняя оценка за день и по каждому врачу.",
+  "published_at": "2026-11-20T00:39:32.296343+00:00",
+  "size": 37214036,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.89/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.90/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.89/021-1.1.89-lite.zip",
-    "sha256": "004ac5013c8e0e458e2972eec048d4e75b6fb486eed47d5a12460d756082a09b",
-    "size": 1839594,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.90/021-1.1.90-lite.zip",
+    "sha256": "3c3972f212db1c1892b6d796b2d72fbc2a1404a0c7846fc20b3c177904484167",
+    "size": 1848888,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AANzav-SzxPOW0oLjPPLZhUZEhxMIRsAAg-yAALg7QABSNRMhLeA8RO1PQQ",
-          "size": 1839594
+          "file_id": "BQACAgIAAyEGAATiX3V3AAN3av-XRBBr_Gv05s3RA0m7z9lmAVkAAimyAALg7QABSGdKaW83VI8XPQQ",
+          "size": 1848888
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANwav-SfNSxpoTFpdFW2yXAZlXH328AAgqyAALg7QABSEXXQF4i3Yx_PQQ",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAN0av-W8OVFgYLRLKWHKp7ZGX_CAuAAAiayAALg7QABSJd8EfZzI_3XPQQ",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AANxav-SojZxzysg2p5dRhH4YplLrs4AAgyyAALg7QABSFJTIfTXi-MDPQQ",
-        "size": 17281913
+        "file_id": "BQACAgIAAyEGAATiX3V3AAN1av-XFlBQqCLBbAOdOsow5LX4llAAAieyAALg7QABSMNLvXfQZa7QPQQ",
+        "size": 17291092
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AANyav-SyxD24sp4-NeutnWNekHJqX8AAg6yAALg7QABSJm4e1JrJJqmPQQ",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAN2av-XQBqB5TZVOFsSpfEQdOFzMWAAAiiyAALg7QABSNn7Eb_Et_szPQQ",
       "size": 18871741
     }
   }
