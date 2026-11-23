@@ -1,25 +1,25 @@
 {
-  "version": "1.1.99",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.99/021-1.1.99.zip",
-  "sha256": "7113fa2c433225188e95850b72295cf0c0d48c1186d5bec1f4ceb59fc96f39ef",
-  "notes": "ИСПРАВЛЕНИЯ\r\n• Окно, открытое до обновления, больше не показывает ошибку на «Дашборде» и других экранах: оно само перезагружается на новую версию.\r\n• Если Telegram не принимает ключ бота пациентов, бот не запускается, а в «Состоянии программы» написано, что нужен новый ключ.",
-  "published_at": "2026-11-21T03:20:46.091979+00:00",
-  "size": 37308104,
+  "version": "1.1.100",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.100/021-1.1.100.zip",
+  "sha256": "bd50eab77b1f036d723446cfe372eb6d1903dd028a3ca6f3c27348c928f96be2",
+  "notes": "TELEGRAM-БОТ\r\n• Бот больше не теряет ответ пациенту после перерыва в работе: каждое сообщение уходит по новому соединению.",
+  "published_at": "2026-11-23T06:37:49.005487+00:00",
+  "size": 37309856,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.99/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.100/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.99/021-1.1.99-lite.zip",
-    "sha256": "dc3b928faaf0e7dda150b44c54eae8e34d1ef1f04a752bce09b12a010f2ef3d9",
-    "size": 1943011,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.100/021-1.1.100-lite.zip",
+    "sha256": "8ff8f731b44170eeed811c38cb16c635b1a8868075db443da63c03a609b4b311",
+    "size": 1944382,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAObawEOh2SoZYOEb2QemCfNLVwojAcAApylAAJIsglINhooEfLgx5g9BA",
-          "size": 1943011
+          "file_id": "BQACAgIAAyEGAATiX3V3AAOfawPf3bXLVWNhQSedOz2klrR4sOAAAqukAAJANyBIf81sh6bZ5Ek9BA",
+          "size": 1944382
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOYawEOOm3iHwYJFWA5gQHuieGEoLMAApmlAAJIsglIUbHojdzF3vA9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOcawPfdICeEsAyk3KOiU1VjgMyKKMAAqakAAJANyBIMIzYSMkEygU9BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOZawEOXRX6vQta9hgAAYXkU3FQEwuPAAKapQACSLIJSJoxui3AUqI_PQQ",
-        "size": 17385160
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOdawPfoYdSUe3QU9RW-ZTv0idhPAoAAqikAAJANyBILucpYfpP4cg9BA",
+        "size": 17386912
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAOaawEOgz2B5wUELvRCvmac_S1E4OcAApulAAJIsglI8ePNQEKhvO09BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAOeawPf1wJPyzWCc7P-jcxXlflHsxkAAqqkAAJANyBI6k0e7BCVnhg9BA",
       "size": 18871741
     }
   }
