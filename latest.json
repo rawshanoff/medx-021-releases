@@ -1,25 +1,25 @@
 {
-  "version": "1.1.100",
-  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.100/021-1.1.100.zip",
-  "sha256": "bd50eab77b1f036d723446cfe372eb6d1903dd028a3ca6f3c27348c928f96be2",
-  "notes": "TELEGRAM-БОТ\r\n• Бот больше не теряет ответ пациенту после перерыва в работе: каждое сообщение уходит по новому соединению.",
-  "published_at": "2026-11-23T06:37:49.005487+00:00",
-  "size": 37309856,
+  "version": "1.1.101",
+  "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.101/021-1.1.101.zip",
+  "sha256": "f89faac67e4b5de480c5cf1695aacf7c71f774e48b598e8024e73312b7d85e2b",
+  "notes": "РЕГИСТРАТУРА\r\n• Два пациента больше не получают один номер: после номера, введённого вручную, следующий автоматический берёт свободный.\r\n• Исправление имени в очереди меняет карточку самого пациента, а не создаёт новую карточку без телефона.\r\n• Оплаченного пациента нельзя сделать «Пустая», «Отменён», удалить или поменять ему сумму — сначала оформите возврат.\r\n• Возврат записывается в сегодняшнюю смену, а не в смену, где была оплата.\r\n\r\nФИНАНСЫ\r\n• Расход берётся только из наличных в кассе: не с карты и не из денег, уже сданных в сейф.\r\n• Итоги за «Сегодня», «Вчера», «7 дней» считаются верно и по всем записям; есть кнопка «Показать все».\r\n• Права «Расход», «Доход», «Открыть/закрыть смену» и «Возвраты» теперь действительно работают.\r\n\r\nОТЧЁТЫ\r\n• «Продажи по врачам, по дням, по услугам» показывают продано, возвраты и итог после возвратов.\r\n• Врач, выбранный в одном отчёте, больше не урезает другие отчёты; «Текущая смена» считается с её открытия.\r\n• Числа в таблицах сортируются по порядку; «Excel: всё за период» — всегда по всей клинике.\r\n• «Зарплату врачей» видят только администратор и владелец.\r\n\r\nДАШБОРД\r\n• «Цель месяца» считает с 1-го числа и хранится в программе; можно задать цели врачам.\r\n• Новое: «Этот месяц», «Расходы» и «Остаток», «Прочие доходы» отдельно, предупреждения о долгом ожидании и плохих оценках.\r\n• В «Рейтинге врачей» все врачи; «В Telegram» отправляет выбранный период.\r\n\r\nПАЦИЕНТЫ\r\n• Карточку ребёнка на телефоне родителя можно править; поиск находит телефон с пробелами и имя в любом порядке.\r\n• Убраны «С долгом» и «Долги пациентов»: долг в программе не ведётся.\r\n\r\nДОП. УСЛУГИ\r\n• Пациент из очереди без карточки записывается по имени, а не как «Бемор».\r\n• В Telegram каждая услуга сохраняется отдельной оплатой, как на компьютере.\r\n\r\nВРАЧИ\r\n• Открытая карточка врача больше не закрывается после изменений; одинаковую услугу дважды не добавить.\r\n• «Журнал изменений» показывает, кто и что поменял: например, «Цена: 150 000 → 180 000».\r\n\r\nСИСТЕМА\r\n• «Восстановить из файла» снова работает; нельзя удалить или отключить последнего администратора.\r\n• Пароль на возврат проверяет сама программа; администраторы видят изменения настроек друг друга.",
+  "published_at": "2026-11-25T05:40:00.291844+00:00",
+  "size": 37354320,
   "updater": {
     "sha256": "71e8f4c6c85db65783079c0116473ccbf02cccfeadebd766bbdb917d929403a1",
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.100/medx-updater.exe",
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.101/medx-updater.exe",
     "size": 18871741
   },
   "lite": {
-    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.100/021-1.1.100-lite.zip",
-    "sha256": "8ff8f731b44170eeed811c38cb16c635b1a8868075db443da63c03a609b4b311",
-    "size": 1944382,
+    "url": "https://github.com/rawshanoff/medx-021-releases/releases/download/v1.1.101/021-1.1.101-lite.zip",
+    "sha256": "d0a05358d08b32d67dd4436550d499f65c0a893b189c856acb68e4e0fad5c612",
+    "size": 1989360,
     "libs": "e5b5d1cc78302781",
     "telegram": {
       "parts": [
         {
-          "file_id": "BQACAgIAAyEGAATiX3V3AAOfawPf3bXLVWNhQSedOz2klrR4sOAAAqukAAJANyBIf81sh6bZ5Ek9BA",
-          "size": 1944382
+          "file_id": "BQACAgIAAyEGAATiX3V3AAOjawZ1MNmy6L29ZdRrVk3PchpHEFAAAtOqAAIPKDFIkcQek-Ahs0o9BA",
+          "size": 1989360
         }
       ]
     }
@@ -27,16 +27,16 @@
   "telegram": {
     "parts": [
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOcawPfdICeEsAyk3KOiU1VjgMyKKMAAqakAAJANyBIMIzYSMkEygU9BA",
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOgawZ03FcPWk_HfUF5tjRUyrQhaqQAAs-qAAIPKDFIxdezDkZpMH09BA",
         "size": 19922944
       },
       {
-        "file_id": "BQACAgIAAyEGAATiX3V3AAOdawPfoYdSUe3QU9RW-ZTv0idhPAoAAqikAAJANyBILucpYfpP4cg9BA",
-        "size": 17386912
+        "file_id": "BQACAgIAAyEGAATiX3V3AAOhawZ1AqJ0J_tQGXMPKI7T_qtKG6IAAtGqAAIPKDFI1QNmOON4CHI9BA",
+        "size": 17431376
       }
     ],
     "updater": {
-      "file_id": "BQACAgIAAyEGAATiX3V3AAOeawPf1wJPyzWCc7P-jcxXlflHsxkAAqqkAAJANyBI6k0e7BCVnhg9BA",
+      "file_id": "BQACAgIAAyEGAATiX3V3AAOiawZ1LPDuBihud7Sl2wWUNr4gkJwAAtKqAAIPKDFIqKkZg8ke8Lw9BA",
       "size": 18871741
     }
   }
